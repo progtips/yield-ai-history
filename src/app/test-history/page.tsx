@@ -659,6 +659,7 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Version</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Type</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Timestamp</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sent To</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
@@ -677,6 +678,9 @@ export default function TestHistoryPage() {
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm">
                               {safeFormatTimestamp(tx.timestamp)}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
+                              {tx.amount}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {safeTruncateAddress(tx.from)}
