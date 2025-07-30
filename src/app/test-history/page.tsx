@@ -9,18 +9,26 @@ import { Separator } from "@/components/ui/separator";
 
 export default function TestHistoryPage() {
   const { account } = useWallet();
-  const walletAddress = account?.address?.toString();
+  const defaultWalletAddress = account?.address?.toString();
   
   // Mock data for history testing
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const [transactions, setTransactions] = React.useState<any[]>([]);
+  const [walletAddress, setWalletAddress] = React.useState(defaultWalletAddress || "");
   const [filters, setFilters] = React.useState({
     type: "all",
     dateRange: "7d",
     protocol: "all"
   });
+
+  // Update wallet address when default changes
+  React.useEffect(() => {
+    if (defaultWalletAddress && !walletAddress) {
+      setWalletAddress(defaultWalletAddress);
+    }
+  }, [defaultWalletAddress, walletAddress]);
 
   const mockTransactions = [
     {
@@ -98,9 +106,13 @@ export default function TestHistoryPage() {
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <span>Wallet Address:</span>
-              <code className="bg-gray-100 px-2 py-1 rounded">
-                {walletAddress || "Not connected"}
-              </code>
+              <input
+                type="text"
+                value={walletAddress}
+                onChange={(e) => setWalletAddress(e.target.value)}
+                placeholder="Enter wallet address"
+                className="flex-1 px-3 py-1 border rounded bg-white"
+              />
             </div>
             
             <div className="flex items-center gap-4">
