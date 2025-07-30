@@ -16,7 +16,8 @@ import {
   Wallet,
   Store,
   Shield,
-  Globe
+  Globe,
+  History
 } from 'lucide-react';
 
 const testPages = [
@@ -99,6 +100,14 @@ const testPages = [
     path: '/test-wallet-store',
     icon: Wallet,
     color: 'bg-green-500'
+  },
+  {
+    name: 'Test History',
+    description: 'Test transaction history management',
+    path: '/test-history',
+    icon: History,
+    badge: 'New',
+    color: 'bg-teal-500'
   },
   {
     name: 'Test Echelon',
