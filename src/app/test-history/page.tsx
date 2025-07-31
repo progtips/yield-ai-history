@@ -62,6 +62,7 @@ export default function TestHistoryPage() {
   const [applyFilters, setApplyFilters] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
   const transactionsPerPage = 20;
+  const [showFullFunctionPath, setShowFullFunctionPath] = React.useState(false);
 
   // Log when transactions state changes
   React.useEffect(() => {
@@ -309,6 +310,125 @@ export default function TestHistoryPage() {
             }
           }
           
+          // Improved recipient address extraction
+          let recipientAddress = 'Unknown';
+          
+          if (tx.payload?.type === 'entry_function_payload') {
+            const functionName = tx.payload.function;
+            const args = tx.payload.arguments || [];
+            
+            // Extract recipient based on function type
+            if (functionName.includes('coin::transfer') || functionName.includes('coin::transfer_with_metadata')) {
+              // For coin transfers, first argument is usually the recipient
+              recipientAddress = args[0] ? String(args[0]) : 'Unknown';
+            } else if (functionName.includes('stake') || functionName.includes('delegation')) {
+              // For staking, look for validator address or pool address
+              // First try to find from events (more accurate)
+              const stakeEvent = tx.events?.find((event: any) => 
+                event.type.includes('Stake') || 
+                event.type.includes('Delegation') ||
+                event.type.includes('Validator')
+              );
+              
+              if (stakeEvent?.data?.validator_address) {
+                recipientAddress = String(stakeEvent.data.validator_address);
+              } else if (stakeEvent?.data?.pool_address) {
+                recipientAddress = String(stakeEvent.data.pool_address);
+              } else if (stakeEvent?.data?.to) {
+                recipientAddress = String(stakeEvent.data.to);
+              } else if (args.length > 0) {
+                // If no event data, check if first argument looks like an address
+                const firstArg = String(args[0]);
+                if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                  recipientAddress = firstArg;
+                } else {
+                  // It's likely a pool ID or validator ID, not an address
+                  recipientAddress = `Pool/Validator ID: ${firstArg}`;
+                }
+              }
+            } else if (functionName.includes('deposit')) {
+              // For deposits, look for pool address
+              const depositEvent = tx.events?.find((event: any) => 
+                event.type.includes('Deposit') || 
+                event.type.includes('Pool') ||
+                event.type.includes('Liquidity')
+              );
+              
+              if (depositEvent?.data?.pool_address) {
+                recipientAddress = String(depositEvent.data.pool_address);
+              } else if (depositEvent?.data?.to) {
+                recipientAddress = String(depositEvent.data.to);
+              } else if (args.length > 0) {
+                // Check if first argument looks like an address
+                const firstArg = String(args[0]);
+                if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                  recipientAddress = firstArg;
+                } else {
+                  recipientAddress = `Pool ID: ${firstArg}`;
+                }
+              }
+            } else if (functionName.includes('swap') || functionName.includes('exchange')) {
+              // For swaps, look for DEX address or pool address
+              const swapEvent = tx.events?.find((event: any) => 
+                event.type.includes('Swap') || 
+                event.type.includes('Exchange') ||
+                event.type.includes('Trade')
+              );
+              
+              if (swapEvent?.data?.dex_address) {
+                recipientAddress = String(swapEvent.data.dex_address);
+              } else if (swapEvent?.data?.pool_address) {
+                recipientAddress = String(swapEvent.data.pool_address);
+              } else if (swapEvent?.data?.to) {
+                recipientAddress = String(swapEvent.data.to);
+              } else if (args.length > 0) {
+                const firstArg = String(args[0]);
+                if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                  recipientAddress = firstArg;
+                } else {
+                  recipientAddress = `DEX/Pool ID: ${firstArg}`;
+                }
+              }
+            } else {
+              // For other functions, try to find recipient from events
+              const transferEvent = tx.events?.find((event: any) => 
+                event.type.includes('Transfer') || 
+                event.type.includes('CoinStore') ||
+                event.type.includes('Deposit') ||
+                event.type.includes('Withdraw')
+              );
+              
+              if (transferEvent?.data?.to) {
+                recipientAddress = String(transferEvent.data.to);
+              } else if (transferEvent?.data?.recipient) {
+                recipientAddress = String(transferEvent.data.recipient);
+              } else if (args.length > 0) {
+                // Fallback to first argument
+                const firstArg = String(args[0]);
+                if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                  recipientAddress = firstArg;
+                } else {
+                  recipientAddress = `ID: ${firstArg}`;
+                }
+              }
+            }
+          }
+          
+          // Additional debug logging for recipient extraction
+          if (Math.random() < 0.1) { // Log 10% of transactions
+            console.log('Recipient extraction debug:', {
+              version: tx.version,
+              function: tx.payload?.function,
+              args: tx.payload?.arguments,
+              recipientAddress,
+              events: tx.events?.map((e: any) => e.type).slice(0, 3),
+              eventData: tx.events?.slice(0, 2).map((e: any) => ({
+                type: e.type,
+                data: e.data
+              }))
+            });
+          }
+          
           return {
             id: tx.version || index.toString(),
             type,
@@ -318,7 +438,7 @@ export default function TestHistoryPage() {
             status: tx.success ? 'completed' : 'failed',
             hash: tx.hash || `0x${(index * 12345).toString(16).padStart(16, '0')}...`,
             from: String(tx.sender || 'Unknown'),
-            to: tx.payload?.arguments?.[0] ? String(tx.payload.arguments[0]) : 'Unknown',
+            to: recipientAddress,
             function: tx.payload?.function || 'N/A'
           };
         });
@@ -469,6 +589,53 @@ export default function TestHistoryPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  // Function to get detailed transaction info
+  const getDetailedTransactionInfo = (tx: any) => {
+    console.log('=== Detailed Transaction Analysis ===');
+    console.log('Transaction Version:', tx.id);
+    console.log('Function:', tx.payload?.function);
+    console.log('Arguments:', tx.payload?.arguments);
+    console.log('Events:', tx.events?.map((e: any) => ({
+      type: e.type,
+      data: e.data
+    })));
+    console.log('Current recipient:', tx.to);
+    console.log('Sender:', tx.from);
+    console.log('Amount:', tx.amount);
+    console.log('Type:', tx.type);
+    console.log('Protocol:', tx.protocol);
+  };
+
+  // Function to format function name for better readability
+  const formatFunctionName = (functionName: string) => {
+    if (!functionName || functionName === 'N/A') {
+      return 'N/A';
+    }
+    
+    // Split by ::
+    const parts = functionName.split('::');
+    
+    if (parts.length >= 3) {
+      const address = parts[0];
+      const module = parts[1];
+      const functionName_ = parts[2];
+      
+      if (showFullFunctionPath) {
+        // Show full path with truncated address
+        if (address.startsWith('0x') && address.length > 20) {
+          const truncatedAddress = `${address.substring(0, 8)}...${address.substring(address.length - 8)}`;
+          return `${truncatedAddress}::${module}::${functionName_}`;
+        }
+        return functionName;
+      } else {
+        // Show simplified path like Aptos Explorer
+        return `${module}::${functionName_}`;
+      }
+    }
+    
+    return functionName;
   };
 
   // Safe address truncation function
@@ -677,6 +844,19 @@ export default function TestHistoryPage() {
                   </label>
                 </div>
                 
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showFullFunctionPath"
+                    checked={showFullFunctionPath}
+                    onChange={(e) => setShowFullFunctionPath(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="showFullFunctionPath" className="text-sm font-medium">
+                    Show Full Function Path
+                  </label>
+                </div>
+                
                 <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!applyFilters ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div>
                     <label className="text-sm font-medium">Transaction Type</label>
@@ -788,6 +968,47 @@ export default function TestHistoryPage() {
                   </div>
                 )}
                 
+                {/* Explanation about "Sent To" differences */}
+                {transactions && transactions.length > 0 && (
+                  <div className="text-xs text-blue-700 bg-blue-50 p-3 rounded border border-blue-200">
+                    <strong>📋 About "Sent To" Column Differences:</strong>
+                    <br />
+                    • <strong>Your app:</strong> Shows recipient based on transaction type and events analysis
+                    <br />
+                    • <strong>Aptos Explorer:</strong> Uses more sophisticated parsing and context awareness
+                    <br />
+                    • <strong>For transfers:</strong> Both should show the same recipient address
+                    <br />
+                    • <strong>For staking/deposits:</strong> May show different addresses (validator vs pool)
+                    <br />
+                    • <strong>For swaps:</strong> May show DEX address vs actual token recipient
+                    <br />
+                    <br />
+                    <strong>Note:</strong> The recipient address shown is the primary destination, but complex transactions may have multiple recipients or intermediate addresses.
+                    <br />
+                    <br />
+                    <strong>Example:</strong> Transaction 3103328894 shows "74090850" (pool ID) vs "0x111ae3e5bc816a5e63c2da97d0aa3886519e0cd5e4b046659fa35796bd11542a" (actual recipient address)
+                  </div>
+                )}
+                
+                {/* Explanation about "Function" differences */}
+                {transactions && transactions.length > 0 && (
+                  <div className="text-xs text-green-700 bg-green-50 p-3 rounded border border-green-200">
+                    <strong>🔧 About "Function" Column Differences:</strong>
+                    <br />
+                    • <strong>Your app:</strong> Shows full function path with module address (truncated for readability)
+                    <br />
+                    • <strong>Aptos Explorer:</strong> Shows simplified function name without module address
+                    <br />
+                    • <strong>Format:</strong> {`{address}::{module}::{function}`} vs {`{module}::{function}`}
+                    <br />
+                    • <strong>Example:</strong> "0x111ae3e5...11542a::router::deposit_and_stake_entry" vs "router::deposit_and_stake_entry"
+                    <br />
+                    <br />
+                    <strong>Note:</strong> Both show the same function, but Aptos Explorer simplifies the display for better user experience.
+                  </div>
+                )}
+                
                 {isLoading ? (
                   <div className="text-center py-8">
                     <div className="text-muted-foreground">Loading transactions...</div>
@@ -804,6 +1025,7 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sent To</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -830,7 +1052,16 @@ export default function TestHistoryPage() {
                               {tx.to !== 'Unknown' ? safeTruncateAddress(tx.to) : '-'}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.function || '-'}
+                              {formatFunctionName(tx.function)}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-2 text-sm">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => getDetailedTransactionInfo(tx)}
+                              >
+                                Analyze
+                              </Button>
                             </td>
                           </tr>
                         ))}
