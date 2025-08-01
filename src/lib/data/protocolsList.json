@@ -8,6 +8,7 @@
     "depositType": "external",
     "depositUrl": "https://hyperion.xyz/pools?inviteCode=O02Eig",
     "isDepositEnabled": true,
+    "contract": "0xc0c240c870606a5cb3150795e2d0dfff9f1f7456",
     "managedType": "native"
   },
   {
@@ -29,6 +30,7 @@
     "description": "Lending protocol on Aptos blockchain",
     "depositType": "native",
     "isDepositEnabled": true,
+    "contract": "0x2fe576faa841347a9b1b32c869685deb75a15e3f62dfe37cbd6d52cc403a16f6",
     "managedType": "native"
   },
   {
@@ -39,6 +41,7 @@
     "description": "High-efficiency lending market on Aptos blockchain",
     "depositType": "native",
     "isDepositEnabled": true,
+    "contract": "0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba",
     "managedType": "native"
   },
   {
@@ -50,6 +53,7 @@
     "depositType": "external",
     "depositUrl": "https://app.meso.finance/points?ref=DTORFK5S9ITD",
     "isDepositEnabled": true,
+    "contract": "0x378d5ba871c3d1bdf477a617f997f23d9e0702de97a02f42925b44fa3abc9866",
     "managedType": "native"
   },
   {
@@ -72,6 +76,7 @@
     "depositType": "external",
     "depositUrl": "https://app.auro.finance?ref=YieldAI",
     "isDepositEnabled": true,
+    "contract": "0x9ad235f7d685b26a6b42ea960aaecbe3a5df46fc344b4300a259a7bef985459b",
     "managedType": "native"
   },
   {
@@ -82,6 +87,7 @@
     "description": "Pioneering Liquid Staking protocol on Aptos",
     "depositType": "native",
     "isDepositEnabled": true,
+    "contract": "0xb36527754eb54d7ff55daf13bcb54b42b88ec484bd6f0e3b2e0d1db169de6451",
     "managedType": "external"
   },
   {

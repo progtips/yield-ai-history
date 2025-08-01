@@ -8,6 +8,7 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Separator } from "@/components/ui/separator";
 import { truncateAddress } from "@aptos-labs/wallet-adapter-react";
 import { WalletSelector } from "@/components/WalletSelector";
+import protocolsList from "@/lib/data/protocolsList.json";
 
 export default function TestHistoryPage() {
   const { account, connected } = useWallet();
@@ -63,6 +64,46 @@ export default function TestHistoryPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const transactionsPerPage = 20;
   const [showFullFunctionPath, setShowFullFunctionPath] = React.useState(false);
+
+  // Function to get protocol name by address
+  const getProtocolNameByAddress = (address: string): string => {
+    if (!address || address === 'Unknown' || address.startsWith('Pool/Validator ID:') || address.startsWith('DEX/Pool ID:') || address.startsWith('ID:')) {
+      return address;
+    }
+    
+    // Debug logging for protocol matching
+    console.log(`🔍 Checking protocol for address: ${address}`);
+    
+    // Normalize address (remove 0x prefix if present, ensure lowercase)
+    const normalizedAddress = address.toLowerCase().replace(/^0x/, '');
+    
+    // Find protocol by contract address
+    const protocol = protocolsList.find(p => {
+      const protocolWithContract = p as any;
+      const hasContract = protocolWithContract.contract && typeof protocolWithContract.contract === 'string';
+      
+      if (!hasContract) {
+        return false;
+      }
+      
+      // Normalize contract address
+      const normalizedContract = protocolWithContract.contract.toLowerCase().replace(/^0x/, '');
+      const matches = normalizedContract === normalizedAddress;
+      
+      console.log(`  Comparing with ${protocolWithContract.name}: ${normalizedContract} vs ${normalizedAddress} = ${matches}`);
+      
+      return matches;
+    });
+    
+    if (protocol) {
+      console.log(`✅ Found protocol: ${protocol.name} for address: ${address}`);
+      return `${protocol.name} (${safeTruncateAddress(address)})`;
+    }
+    
+    console.log(`❌ No protocol found for address: ${address}`);
+    // If no exact match found, return the original address
+    return address;
+  };
 
   // Log when transactions state changes
   React.useEffect(() => {
@@ -427,6 +468,11 @@ export default function TestHistoryPage() {
                 data: e.data
               }))
             });
+          }
+          
+          // Debug: Log all recipient addresses for protocol matching
+          if (recipientAddress !== 'Unknown' && !recipientAddress.startsWith('Pool/Validator ID:') && !recipientAddress.startsWith('DEX/Pool ID:') && !recipientAddress.startsWith('ID:')) {
+            console.log(`📋 Transaction ${tx.version}: recipient address = ${recipientAddress}`);
           }
           
           return {
@@ -968,26 +1014,23 @@ export default function TestHistoryPage() {
                   </div>
                 )}
                 
-                {/* Explanation about "Sent To" differences */}
+                {/* Explanation about "Protocol/Recipient" differences */}
                 {transactions && transactions.length > 0 && (
                   <div className="text-xs text-blue-700 bg-blue-50 p-3 rounded border border-blue-200">
-                    <strong>📋 About "Sent To" Column Differences:</strong>
+                    <strong>📋 About "Protocol/Recipient" Column:</strong>
                     <br />
-                    • <strong>Your app:</strong> Shows recipient based on transaction type and events analysis
+                    • <strong>Your app:</strong> Shows protocol name when address matches known protocol contracts, otherwise shows recipient address
                     <br />
-                    • <strong>Aptos Explorer:</strong> Uses more sophisticated parsing and context awareness
+                    • <strong>Supported protocols:</strong> Hyperion, Aries, Joule, Echelon, Meso Finance, Tapp Exchange, Auro Finance, Amnis Finance, Panora
                     <br />
-                    • <strong>For transfers:</strong> Both should show the same recipient address
+                    • <strong>For known protocols:</strong> Shows protocol name with address (e.g., "Hyperion (0xc0c240c8...)" instead of just contract address)
                     <br />
-                    • <strong>For staking/deposits:</strong> May show different addresses (validator vs pool)
+                    • <strong>For unknown addresses:</strong> Shows truncated recipient address
                     <br />
-                    • <strong>For swaps:</strong> May show DEX address vs actual token recipient
-                    <br />
-                    <br />
-                    <strong>Note:</strong> The recipient address shown is the primary destination, but complex transactions may have multiple recipients or intermediate addresses.
+                    • <strong>For pool/validator IDs:</strong> Shows descriptive text (e.g., "Pool ID: 74090850")
                     <br />
                     <br />
-                    <strong>Example:</strong> Transaction 3103328894 shows "74090850" (pool ID) vs "0x111ae3e5bc816a5e63c2da97d0aa3886519e0cd5e4b046659fa35796bd11542a" (actual recipient address)
+                    <strong>Note:</strong> Protocol names are matched by contract addresses from protocolsList.json. If a protocol's contract address changes, the name may not display correctly.
                   </div>
                 )}
                 
@@ -1023,7 +1066,7 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Timestamp</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sent To</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Protocol/Recipient</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
                         </tr>
@@ -1049,7 +1092,7 @@ export default function TestHistoryPage() {
                               {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.to !== 'Unknown' ? safeTruncateAddress(tx.to) : '-'}
+                              {tx.to !== 'Unknown' ? getProtocolNameByAddress(tx.to) : '-'}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}
@@ -1176,6 +1219,41 @@ export default function TestHistoryPage() {
                   variant="outline"
                 >
                   Log Debug Info to Console
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    console.log('=== Protocol Mapping Test ===');
+                    console.log('Protocols List:', protocolsList);
+                    
+                    // Log all protocol addresses
+                    console.log('=== All Protocol Addresses ===');
+                    protocolsList.forEach((protocol: any) => {
+                      if (protocol.contract) {
+                        console.log(`${protocol.name}: ${protocol.contract}`);
+                      } else {
+                        console.log(`${protocol.name}: NO CONTRACT ADDRESS`);
+                      }
+                    });
+                    
+                    // Test some known addresses
+                    const testAddresses = [
+                      '0xc0c240c870606a5cb3150795e2d0dfff9f1f7456', // Hyperion
+                      '0x2fe576faa841347a9b1b32c869685deb75a15e3f62dfe37cbd6d52cc403a16f6', // Joule
+                      '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba', // Echelon
+                      '0x111ae3e5bc816a5e63c2da97d0aa3886519e0cd5e4b046659fa35796bd11542a', // Unknown
+                      'Pool/Validator ID: 74090850', // Pool ID
+                    ];
+                    
+                    console.log('=== Testing Addresses ===');
+                    testAddresses.forEach(address => {
+                      const result = getProtocolNameByAddress(address);
+                      console.log(`${address} -> ${result}`);
+                    });
+                  }}
+                  variant="outline"
+                >
+                  Test Protocol Mapping
                 </Button>
               </div>
             </CardContent>
