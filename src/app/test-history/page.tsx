@@ -64,9 +64,12 @@ export default function TestHistoryPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const transactionsPerPage = 20;
   const [showFullFunctionPath, setShowFullFunctionPath] = React.useState(false);
+  const [detailedAnalysis, setDetailedAnalysis] = React.useState<any>(null);
 
   // Function to get protocol name by address
   const getProtocolNameByAddress = (address: string): string => {
+    console.log('🔍 DEBUG: getProtocolNameByAddress input - type:', typeof address, 'value:', address, 'is object:', typeof address === 'object');
+    
     if (!address || address === 'Unknown' || address.startsWith('Pool/Validator ID:') || address.startsWith('DEX/Pool ID:') || address.startsWith('ID:')) {
       return address;
     }
@@ -358,10 +361,24 @@ export default function TestHistoryPage() {
             const functionName = tx.payload.function;
             const args = tx.payload.arguments || [];
             
+            // DEBUG: Log the raw arguments array
+            console.log(`🔍 DEBUG: Raw arguments for tx ${tx.version} - args:`, args, 'args[0] type:', typeof args[0], 'args[0] value:', args[0]);
+            
+            // Check if args[0] is an object with 'inner' property first
+            if (args.length > 0 && typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+              console.log(`🔍 DEBUG: args[0] is object with 'inner' property:`, args[0]);
+              const innerValue = String(args[0].inner || '');
+              console.log(`🔍 DEBUG: Extracted inner value:`, innerValue);
+              if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                recipientAddress = innerValue;
+              } else {
+                recipientAddress = `Pool/Validator ID: ${innerValue}`;
+              }
+            }
             // Extract recipient based on function type
-            if (functionName.includes('coin::transfer') || functionName.includes('coin::transfer_with_metadata')) {
+            else if (functionName.includes('coin::transfer') || functionName.includes('coin::transfer_with_metadata')) {
               // For coin transfers, first argument is usually the recipient
-              recipientAddress = args[0] ? String(args[0]) : 'Unknown';
+              recipientAddress = String(args[0] || 'Unknown');
             } else if (functionName.includes('stake') || functionName.includes('delegation')) {
               // For staking, look for validator address or pool address
               // First try to find from events (more accurate)
@@ -379,12 +396,32 @@ export default function TestHistoryPage() {
                 recipientAddress = String(stakeEvent.data.to);
               } else if (args.length > 0) {
                 // If no event data, check if first argument looks like an address
-                const firstArg = String(args[0]);
-                if (firstArg.startsWith('0x') && firstArg.length > 40) {
-                  recipientAddress = firstArg;
+                // Check if args[0] is an object with 'inner' property
+                if (typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+                  const innerValue = String(args[0].inner || '');
+                  if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                    recipientAddress = innerValue;
+                  } else {
+                    recipientAddress = `Pool/Validator ID: ${innerValue}`;
+                  }
+                } else if (typeof args[0] === 'object' && args[0] !== null && !('inner' in args[0]) && args.length > 1) {
+                  // Handle case where args[0] is an object without 'inner' property (like { "vec": [] })
+                  // and check if args[1] contains the address
+                  console.log(`🔍 DEBUG: args[0] is object without 'inner' property, checking args[1]:`, args[1]);
+                  const secondArg = String(args[1] || '');
+                  if (secondArg.startsWith('0x') && secondArg.length > 40) {
+                    recipientAddress = secondArg;
+                  } else {
+                    recipientAddress = `Pool/Validator ID: ${secondArg}`;
+                  }
                 } else {
-                  // It's likely a pool ID or validator ID, not an address
-                  recipientAddress = `Pool/Validator ID: ${firstArg}`;
+                  const firstArg = String(args[0] || '');
+                  if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                    recipientAddress = firstArg;
+                  } else {
+                    // It's likely a pool ID or validator ID, not an address
+                    recipientAddress = `Pool/Validator ID: ${firstArg}`;
+                  }
                 }
               }
             } else if (functionName.includes('deposit')) {
@@ -401,11 +438,31 @@ export default function TestHistoryPage() {
                 recipientAddress = String(depositEvent.data.to);
               } else if (args.length > 0) {
                 // Check if first argument looks like an address
-                const firstArg = String(args[0]);
-                if (firstArg.startsWith('0x') && firstArg.length > 40) {
-                  recipientAddress = firstArg;
+                // Check if args[0] is an object with 'inner' property
+                if (typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+                  const innerValue = String(args[0].inner || '');
+                  if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                    recipientAddress = innerValue;
+                  } else {
+                    recipientAddress = `Pool ID: ${innerValue}`;
+                  }
+                } else if (typeof args[0] === 'object' && args[0] !== null && !('inner' in args[0]) && args.length > 1) {
+                  // Handle case where args[0] is an object without 'inner' property (like { "vec": [] })
+                  // and check if args[1] contains the address
+                  console.log(`🔍 DEBUG: args[0] is object without 'inner' property, checking args[1]:`, args[1]);
+                  const secondArg = String(args[1] || '');
+                  if (secondArg.startsWith('0x') && secondArg.length > 40) {
+                    recipientAddress = secondArg;
+                  } else {
+                    recipientAddress = `Pool ID: ${secondArg}`;
+                  }
                 } else {
-                  recipientAddress = `Pool ID: ${firstArg}`;
+                  const firstArg = String(args[0] || '');
+                  if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                    recipientAddress = firstArg;
+                  } else {
+                    recipientAddress = `Pool ID: ${firstArg}`;
+                  }
                 }
               }
             } else if (functionName.includes('swap') || functionName.includes('exchange')) {
@@ -423,11 +480,35 @@ export default function TestHistoryPage() {
               } else if (swapEvent?.data?.to) {
                 recipientAddress = String(swapEvent.data.to);
               } else if (args.length > 0) {
-                const firstArg = String(args[0]);
-                if (firstArg.startsWith('0x') && firstArg.length > 40) {
-                  recipientAddress = firstArg;
+                // DEBUG: Log the raw args[0] before conversion
+                console.log(`🔍 DEBUG: Raw args[0] for DEX/Pool ID - type:`, typeof args[0], 'value:', args[0], 'is object:', typeof args[0] === 'object');
+                // Check if args[0] is an object with 'inner' property
+                if (typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+                  const innerValue = String(args[0].inner || '');
+                  console.log(`🔍 DEBUG: Extracted inner value for DEX/Pool ID:`, innerValue);
+                  if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                    recipientAddress = innerValue;
+                  } else {
+                    recipientAddress = `DEX/Pool ID: ${innerValue}`;
+                  }
+                } else if (typeof args[0] === 'object' && args[0] !== null && !('inner' in args[0]) && args.length > 1) {
+                  // Handle case where args[0] is an object without 'inner' property (like { "vec": [] })
+                  // and check if args[1] contains the address
+                  console.log(`🔍 DEBUG: args[0] is object without 'inner' property, checking args[1]:`, args[1]);
+                  const secondArg = String(args[1] || '');
+                  if (secondArg.startsWith('0x') && secondArg.length > 40) {
+                    recipientAddress = secondArg;
+                  } else {
+                    recipientAddress = `DEX/Pool ID: ${secondArg}`;
+                  }
                 } else {
-                  recipientAddress = `DEX/Pool ID: ${firstArg}`;
+                  const firstArg = String(args[0] || '');
+                  console.log(`🔍 DEBUG: Converted firstArg for DEX/Pool ID - type:`, typeof firstArg, 'value:', firstArg);
+                  if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                    recipientAddress = firstArg;
+                  } else {
+                    recipientAddress = `DEX/Pool ID: ${firstArg}`;
+                  }
                 }
               }
             } else {
@@ -445,11 +526,35 @@ export default function TestHistoryPage() {
                 recipientAddress = String(transferEvent.data.recipient);
               } else if (args.length > 0) {
                 // Fallback to first argument
-                const firstArg = String(args[0]);
-                if (firstArg.startsWith('0x') && firstArg.length > 40) {
-                  recipientAddress = firstArg;
+                // DEBUG: Log the raw args[0] before conversion
+                console.log(`🔍 DEBUG: Raw args[0] for ID - type:`, typeof args[0], 'value:', args[0], 'is object:', typeof args[0] === 'object');
+                // Check if args[0] is an object with 'inner' property
+                if (typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+                  const innerValue = String(args[0].inner || '');
+                  console.log(`🔍 DEBUG: Extracted inner value for ID:`, innerValue);
+                  if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                    recipientAddress = innerValue;
+                  } else {
+                    recipientAddress = `ID: ${innerValue}`;
+                  }
+                } else if (typeof args[0] === 'object' && args[0] !== null && !('inner' in args[0]) && args.length > 1) {
+                  // Handle case where args[0] is an object without 'inner' property (like { "vec": [] })
+                  // and check if args[1] contains the address
+                  console.log(`🔍 DEBUG: args[0] is object without 'inner' property, checking args[1]:`, args[1]);
+                  const secondArg = String(args[1] || '');
+                  if (secondArg.startsWith('0x') && secondArg.length > 40) {
+                    recipientAddress = secondArg;
+                  } else {
+                    recipientAddress = `ID: ${secondArg}`;
+                  }
                 } else {
-                  recipientAddress = `ID: ${firstArg}`;
+                  const firstArg = String(args[0] || '');
+                  console.log(`🔍 DEBUG: Converted firstArg for ID - type:`, typeof firstArg, 'value:', firstArg);
+                  if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                    recipientAddress = firstArg;
+                  } else {
+                    recipientAddress = `ID: ${firstArg}`;
+                  }
                 }
               }
             }
@@ -475,6 +580,14 @@ export default function TestHistoryPage() {
             console.log(`📋 Transaction ${tx.version}: recipient address = ${recipientAddress}`);
           }
           
+          // Debug: log recipientAddress before creating transaction object
+          console.log(`🔍 DEBUG: Creating transaction object - recipientAddress type:`, typeof recipientAddress, 'value:', recipientAddress);
+          
+          // Additional debug: Check if recipientAddress contains [object Object]
+          if (recipientAddress.includes('[object Object]')) {
+            console.log('⚠️ WARNING: recipientAddress contains [object Object] - this should not happen after the fix');
+          }
+          
           return {
             id: tx.version || index.toString(),
             type,
@@ -485,7 +598,8 @@ export default function TestHistoryPage() {
             hash: tx.hash || `0x${(index * 12345).toString(16).padStart(16, '0')}...`,
             from: String(tx.sender || 'Unknown'),
             to: recipientAddress,
-            function: tx.payload?.function || 'N/A'
+            function: tx.payload?.function || 'N/A',
+            _rawData: tx // Store raw API data for debugging
           };
         });
         
@@ -652,6 +766,15 @@ export default function TestHistoryPage() {
     console.log('Amount:', tx.amount);
     console.log('Type:', tx.type);
     console.log('Protocol:', tx.protocol);
+    
+    // If we have raw data, show it
+    if (tx._rawData) {
+      console.log('=== Raw API Data ===');
+      console.log('Raw transaction:', tx._rawData);
+      console.log('Raw payload:', tx._rawData.payload);
+      console.log('Raw arguments:', tx._rawData.payload?.arguments);
+      console.log('Raw events:', tx._rawData.events);
+    }
   };
 
   // Function to format function name for better readability
@@ -1092,7 +1215,15 @@ export default function TestHistoryPage() {
                               {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.to !== 'Unknown' ? getProtocolNameByAddress(tx.to) : '-'}
+                              {(() => {
+                                console.log('🔍 DEBUG: tx.to type:', typeof tx.to, 'value:', tx.to, 'is object:', typeof tx.to === 'object');
+                                if (tx.to !== 'Unknown') {
+                                  const result = getProtocolNameByAddress(tx.to);
+                                  console.log('🔍 DEBUG: getProtocolNameByAddress result:', result, 'type:', typeof result);
+                                  return result;
+                                }
+                                return '-';
+                              })()}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}
@@ -1131,7 +1262,7 @@ export default function TestHistoryPage() {
               <div className="flex items-center justify-between">
                 <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</Button>
                 <span>Page {currentPage} of {getTotalPages()}</span>
-                <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === getTotalPages()}>Next</Button>
+                <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === getTotalPages()}>Next                </Button>
               </div>
             </CardContent>
           </Card>
@@ -1255,7 +1386,213 @@ export default function TestHistoryPage() {
                 >
                   Test Protocol Mapping
                 </Button>
+                
+                <Button 
+                  onClick={() => {
+                    console.log('=== Analyzing Transactions with [object Object] ===');
+                    const problematicTxs = transactions.filter(tx => 
+                      tx.to && tx.to.includes('[object Object]')
+                    );
+                    
+                    console.log(`Found ${problematicTxs.length} transactions with [object Object]:`, problematicTxs);
+                    
+                    if (problematicTxs.length > 0) {
+                      console.log('=== Detailed Analysis of First Problematic Transaction ===');
+                      getDetailedTransactionInfo(problematicTxs[0]);
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Analyze [object Object] Transactions
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    console.log('=== Raw API Data Analysis ===');
+                    console.log('Current transactions state:', transactions);
+                    
+                    // Find transactions that might have raw API data
+                    const txsWithRawData = transactions.filter(tx => 
+                      tx._rawData || tx.originalData
+                    );
+                    
+                    console.log(`Found ${txsWithRawData.length} transactions with raw data:`, txsWithRawData);
+                    
+                    if (txsWithRawData.length > 0) {
+                      console.log('=== Raw API Data for First Transaction ===');
+                      console.log('Raw data:', txsWithRawData[0]._rawData || txsWithRawData[0].originalData);
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Analyze Raw API Data
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    // Find the first transaction with [object Object] and analyze it
+                    const problematicTx = transactions.find(tx => 
+                      tx.to && tx.to.includes('[object Object]')
+                    );
+                    
+                    if (problematicTx) {
+                      console.log('=== Analyzing Specific Problematic Transaction ===');
+                      console.log('Transaction ID:', problematicTx.id);
+                      console.log('Current "to" value:', problematicTx.to);
+                      getDetailedTransactionInfo(problematicTx);
+                    } else {
+                      console.log('No transactions with [object Object] found');
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Analyze First [object Object] Transaction
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    console.clear();
+                    console.log('=== Console cleared ===');
+                    console.log('Ready for new debugging session');
+                  }}
+                  variant="outline"
+                >
+                  Clear Console
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    console.log('=== Testing Specific Addresses from Logs ===');
+                    
+                    // Test the specific addresses we saw in the logs
+                    const testAddresses = [
+                      '0xd3894aca06d5f42b27c89e6f448114b3ed6a1ba07f992a58b2126c71dd83c127',
+                      'Pool/Validator ID: 74090850',
+                      'ID: 8',
+                      'DEX/Pool ID: [object Object]',
+                      'ID: [object Object]'
+                    ];
+                    
+                    testAddresses.forEach(address => {
+                      const result = getProtocolNameByAddress(address);
+                      console.log(`Testing: "${address}" -> "${result}"`);
+                    });
+                  }}
+                  variant="outline"
+                >
+                  Test Addresses from Logs
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    // Find the first problematic transaction
+                    const problematicTx = transactions.find(tx => 
+                      tx.to && tx.to.includes('[object Object]')
+                    );
+                    
+                    if (problematicTx && problematicTx._rawData) {
+                      console.log('=== Detailed Raw Data Analysis ===');
+                      
+                      const rawData = problematicTx._rawData;
+                      const analysis = {
+                        transactionId: problematicTx.id,
+                        currentToValue: problematicTx.to,
+                        rawPayload: rawData.payload,
+                        rawArguments: rawData.payload?.arguments,
+                        rawEvents: rawData.events,
+                        argumentsAnalysis: {
+                          length: rawData.payload?.arguments?.length || 0,
+                          types: rawData.payload?.arguments?.map((arg: any, index: number) => ({
+                            index,
+                            type: typeof arg,
+                            value: arg,
+                            isObject: typeof arg === 'object',
+                            stringified: String(arg)
+                          })) || []
+                        },
+                        eventsAnalysis: {
+                          length: rawData.events?.length || 0,
+                          types: rawData.events?.map((event: any, index: number) => ({
+                            index,
+                            type: event.type,
+                            data: event.data
+                          })) || []
+                        }
+                      };
+                      
+                      console.log('Detailed Analysis:', analysis);
+                      setDetailedAnalysis(analysis);
+                    } else {
+                      console.log('No problematic transaction with raw data found');
+                      setDetailedAnalysis(null);
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Expand Raw Arguments & Events
+                </Button>
               </div>
+              
+              {/* Detailed Analysis Results */}
+              {detailedAnalysis && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">Детальный анализ сырых данных</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-gray-700">Информация о транзакции</h4>
+                      <p className="text-sm text-gray-600">ID: {detailedAnalysis.transactionId}</p>
+                      <p className="text-sm text-gray-600">Текущее значение "to": {detailedAnalysis.currentToValue}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-700">Анализ аргументов ({detailedAnalysis.argumentsAnalysis.length})</h4>
+                      <div className="space-y-2">
+                        {detailedAnalysis.argumentsAnalysis.types.map((arg: any, index: number) => (
+                          <div key={index} className="p-2 bg-white rounded border">
+                            <p className="text-sm font-medium">Аргумент {arg.index}:</p>
+                            <p className="text-xs text-gray-600">Тип: {arg.type}</p>
+                            <p className="text-xs text-gray-600">Значение: {JSON.stringify(arg.value, null, 2)}</p>
+                            <p className="text-xs text-gray-600">Строковое представление: "{arg.stringified}"</p>
+                            {arg.isObject && (
+                              <p className="text-xs text-red-600 font-medium">⚠️ Это объект!</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-700">Анализ событий ({detailedAnalysis.eventsAnalysis.length})</h4>
+                      <div className="space-y-2">
+                        {detailedAnalysis.eventsAnalysis.types.map((event: any, index: number) => (
+                          <div key={index} className="p-2 bg-white rounded border">
+                            <p className="text-sm font-medium">Событие {event.index}:</p>
+                            <p className="text-xs text-gray-600">Тип: {event.type}</p>
+                            <p className="text-xs text-gray-600">Данные: {JSON.stringify(event.data, null, 2)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-700">Полные сырые данные</h4>
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-800">
+                          Развернуть полные данные
+                        </summary>
+                        <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-96">
+                          {JSON.stringify({
+                            payload: detailedAnalysis.rawPayload,
+                            arguments: detailedAnalysis.rawArguments,
+                            events: detailedAnalysis.rawEvents
+                          }, null, 2)}
+                        </pre>
+                      </details>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </>
