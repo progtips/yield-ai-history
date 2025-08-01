@@ -8,7 +8,7 @@
     "depositType": "external",
     "depositUrl": "https://hyperion.xyz/pools?inviteCode=O02Eig",
     "isDepositEnabled": true,
-    "contract": "0xc0c240c870606a5cb3150795e2d0dfff9f1f7456",
+    "contract": "0x8b4a2c4bb53857c718a04c020b98f8c2e1f99a68b0f57389a8bf5434cd22e05c",
     "managedType": "native"
   },
   {
@@ -87,7 +87,7 @@
     "description": "Pioneering Liquid Staking protocol on Aptos",
     "depositType": "native",
     "isDepositEnabled": true,
-    "contract": "0xb36527754eb54d7ff55daf13bcb54b42b88ec484bd6f0e3b2e0d1db169de6451",
+    "contract": "0x111ae3e5bc816a5e63c2da97d0aa3886519e0cd5e4b046659fa35796bd11542a",
     "managedType": "external"
   },
   {

@@ -58,14 +58,22 @@ export default function TestHistoryPage() {
   const [showFullFunctionPath, setShowFullFunctionPath] = React.useState(false);
   const [detailedAnalysis, setDetailedAnalysis] = React.useState<any>(null);
 
-  // Function to get protocol name by address
-  const getProtocolNameByAddress = (address: string): string => {
-    if (!address || address === 'Unknown' || address.startsWith('Pool/Validator ID:') || address.startsWith('DEX/Pool ID:') || address.startsWith('ID:')) {
-      return address;
+  // Function to get protocol name by function path
+  const getProtocolNameByFunction = (functionPath: string, recipientAddress: string): string => {
+    if (!functionPath || functionPath === 'Unknown') {
+      return recipientAddress || 'Unknown';
     }
     
+    // Extract the first part of the function path (before the first ::)
+    const parts = functionPath.split('::');
+    if (parts.length < 2) {
+      return recipientAddress || functionPath;
+    }
+    
+    const contractAddress = parts[0];
+    
     // Normalize address (remove 0x prefix if present, ensure lowercase)
-    const normalizedAddress = address.toLowerCase().replace(/^0x/, '');
+    const normalizedAddress = contractAddress.toLowerCase().replace(/^0x/, '');
     
     // Find protocol by contract address
     const protocol = protocolsList.find(p => {
@@ -84,11 +92,38 @@ export default function TestHistoryPage() {
     });
     
     if (protocol) {
-      return `${protocol.name} (${safeTruncateAddress(address)})`;
+      return protocol.name;
     }
     
-    // If no exact match found, return the original address
-    return address;
+    // If no exact match found, return the original recipient address logic
+    if (!recipientAddress || recipientAddress === 'Unknown' || recipientAddress.startsWith('Pool/Validator ID:') || recipientAddress.startsWith('DEX/Pool ID:') || recipientAddress.startsWith('ID:')) {
+      return recipientAddress;
+    }
+    
+    // Try to find protocol by recipient address (old logic)
+    const normalizedRecipientAddress = recipientAddress.toLowerCase().replace(/^0x/, '');
+    
+    const protocolByAddress = protocolsList.find(p => {
+      const protocolWithContract = p as any;
+      const hasContract = protocolWithContract.contract && typeof protocolWithContract.contract === 'string';
+      
+      if (!hasContract) {
+        return false;
+      }
+      
+      // Normalize contract address
+      const normalizedContract = protocolWithContract.contract.toLowerCase().replace(/^0x/, '');
+      const matches = normalizedContract === normalizedRecipientAddress;
+      
+      return matches;
+    });
+    
+    if (protocolByAddress) {
+      return `${protocolByAddress.name} (${safeTruncateAddress(recipientAddress)})`;
+    }
+    
+    // If no match found at all, return the original recipient address
+    return recipientAddress;
   };
 
   // Log when transactions state changes
@@ -1063,7 +1098,7 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Timestamp</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Protocol/Recipient</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Protocol</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
 
                         </tr>
@@ -1094,7 +1129,7 @@ export default function TestHistoryPage() {
                               {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.to !== 'Unknown' ? getProtocolNameByAddress(tx.to) : '-'}
+                              {getProtocolNameByFunction(tx.function, tx.to)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}
@@ -1240,7 +1275,7 @@ export default function TestHistoryPage() {
                     
                     console.log('=== Testing Addresses ===');
                     testAddresses.forEach(address => {
-                      const result = getProtocolNameByAddress(address);
+                      const result = getProtocolNameByFunction(address, address);
                       console.log(`${address} -> ${result}`);
                     });
                   }}
@@ -1336,7 +1371,7 @@ export default function TestHistoryPage() {
                     ];
                     
                     testAddresses.forEach(address => {
-                      const result = getProtocolNameByAddress(address);
+                      const result = getProtocolNameByFunction(address, address);
                       console.log(`Testing: "${address}" -> "${result}"`);
                     });
                   }}
