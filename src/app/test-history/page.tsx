@@ -1072,7 +1072,12 @@ export default function TestHistoryPage() {
                         {getPaginatedTransactions().map((tx) => (
                           <tr key={`${tx.id}-${walletAddress}`} className="hover:bg-gray-50">
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.id}
+                              <a
+                                href={`/test-transaction/${tx.id}`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                              >
+                                {tx.id}
+                              </a>
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm">
                               <Badge variant="outline" className="capitalize">
@@ -1095,13 +1100,22 @@ export default function TestHistoryPage() {
                               {formatFunctionName(tx.function)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => getDetailedTransactionInfo(tx)}
-                              >
-                                Analyze
-                              </Button>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => getDetailedTransactionInfo(tx)}
+                                >
+                                  Analyze
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(`https://explorer.aptoslabs.com/txn/${tx.id}?network=mainnet`, '_blank')}
+                                >
+                                  Explorer
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
