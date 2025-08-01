@@ -24,20 +24,12 @@ export default function TestHistoryPage() {
   // Debug logging
   React.useEffect(() => {
     if (!isClient) return; // Only run on client side
-    
-    console.log('=== Wallet Debug Info ===');
-    console.log('connected:', connected);
-    console.log('account:', account);
-    console.log('defaultWalletAddress:', defaultWalletAddress);
-    console.log('window.aptos:', typeof window !== 'undefined' ? !!window.aptos : 'SSR');
   }, [connected, account, defaultWalletAddress, isClient]);
 
   // Listen for wallet connection events
   React.useEffect(() => {
     const handleWalletChange = () => {
-      console.log('=== Wallet Connection Event ===');
-      console.log('New connected state:', connected);
-      console.log('New account:', account);
+      // Wallet connection event handling removed
     };
 
     // Log initial state
@@ -45,7 +37,7 @@ export default function TestHistoryPage() {
 
     // This will run whenever connected or account changes
     return () => {
-      console.log('Wallet state changed');
+      // Wallet state change handling removed
     };
   }, [connected, account]);
   
@@ -68,14 +60,9 @@ export default function TestHistoryPage() {
 
   // Function to get protocol name by address
   const getProtocolNameByAddress = (address: string): string => {
-    console.log('🔍 DEBUG: getProtocolNameByAddress input - type:', typeof address, 'value:', address, 'is object:', typeof address === 'object');
-    
     if (!address || address === 'Unknown' || address.startsWith('Pool/Validator ID:') || address.startsWith('DEX/Pool ID:') || address.startsWith('ID:')) {
       return address;
     }
-    
-    // Debug logging for protocol matching
-    console.log(`🔍 Checking protocol for address: ${address}`);
     
     // Normalize address (remove 0x prefix if present, ensure lowercase)
     const normalizedAddress = address.toLowerCase().replace(/^0x/, '');
@@ -93,29 +80,20 @@ export default function TestHistoryPage() {
       const normalizedContract = protocolWithContract.contract.toLowerCase().replace(/^0x/, '');
       const matches = normalizedContract === normalizedAddress;
       
-      console.log(`  Comparing with ${protocolWithContract.name}: ${normalizedContract} vs ${normalizedAddress} = ${matches}`);
-      
       return matches;
     });
     
     if (protocol) {
-      console.log(`✅ Found protocol: ${protocol.name} for address: ${address}`);
       return `${protocol.name} (${safeTruncateAddress(address)})`;
     }
     
-    console.log(`❌ No protocol found for address: ${address}`);
     // If no exact match found, return the original address
     return address;
   };
 
   // Log when transactions state changes
   React.useEffect(() => {
-    console.log('=== Transactions state changed ===');
-    console.log('New transactions count:', transactions.length);
-    if (transactions.length > 0) {
-      console.log('First transaction:', transactions[0]);
-      console.log('Sample amounts:', JSON.stringify(transactions.slice(0, 3).map(tx => tx.amount)));
-    }
+    // Transactions state change logging removed
   }, [transactions]);
 
   // Update wallet address when default changes
@@ -149,8 +127,6 @@ export default function TestHistoryPage() {
     // Fetch real transactions from Aptos blockchain
     const fetchRealTransactions = async (address: string) => {
       try {
-        console.log(`Fetching real transactions for wallet: ${address}`);
-        
         // Function to fetch all transactions with pagination
         const fetchAllTransactions = async (address: string) => {
           let allTransactions: any[] = [];
@@ -159,11 +135,8 @@ export default function TestHistoryPage() {
           let hasMore = true;
           let pageCount = 0;
           
-          console.log(`Starting pagination for address: ${address}`);
-          
           while (hasMore) {
             pageCount++;
-            console.log(`Fetching page ${pageCount}, start: ${start}, limit: ${limit}`);
             
             const response = await fetch(`https://indexer.mainnet.aptoslabs.com/v1/accounts/${address}/transactions?start=${start}&limit=${limit}&include_events=true&include_payload=true&order=desc`);
             
@@ -172,23 +145,17 @@ export default function TestHistoryPage() {
             }
             
             const data = await response.json();
-            console.log(`Page ${pageCount}: received ${data.length} transactions`);
             
             allTransactions = allTransactions.concat(data);
             
             // If we got less than the limit, we've reached the end
             if (data.length < limit) {
-              console.log(`Reached end of transactions (got ${data.length} < ${limit})`);
               hasMore = false;
             } else {
               start += limit;
-              console.log(`Moving to next page, new start: ${start}`);
             }
-            
-            console.log(`Fetched ${data.length} transactions, total so far: ${allTransactions.length}`);
           }
           
-          console.log(`Pagination complete: ${pageCount} pages, ${allTransactions.length} total transactions`);
           return allTransactions;
         };
         
@@ -916,28 +883,7 @@ export default function TestHistoryPage() {
                   </div>
                 )}
                 
-                {/* Debug Information */}
-                <div className="mt-4 p-3 bg-gray-50 rounded text-xs">
-                  <div className="font-medium mb-2">Debug Info:</div>
-                  <div>connected: {String(connected)}</div>
-                  <div>account exists: {account ? 'yes' : 'no'}</div>
-                  <div>account address: {account?.address?.toString() || 'null'}</div>
-                  <div>defaultWalletAddress: {defaultWalletAddress || 'null'}</div>
-                  
-                  <div className="mt-3 space-y-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        console.log('=== Manual Refresh ===');
-                        console.log('Current state:', { connected, account });
-                        window.location.reload();
-                      }}
-                    >
-                      Refresh Page
-                    </Button>
-                  </div>
-                </div>
+
               </div>
             </CardContent>
           </Card>
@@ -1101,79 +1047,7 @@ export default function TestHistoryPage() {
                   )}
                 </div>
                 
-                {/* Info about data source */}
-                <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
-                  <strong>Note:</strong> Data is fetched from Aptos Indexer API. Results may differ from Aptos Explorer due to different data sources, pagination, indexing delays, or transaction ordering. Version numbers and transaction order might not match exactly.
-                </div>
-                
-                {/* Explanation of difference with Explorer */}
-                {transactions && transactions.length > 0 && (
-                  <div className="text-xs text-amber-700 bg-amber-50 p-3 rounded border border-amber-200">
-                    <strong>🔍 Difference with Aptos Explorer Explained:</strong>
-                    <br />
-                    • <strong>Your app shows:</strong> {transactions.length} transactions (user transactions only)
-                    <br />
-                    • <strong>Aptos Explorer shows:</strong> 7 transactions (includes system transactions)
-                    <br />
-                    • <strong>Missing:</strong> 2 system transactions (account initialization, resource creation, etc.)
-                    <br />
-                    <br />
-                    <strong>Why this happens:</strong>
-                    <br />
-                    • Aptos Indexer API returns only user-initiated transactions
-                    <br />
-                    • Aptos Explorer includes all transaction types (user + system)
-                    <br />
-                    • This is normal behavior and your app is working correctly
-                    <br />
-                    <br />
-                    <strong>Your transactions (versions):</strong>
-                    <br />
-                    {transactions.map((tx, index) => (
-                      <span key={tx.id}>
-                        {index + 1}. {tx.id} ({tx.type}){index < transactions.length - 1 ? ', ' : ''}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Explanation about "Protocol/Recipient" differences */}
-                {transactions && transactions.length > 0 && (
-                  <div className="text-xs text-blue-700 bg-blue-50 p-3 rounded border border-blue-200">
-                    <strong>📋 About "Protocol/Recipient" Column:</strong>
-                    <br />
-                    • <strong>Your app:</strong> Shows protocol name when address matches known protocol contracts, otherwise shows recipient address
-                    <br />
-                    • <strong>Supported protocols:</strong> Hyperion, Aries, Joule, Echelon, Meso Finance, Tapp Exchange, Auro Finance, Amnis Finance, Panora
-                    <br />
-                    • <strong>For known protocols:</strong> Shows protocol name with address (e.g., "Hyperion (0xc0c240c8...)" instead of just contract address)
-                    <br />
-                    • <strong>For unknown addresses:</strong> Shows truncated recipient address
-                    <br />
-                    • <strong>For pool/validator IDs:</strong> Shows descriptive text (e.g., "Pool ID: 74090850")
-                    <br />
-                    <br />
-                    <strong>Note:</strong> Protocol names are matched by contract addresses from protocolsList.json. If a protocol's contract address changes, the name may not display correctly.
-                  </div>
-                )}
-                
-                {/* Explanation about "Function" differences */}
-                {transactions && transactions.length > 0 && (
-                  <div className="text-xs text-green-700 bg-green-50 p-3 rounded border border-green-200">
-                    <strong>🔧 About "Function" Column Differences:</strong>
-                    <br />
-                    • <strong>Your app:</strong> Shows full function path with module address (truncated for readability)
-                    <br />
-                    • <strong>Aptos Explorer:</strong> Shows simplified function name without module address
-                    <br />
-                    • <strong>Format:</strong> {`{address}::{module}::{function}`} vs {`{module}::{function}`}
-                    <br />
-                    • <strong>Example:</strong> "0x111ae3e5...11542a::router::deposit_and_stake_entry" vs "router::deposit_and_stake_entry"
-                    <br />
-                    <br />
-                    <strong>Note:</strong> Both show the same function, but Aptos Explorer simplifies the display for better user experience.
-                  </div>
-                )}
+
                 
                 {isLoading ? (
                   <div className="text-center py-8">
@@ -1215,15 +1089,7 @@ export default function TestHistoryPage() {
                               {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {(() => {
-                                console.log('🔍 DEBUG: tx.to type:', typeof tx.to, 'value:', tx.to, 'is object:', typeof tx.to === 'object');
-                                if (tx.to !== 'Unknown') {
-                                  const result = getProtocolNameByAddress(tx.to);
-                                  console.log('🔍 DEBUG: getProtocolNameByAddress result:', result, 'type:', typeof result);
-                                  return result;
-                                }
-                                return '-';
-                              })()}
+                              {tx.to !== 'Unknown' ? getProtocolNameByAddress(tx.to) : '-'}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}

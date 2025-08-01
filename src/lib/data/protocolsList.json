@@ -99,6 +99,7 @@
     "depositType": "native",
     "isDepositEnabled": true,
     "managedType": "native",
+    "contract": "0x1c3206329806286fd2223647c9f9b130e66baeb6d7224a18c1f642ffe48f3b4c",
     "panoraConfig": {
       "integratorFeeAddress": "0x89e68b91fa64038e98cc1ac0e3e7f6b50d056036980be712dcbe6302cee948cb",
       "integratorFeePercentage": "0.25",
