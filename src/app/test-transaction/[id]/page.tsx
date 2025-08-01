@@ -79,8 +79,62 @@ export default function TransactionDetailsPage({ params }: { params: { id: strin
     }
   };
 
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(parseInt(timestamp) * 1000).toLocaleString();
+  const formatTimestamp = (timestamp: any) => {
+    if (!timestamp) {
+      return 'Unknown';
+    }
+    
+    // Try different timestamp formats
+    let date: Date;
+    
+    if (typeof timestamp === 'string') {
+      // Convert string to number first
+      const numTimestamp = parseFloat(timestamp);
+      if (isNaN(numTimestamp)) {
+        return 'Invalid Date';
+      }
+      
+      // Check if it's microseconds (very large number)
+      if (numTimestamp > 1000000000000000) {
+        // Microseconds - convert to milliseconds
+        date = new Date(numTimestamp / 1000);
+      } else if (numTimestamp > 1000000000000) {
+        // Likely milliseconds
+        date = new Date(numTimestamp);
+      } else {
+        // Likely seconds, convert to milliseconds
+        date = new Date(numTimestamp * 1000);
+      }
+    } else if (typeof timestamp === 'number') {
+      // Check if it's microseconds (very large number)
+      if (timestamp > 1000000000000000) {
+        // Microseconds - convert to milliseconds
+        date = new Date(timestamp / 1000);
+      } else if (timestamp > 1000000000000) {
+        // Likely milliseconds
+        date = new Date(timestamp);
+      } else {
+        // Likely seconds, convert to milliseconds
+        date = new Date(timestamp * 1000);
+      }
+    } else {
+      return 'Invalid Date';
+    }
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return date.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
   };
 
   const formatAddress = (address: string) => {
@@ -222,10 +276,14 @@ export default function TransactionDetailsPage({ params }: { params: { id: strin
                 <span className="text-sm font-medium text-gray-600">Max Gas Amount:</span>
                 <span className="text-sm">{transaction.max_gas_amount}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium text-gray-600">Sequence Number:</span>
-                <span className="text-sm">{transaction.sequence_number}</span>
-              </div>
+                             <div className="flex justify-between">
+                 <span className="text-sm font-medium text-gray-600">Sequence Number:</span>
+                 <span className="text-sm">{transaction.sequence_number}</span>
+               </div>
+               <div className="flex justify-between">
+                 <span className="text-sm font-medium text-gray-600">Timestamp:</span>
+                 <span className="text-sm">{formatTimestamp(transaction.timestamp)}</span>
+               </div>
             </div>
           </div>
         </CardContent>

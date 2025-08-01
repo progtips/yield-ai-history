@@ -1065,7 +1065,7 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Protocol/Recipient</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
+
                         </tr>
                       </thead>
                       <tbody>
@@ -1098,24 +1098,6 @@ export default function TestHistoryPage() {
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}
-                            </td>
-                            <td className="border border-gray-200 px-4 py-2 text-sm">
-                              <div className="flex space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => getDetailedTransactionInfo(tx)}
-                                >
-                                  Analyze
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(`https://explorer.aptoslabs.com/txn/${tx.id}?network=mainnet`, '_blank')}
-                                >
-                                  Explorer
-                                </Button>
-                              </div>
                             </td>
                           </tr>
                         ))}
