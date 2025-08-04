@@ -47,21 +47,27 @@ export default function TestHistoryPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const [transactions, setTransactions] = React.useState<any[]>([]);
+  const [allTransactions, setAllTransactions] = React.useState<any[]>([]); // Все транзакции без фильтрации
+  const [transactions, setTransactions] = React.useState<any[]>([]); // Отфильтрованные транзакции
   const [walletAddress, setWalletAddress] = React.useState(defaultWalletAddress || "");
   const [filters, setFilters] = React.useState({
     type: "all",
-    dateRange: "7d",
+    dateRange: "all", // "All time" - показывать все транзакции
     protocol: "all"
   });
   const [applyFilters, setApplyFilters] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
   const transactionsPerPage = 20;
-  const [showFullFunctionPath, setShowFullFunctionPath] = React.useState(false);
+
   const [detailedAnalysis, setDetailedAnalysis] = React.useState<any>(null);
 
   // Function to get protocol name by function path
   const getProtocolNameByFunction = (functionPath: string, recipientAddress: string): string => {
+    // Debug logging for protocol detection
+    if (Math.random() < 0.05) { // Log 5% of calls to avoid spam
+      console.log('getProtocolNameByFunction called:', { functionPath, recipientAddress });
+    }
+    
     if (!functionPath || functionPath === 'Unknown') {
       return recipientAddress || 'Unknown';
     }
@@ -94,6 +100,9 @@ export default function TestHistoryPage() {
     });
     
     if (protocol) {
+      if (Math.random() < 0.05) {
+        console.log('getProtocolNameByFunction result (by contract):', protocol.name);
+      }
       return protocol.name;
     }
     
@@ -121,10 +130,17 @@ export default function TestHistoryPage() {
     });
     
     if (protocolByAddress) {
-      return `${protocolByAddress.name} (${safeTruncateAddress(recipientAddress)})`;
+      const result = `${protocolByAddress.name} (${safeTruncateAddress(recipientAddress)})`;
+      if (Math.random() < 0.05) {
+        console.log('getProtocolNameByFunction result (by address):', result);
+      }
+      return result;
     }
     
     // If no match found at all, return the original recipient address
+    if (Math.random() < 0.05) {
+      console.log('getProtocolNameByFunction result (fallback):', recipientAddress);
+    }
     return recipientAddress;
   };
 
@@ -144,6 +160,209 @@ export default function TestHistoryPage() {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [walletAddress]);
+
+  // Apply filters to existing data when filters change
+  React.useEffect(() => {
+    console.log('Filter useEffect triggered:', { 
+      allTransactionsLength: allTransactions.length, 
+      applyFilters, 
+      filters,
+      isLoading
+    });
+    
+    // Не применяем фильтры, если данные еще загружаются
+    if (isLoading) {
+      console.log('Data is still loading, skipping filter application');
+      return;
+    }
+    
+    if (allTransactions.length > 0) {
+      let filteredTransactions = [...allTransactions];
+      
+      if (applyFilters) {
+        console.log('Applying filters...');
+        
+        // Filter by transaction type
+        if (filters.type !== "all") {
+          const beforeTypeFilter = filteredTransactions.length;
+          filteredTransactions = filteredTransactions.filter(tx => tx.type === filters.type);
+          console.log(`Type filter (${filters.type}): ${beforeTypeFilter} -> ${filteredTransactions.length}`);
+        }
+        
+        // Filter by protocol
+        if (filters.protocol !== "all") {
+          const beforeProtocolFilter = filteredTransactions.length;
+          filteredTransactions = filteredTransactions.filter(tx => {
+            const protocolName = getProtocolNameByFunction(tx.function, tx.to);
+            const matches = protocolName === filters.protocol;
+            if (Math.random() < 0.1) { // Log 10% of comparisons
+              console.log(`Protocol comparison: "${protocolName}" === "${filters.protocol}" = ${matches}`);
+            }
+            return matches;
+          });
+          console.log(`Protocol filter (${filters.protocol}): ${beforeProtocolFilter} -> ${filteredTransactions.length}`);
+        }
+        
+        // Filter by date range
+        const now = Date.now();
+        const dateRanges = {
+          "7d": 7 * 24 * 60 * 60 * 1000,
+          "30d": 30 * 24 * 60 * 60 * 1000,
+          "90d": 90 * 24 * 60 * 60 * 1000,
+          "1y": 365 * 24 * 60 * 60 * 1000
+        };
+        
+        if (filters.dateRange !== "all") {
+          const beforeDateFilter = filteredTransactions.length;
+          const rangeMs = dateRanges[filters.dateRange as keyof typeof dateRanges];
+          const cutoffTime = now - rangeMs;
+          
+          // Debug: показать временные метки транзакций
+          filteredTransactions.forEach((tx, index) => {
+            if (index < 3) { // Показать первые 3 транзакции
+              try {
+                let txTime: number;
+                
+                if (typeof tx.timestamp === 'string') {
+                  const numTimestamp = parseFloat(tx.timestamp);
+                  if (isNaN(numTimestamp)) {
+                    console.log(`Transaction ${index + 1}: Invalid timestamp`, {
+                      timestamp: tx.timestamp,
+                      type: typeof tx.timestamp
+                    });
+                    return;
+                  }
+                  
+                  // Check if it's nanoseconds (very very large number)
+                  if (numTimestamp > 1000000000000000000) {
+                    // Nanoseconds - convert to milliseconds
+                    txTime = numTimestamp / 1000000;
+                  } else if (numTimestamp > 1000000000000000) {
+                    // Microseconds - convert to milliseconds
+                    txTime = numTimestamp / 1000;
+                  } else if (numTimestamp > 1000000000000) {
+                    // Likely milliseconds
+                    txTime = numTimestamp;
+                  } else {
+                    // Likely seconds, convert to milliseconds
+                    txTime = numTimestamp * 1000;
+                  }
+                } else if (typeof tx.timestamp === 'number') {
+                  // Check if it's nanoseconds (very very large number)
+                  if (tx.timestamp > 1000000000000000000) {
+                    // Nanoseconds - convert to milliseconds
+                    txTime = tx.timestamp / 1000000;
+                  } else if (tx.timestamp > 1000000000000000) {
+                    // Microseconds - convert to milliseconds
+                    txTime = tx.timestamp / 1000;
+                  } else if (tx.timestamp > 1000000000000) {
+                    // Likely milliseconds
+                    txTime = tx.timestamp;
+                  } else {
+                    // Likely seconds, convert to milliseconds
+                    txTime = tx.timestamp * 1000;
+                  }
+                } else {
+                  console.log(`Transaction ${index + 1}: Invalid timestamp type`, {
+                    timestamp: tx.timestamp,
+                    type: typeof tx.timestamp
+                  });
+                  return;
+                }
+                
+                const isRecent = txTime > cutoffTime;
+                const date = new Date(txTime);
+                
+                console.log(`Transaction ${index + 1}:`, {
+                  timestamp: tx.timestamp,
+                  date: date.toISOString(),
+                  txTime,
+                  cutoffTime,
+                  isRecent,
+                  ageInDays: Math.floor((now - txTime) / (24 * 60 * 60 * 1000))
+                });
+              } catch (error) {
+                console.log(`Transaction ${index + 1}: Error processing timestamp`, {
+                  timestamp: tx.timestamp,
+                  error: error instanceof Error ? error.message : String(error)
+                });
+              }
+            }
+          });
+          
+          filteredTransactions = filteredTransactions.filter(tx => {
+            try {
+              let txTime: number;
+              
+              if (typeof tx.timestamp === 'string') {
+                const numTimestamp = parseFloat(tx.timestamp);
+                if (isNaN(numTimestamp)) {
+                  return false;
+                }
+                
+                // Check if it's nanoseconds (very very large number)
+                if (numTimestamp > 1000000000000000000) {
+                  // Nanoseconds - convert to milliseconds
+                  txTime = numTimestamp / 1000000;
+                } else if (numTimestamp > 1000000000000000) {
+                  // Microseconds - convert to milliseconds
+                  txTime = numTimestamp / 1000;
+                } else if (numTimestamp > 1000000000000) {
+                  // Likely milliseconds
+                  txTime = numTimestamp;
+                } else {
+                  // Likely seconds, convert to milliseconds
+                  txTime = numTimestamp * 1000;
+                }
+              } else if (typeof tx.timestamp === 'number') {
+                // Check if it's nanoseconds (very very large number)
+                if (tx.timestamp > 1000000000000000000) {
+                  // Nanoseconds - convert to milliseconds
+                  txTime = tx.timestamp / 1000000;
+                } else if (tx.timestamp > 1000000000000000) {
+                  // Microseconds - convert to milliseconds
+                  txTime = tx.timestamp / 1000;
+                } else if (tx.timestamp > 1000000000000) {
+                  // Likely milliseconds
+                  txTime = tx.timestamp;
+                } else {
+                  // Likely seconds, convert to milliseconds
+                  txTime = tx.timestamp * 1000;
+                }
+              } else {
+                return false;
+              }
+              
+              return !isNaN(txTime) && txTime > cutoffTime;
+            } catch (error) {
+              console.log('Error filtering transaction by date:', {
+                timestamp: tx.timestamp,
+                error: error instanceof Error ? error.message : String(error)
+              });
+              return false; // Исключаем транзакции с невалидными временными метками
+            }
+          });
+          console.log(`Date filter (${filters.dateRange}): ${beforeDateFilter} -> ${filteredTransactions.length}`);
+        }
+      } else {
+        console.log('No filters applied, showing all transactions');
+      }
+      
+      console.log(`Final filtered transactions: ${filteredTransactions.length}`);
+      setTransactions(filteredTransactions);
+      setCurrentPage(1); // Reset to first page when filters change
+    } else {
+      console.log('No transactions available for filtering');
+    }
+  }, [filters, applyFilters, allTransactions, isLoading]);
+
+  // Auto-load data when filters change and no data is available
+  React.useEffect(() => {
+    if (walletAddress && isClient && allTransactions.length === 0 && !isLoading && applyFilters) {
+      console.log('Auto-loading data due to filter change');
+      handleRefreshHistory();
+    }
+  }, [filters, applyFilters, walletAddress, isClient, allTransactions.length, isLoading]);
 
   const handleRefreshHistory = () => {
     if (!walletAddress.trim()) {
@@ -710,9 +929,11 @@ export default function TestHistoryPage() {
           }
         }
         
-        console.log('Setting transactions:', filteredTransactions.length, 'items');
+        console.log('Setting all transactions:', realTransactions.length, 'items');
+        console.log('Setting filtered transactions:', filteredTransactions.length, 'items');
         console.log('First transaction sample:', filteredTransactions[0]);
         
+        setAllTransactions(realTransactions);
         setTransactions(filteredTransactions);
         setIsLoading(false);
         
@@ -728,14 +949,31 @@ export default function TestHistoryPage() {
   };
 
   const handleFilterChange = (filterType: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+    console.log('handleFilterChange called:', { filterType, value });
+    
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [filterType]: value
+      };
+      console.log('New filters:', newFilters);
+      return newFilters;
+    });
+    
+    // Если выбран протокол (не "all"), автоматически включаем фильтры
+    if (filterType === "protocol" && value !== "all") {
+      console.log('Auto-enabling filters for protocol:', value);
+      setApplyFilters(true);
+      
+      // Если данных нет, загружаем их
+      if (allTransactions.length === 0 && walletAddress && !isLoading) {
+        console.log('No data available, triggering data load');
+        setTimeout(() => handleRefreshHistory(), 100); // Небольшая задержка для обновления состояния
+      }
+    }
   };
 
   const getFilteredTransactions = () => {
-    // Filters are now applied when loading data, so just return the current transactions
     return transactions;
   };
 
@@ -820,8 +1058,11 @@ export default function TestHistoryPage() {
         return 'Invalid Date';
       }
       
-      // Check if it's microseconds (very large number)
-      if (numTimestamp > 1000000000000000) {
+      // Check if it's nanoseconds (very very large number)
+      if (numTimestamp > 1000000000000000000) {
+        // Nanoseconds - convert to milliseconds
+        date = new Date(numTimestamp / 1000000);
+      } else if (numTimestamp > 1000000000000000) {
         // Microseconds - convert to milliseconds
         date = new Date(numTimestamp / 1000);
       } else if (numTimestamp > 1000000000000) {
@@ -832,8 +1073,11 @@ export default function TestHistoryPage() {
         date = new Date(numTimestamp * 1000);
       }
     } else if (typeof timestamp === 'number') {
-      // Check if it's microseconds (very large number)
-      if (timestamp > 1000000000000000) {
+      // Check if it's nanoseconds (very very large number)
+      if (timestamp > 1000000000000000000) {
+        // Nanoseconds - convert to milliseconds
+        date = new Date(timestamp / 1000000);
+      } else if (timestamp > 1000000000000000) {
         // Microseconds - convert to milliseconds
         date = new Date(timestamp / 1000);
       } else if (timestamp > 1000000000000) {
@@ -917,6 +1161,12 @@ export default function TestHistoryPage() {
                   >
                     Кошелек Рыбакова
                   </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setWalletAddress("0xb427414a10936c52807ff270be4d3eb0520f0fb427f22e4a7924849369fe948e")}
+                  >
+                    Кошелек Солкина
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -993,18 +1243,7 @@ export default function TestHistoryPage() {
                   </label>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="showFullFunctionPath"
-                    checked={showFullFunctionPath}
-                    onChange={(e) => setShowFullFunctionPath(e.target.checked)}
-                    className="rounded border-gray-300"
-                  />
-                  <label htmlFor="showFullFunctionPath" className="text-sm font-medium">
-                    Show Full Function Path
-                  </label>
-                </div>
+
                 
                 <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${!applyFilters ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div>
@@ -1034,6 +1273,7 @@ export default function TestHistoryPage() {
                       onChange={(e) => handleFilterChange("dateRange", e.target.value)}
                       disabled={!applyFilters}
                     >
+                      <option value="all">All time</option>
                       <option value="7d">Last 7 days</option>
                       <option value="30d">Last 30 days</option>
                       <option value="90d">Last 90 days</option>
@@ -1050,12 +1290,11 @@ export default function TestHistoryPage() {
                       disabled={!applyFilters}
                     >
                       <option value="all">All Protocols</option>
-                      <option value="Aptos">Aptos</option>
-                      <option value="DEX">DEX</option>
-                      <option value="Staking">Staking</option>
-                      <option value="Yield">Yield</option>
-                      <option value="Protocol">Protocol</option>
-                      <option value="Rewards">Rewards</option>
+                      {protocolsList.map((protocol) => (
+                        <option key={protocol.name} value={protocol.name}>
+                          {protocol.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -1131,7 +1370,7 @@ export default function TestHistoryPage() {
                               {getProtocolNameByFunction(tx.function, tx.to)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {formatFunctionName(tx.function, showFullFunctionPath)}
+                              {formatFunctionName(tx.function)}
                             </td>
                           </tr>
                         ))}
