@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { truncateAddress } from "@aptos-labs/wallet-adapter-react";
 import { WalletSelector } from "@/components/WalletSelector";
 import protocolsList from "@/lib/data/protocolsList.json";
+import { formatFunctionName } from "@/lib/utils/functionMapping";
 
 export default function TestHistoryPage() {
   const { account, connected } = useWallet();
@@ -779,35 +780,7 @@ export default function TestHistoryPage() {
     }
   };
 
-  // Function to format function name for better readability
-  const formatFunctionName = (functionName: string) => {
-    if (!functionName || functionName === 'N/A') {
-      return 'N/A';
-    }
-    
-    // Split by ::
-    const parts = functionName.split('::');
-    
-    if (parts.length >= 3) {
-      const address = parts[0];
-      const module = parts[1];
-      const functionName_ = parts[2];
-      
-      if (showFullFunctionPath) {
-        // Show full path with truncated address
-        if (address.startsWith('0x') && address.length > 20) {
-          const truncatedAddress = `${address.substring(0, 8)}...${address.substring(address.length - 8)}`;
-          return `${truncatedAddress}::${module}::${functionName_}`;
-        }
-        return functionName;
-      } else {
-        // Show simplified path like Aptos Explorer
-        return `${module}::${functionName_}`;
-      }
-    }
-    
-    return functionName;
-  };
+
 
   // Safe address truncation function
   const safeTruncateAddress = (address: any) => {
@@ -919,6 +892,31 @@ export default function TestHistoryPage() {
                 )}
                 
 
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Debug Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Отладка</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setWalletAddress("0x56ff2fc971deecd286314fe99b8ffd6a5e72e62eacdc46ae9b234c5282985f97")}
+                  >
+                    Кошелек Садкова
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setWalletAddress("0x03f422163a5a64b50c9cae35afe64a78e7cc0dc9b0f47c5104cfd96847ba0e2b")}
+                  >
+                    Кошелек Рыбакова
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1132,7 +1130,7 @@ export default function TestHistoryPage() {
                               {getProtocolNameByFunction(tx.function, tx.to)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {formatFunctionName(tx.function)}
+                              {formatFunctionName(tx.function, showFullFunctionPath)}
                             </td>
                           </tr>
                         ))}

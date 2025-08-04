@@ -140,6 +140,19 @@ export function calculateAPY(deposit: number, reward: number, period: number): n
 }
 ```
 
+#### Утилитарные функции
+```typescript
+/**
+ * Форматирует техническое имя функции в понятное пользователю название действия
+ * @param functionName - Техническое имя функции (например, "router::deposit_and_stake_entry")
+ * @param showFullPath - Показывать ли полный путь функции если маппинг не найден
+ * @returns Понятное название действия (например, "Stake")
+ */
+export function formatFunctionName(functionName: string, showFullPath?: boolean): string {
+  // Логика форматирования
+}
+```
+
 #### Комментарии в коде
 ```typescript
 // Сложная логика требует объяснения
