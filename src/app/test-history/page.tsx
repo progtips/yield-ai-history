@@ -993,6 +993,62 @@ export default function TestHistoryPage() {
     setCurrentPage(page);
   };
 
+  // Функция расчета прибыли/убытка по протоколу
+  const calculateProtocolProfit = (protocolName: string) => {
+    if (!protocolName || protocolName === "all") {
+      return null;
+    }
+
+    const protocolTransactions = transactions.filter(tx => {
+      const txProtocol = getProtocolNameByFunction(tx.function, tx.to);
+      return txProtocol === protocolName;
+    });
+
+    if (protocolTransactions.length === 0) {
+      return null;
+    }
+
+    let totalProfit = 0;
+    let totalDeposits = 0;
+    let totalWithdrawals = 0;
+    let totalClaims = 0;
+
+    protocolTransactions.forEach(tx => {
+      const amount = parseFloat(tx.amount) || 0;
+      
+      switch (tx.type) {
+        case 'deposit':
+        case 'stake':
+          totalDeposits += amount;
+          break;
+        case 'withdraw':
+        case 'unstake':
+          totalWithdrawals += amount;
+          break;
+        case 'claim':
+        case 'yield':
+          totalClaims += amount;
+          break;
+        case 'swap':
+          // Для свопов считаем разность между входом и выходом
+          // Это упрощенная логика, в реальности нужно анализировать токены
+          totalProfit += amount;
+          break;
+      }
+    });
+
+    // Прибыль = Выводы + Клеймы - Депозиты
+    const profit = totalWithdrawals + totalClaims - totalDeposits + totalProfit;
+
+    return {
+      totalDeposits,
+      totalWithdrawals,
+      totalClaims,
+      profit,
+      transactionCount: protocolTransactions.length
+    };
+  };
+
   // Function to get detailed transaction info
   const getDetailedTransactionInfo = (tx: any) => {
     console.log('=== Detailed Transaction Analysis ===');
@@ -1382,6 +1438,64 @@ export default function TestHistoryPage() {
                         No transactions found
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Protocol Profit/Loss Summary */}
+                {filters.protocol !== "all" && !isLoading && getPaginatedTransactions().length > 0 && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+                    <h3 className="text-lg font-semibold mb-3 text-gray-800">
+                      Результат работы с протоколом {filters.protocol}
+                    </h3>
+                    {(() => {
+                      const profitData = calculateProtocolProfit(filters.protocol);
+                      if (!profitData) {
+                        return (
+                          <div className="text-center text-muted-foreground">
+                            Недостаточно данных для расчета прибыли
+                          </div>
+                        );
+                      }
+                      
+                      const { totalDeposits, totalWithdrawals, totalClaims, profit, transactionCount } = profitData;
+                      const isProfit = profit > 0;
+                      const isLoss = profit < 0;
+                      
+                      return (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="text-center">
+                            <div className="text-sm text-muted-foreground">Всего депозитов</div>
+                            <div className="text-lg font-semibold text-blue-600">
+                              {totalDeposits.toFixed(4)} APT
+                            </div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-sm text-muted-foreground">Всего выводов</div>
+                            <div className="text-lg font-semibold text-green-600">
+                              {totalWithdrawals.toFixed(4)} APT
+                            </div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-sm text-muted-foreground">Всего наград</div>
+                            <div className="text-lg font-semibold text-purple-600">
+                              {totalClaims.toFixed(4)} APT
+                            </div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-sm text-muted-foreground">Итоговая прибыль/убыток</div>
+                            <div className={`text-lg font-bold ${isProfit ? 'text-green-600' : isLoss ? 'text-red-600' : 'text-gray-600'}`}>
+                              {profit > 0 ? '+' : ''}{profit.toFixed(4)} APT
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {transactionCount} транзакций
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
