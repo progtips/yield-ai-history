@@ -31,6 +31,8 @@ export const FUNCTION_NAME_MAPPING: { [key: string]: string } = {
   'coin::transfer_with_metadata': 'Transfer',
   'liquidity::add_liquidity': 'Add Liquidity',
   'liquidity::remove_liquidity': 'Remove Liquidity',
+  'router_adapter::create_liquidity_entry': 'Add Liquidity',
+  'router_adapter::remove_liquidity_entry': 'Remove Liquidity',
   'lending::deposit': 'Deposit',
   'lending::withdraw': 'Withdraw',
   'lending::borrow': 'Borrow',
@@ -69,7 +71,11 @@ export const FUNCTION_NAME_MAPPING: { [key: string]: string } = {
   'mint::mint': 'Mint',
   'burn::burn': 'Burn',
   'approve::approve': 'Approve',
-  'revoke::revoke': 'Revoke'
+  'revoke::revoke': 'Revoke',
+  
+  // Loops Protocol
+  'loops::open_loop_aggregate': 'Open Position',
+  'loops::close_loop_aggregate': 'Close Position'
 };
 
 /**
@@ -127,10 +133,18 @@ export function formatFunctionName(functionName: string, showFullPath?: boolean)
     return 'Delegate';
   } else if (functionNameLower.includes('undelegate')) {
     return 'Undelegate';
-  } else if (functionNameLower.includes('add_liquidity')) {
+  } else if (functionNameLower.includes('create_liquidity') || functionNameLower.includes('add_liquidity')) {
     return 'Add Liquidity';
   } else if (functionNameLower.includes('remove_liquidity')) {
     return 'Remove Liquidity';
+  } else if (functionNameLower.includes('supply')) {
+    return 'Supply';
+  } else if (functionNameLower.includes('open_loop') || functionNameLower.includes('open_position')) {
+    return 'Open Position';
+  } else if (functionNameLower.includes('close_loop') || functionNameLower.includes('close_position')) {
+    return 'Close Position';
+  } else if (functionNameLower.includes('loop') || functionNameLower.includes('position')) {
+    return 'Position';
   }
   
   // If no match found, show simplified path like Aptos Explorer
@@ -193,6 +207,10 @@ export function getActionType(functionName: string): string {
     return 'repay';
   } else if (functionNameLower.includes('liquidity')) {
     return 'liquidity';
+  } else if (functionNameLower.includes('supply')) {
+    return 'supply';
+  } else if (functionNameLower.includes('loop') || functionNameLower.includes('position')) {
+    return 'position';
   }
   
   return 'other';
@@ -213,6 +231,7 @@ export function getProtocolFromFunction(functionName: string): string {
     // Map common module names to protocol names
     const protocolMapping: { [key: string]: string } = {
       'router': 'Amnis',
+      'router_adapter': 'DEX',
       'stake': 'Amnis',
       'scripts': 'Echelon',
       'panora_swap': 'Panora',
@@ -235,6 +254,7 @@ export function getProtocolFromFunction(functionName: string): string {
       'farming': 'Farming',
       'yield_farming': 'Farming',
       'nft': 'NFT',
+      'loops': 'Loops',
       'claim': 'Rewards',
       'withdraw': 'Protocol',
       'deposit': 'Protocol',

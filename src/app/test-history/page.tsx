@@ -10,6 +10,7 @@ import { truncateAddress } from "@aptos-labs/wallet-adapter-react";
 import { WalletSelector } from "@/components/WalletSelector";
 import protocolsList from "@/lib/data/protocolsList.json";
 import { formatFunctionName } from "@/lib/utils/functionMapping";
+import { formatTransactionDescription } from "@/lib/utils/transactionDescription";
 
 export default function TestHistoryPage() {
   const { account, connected } = useWallet();
