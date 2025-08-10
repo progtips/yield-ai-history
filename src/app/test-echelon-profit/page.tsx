@@ -35,6 +35,7 @@ export default function TestEchelonProfitPage() {
   const [walletAddress, setWalletAddress] = React.useState(defaultWalletAddress || "");
   const [profitData, setProfitData] = React.useState<any>(null);
   const [echelonTransactions, setEchelonTransactions] = React.useState<any[]>([]);
+  const [echelonProfitResults, setEchelonProfitResults] = React.useState<any[]>([]);
 
   // Обновляем useEffect для расчета прибыли при изменении транзакций
   React.useEffect(() => {
@@ -47,6 +48,22 @@ export default function TestEchelonProfitPage() {
         const protocol = getProtocolNameByFunction(tx.function, tx.to);
         return protocol === 'Echelon';
       });
+      
+      console.log('=== Фильтрация Echelon транзакций ===');
+      console.log('Всего транзакций:', transactions.length);
+      console.log('Найдено Echelon транзакций:', echelonOnly.length);
+      
+      // Логируем первые несколько транзакций для отладки
+      transactions.slice(0, 3).forEach((tx, index) => {
+        const protocol = getProtocolNameByFunction(tx.function, tx.to);
+        console.log(`Транзакция ${index + 1}:`, {
+          function: tx.function,
+          to: tx.to,
+          protocol: protocol,
+          type: tx.type
+        });
+      });
+      
       setEchelonTransactions(echelonOnly);
     } else {
       setProfitData(null);
@@ -68,11 +85,27 @@ export default function TestEchelonProfitPage() {
     const contractAddress = parts[0];
     const normalizedAddress = contractAddress.toLowerCase().replace(/^0x/, '');
     
+    // Известные адреса контрактов Echelon
     const protocolAddresses: { [key: string]: string } = {
       'c6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba': 'Echelon',
     };
     
-    return protocolAddresses[normalizedAddress] || 'Unknown';
+    // Проверяем по адресу контракта
+    if (protocolAddresses[normalizedAddress]) {
+      return protocolAddresses[normalizedAddress];
+    }
+    
+    // Проверяем по названию функции (более гибкий подход)
+    const functionName = functionPath.toLowerCase();
+    if (functionName.includes('echelon') || 
+        functionName.includes('supply_fa') || 
+        functionName.includes('withdraw_fa') ||
+        functionName.includes('flash_loan') ||
+        functionName.includes('liquidate')) {
+      return 'Echelon';
+    }
+    
+    return 'Unknown';
   }
 
   const handleRefreshHistory = () => {
@@ -243,6 +276,12 @@ export default function TestEchelonProfitPage() {
         console.log(`Fetched ${realTransactions.length} real transactions for Echelon analysis`);
         setTransactions(realTransactions);
         setIsLoading(false);
+        
+        // Автоматически рассчитываем прибыль Echelon после загрузки
+        setTimeout(() => {
+          console.log('=== Автоматический расчет прибыли Echelon ===');
+          calculateEchelonProfit();
+        }, 1000); // Небольшая задержка для завершения рендеринга
       })
       .catch((error) => {
         console.error('Failed to fetch transactions:', error);
@@ -261,6 +300,121 @@ export default function TestEchelonProfitPage() {
       return address;
     }
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  // Функция для подсчета прибыли по протоколу Echelon
+  const calculateEchelonProfit = () => {
+    // Параметры, которые пользователь может скорректировать
+    const params = {
+      remainingPosition: 0,   // текущая стоимость активов, которые остались в пуле (в той же валюте)
+      rewards: 0,             // начисленные награды (в той же валюте), если UI их не показывает отдельной транзакцией
+      feesPaid: 0             // суммарные комиссии (в той же валюте), если известны отдельно
+    };
+
+    console.log('=== Начинаем расчет прибыли Echelon ===');
+    console.log('Загруженные транзакции Echelon:', echelonTransactions.length);
+    console.log('Всего загруженных транзакций:', transactions.length);
+
+    // Используем данные из состояния React
+    let transactionsToAnalyze = echelonTransactions;
+    
+    // Если Echelon транзакции не найдены, используем все транзакции
+    if (echelonTransactions.length === 0 && transactions.length > 0) {
+      console.log('Echelon транзакции не найдены, анализируем все транзакции');
+      transactionsToAnalyze = transactions;
+    }
+    
+    const filteredTransactions = transactionsToAnalyze.filter(tx => 
+      tx.type === 'deposit' || tx.type === 'withdraw'
+    );
+
+    console.log('Отфильтрованные транзакции deposit/withdraw:', filteredTransactions.length);
+
+    // Группируем транзакции по валютам
+    const transactionsByCurrency: { [currency: string]: any[] } = {};
+
+    filteredTransactions.forEach((tx, index) => {
+      // Извлекаем сумму и валюту из транзакции
+      const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
+      
+      // Ищем события для определения точной суммы
+      let actualAmount = extractedAmount;
+      let actualToken = extractedToken;
+      
+      if (tx._rawData?.events) {
+        const supplyEvent = tx._rawData.events.find((event: any) => 
+          event.type.includes('SupplyEvent')
+        );
+        const withdrawEvent = tx._rawData.events.find((event: any) => 
+          event.type.includes('WithdrawEvent')
+        );
+        
+        if (supplyEvent && supplyEvent.data) {
+          actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, 6); // USDt has 6 decimals
+          actualToken = 'USDt';
+        } else if (withdrawEvent && withdrawEvent.data) {
+          actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, 6);
+          actualToken = 'USDt';
+        }
+      }
+
+      // Определяем тип операции
+      const operationType = tx.type === 'deposit' ? 'supply' : 'withdraw';
+      
+      // Определяем знак суммы по типу операции
+      const signedAmount = operationType === 'supply' ? -Math.abs(actualAmount) : Math.abs(actualAmount);
+      
+      const transaction = {
+        date: new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU'),
+        type: operationType,
+        amount: Math.abs(actualAmount),
+        signedAmount,
+        currency: actualToken,
+        tx: tx.hash
+      };
+
+      if (!transactionsByCurrency[actualToken]) {
+        transactionsByCurrency[actualToken] = [];
+      }
+      transactionsByCurrency[actualToken].push(transaction);
+    });
+
+    // Рассчитываем прибыль для каждой валюты
+    const results = Object.entries(transactionsByCurrency).map(([currency, transactions]) => {
+      const totalSupply = transactions
+        .filter(tx => tx.type === 'supply')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      
+      const totalWithdraw = transactions
+        .filter(tx => tx.type === 'withdraw')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      
+      const netPnL = totalWithdraw - totalSupply;
+      const realizedPnL = netPnL;
+      const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid;
+
+      return {
+        currency,
+        totalSupply,
+        totalWithdraw,
+        netPnL,
+        remainingPosition: params.remainingPosition,
+        rewards: params.rewards,
+        feesPaid: params.feesPaid,
+        totalPnL,
+        transactions
+      };
+    });
+
+    // Сохраняем результаты в состояние
+    if (results.length === 0) {
+      console.log('Не найдено транзакций для расчета прибыли');
+      setEchelonProfitResults([]);
+      return;
+    }
+
+    setEchelonProfitResults(results);
+    return results;
   };
 
   return (
@@ -323,6 +477,8 @@ export default function TestEchelonProfitPage() {
                   </Badge>
                 </div>
                 
+
+                
                 {hasError && (
                   <div className="text-sm text-red-600">
                     Ошибка: {errorMessage}
@@ -344,6 +500,8 @@ export default function TestEchelonProfitPage() {
                   >
                     Открыть в Aptos Explorer
                   </Button>
+                  
+
                 </div>
               </div>
             </CardContent>
@@ -390,82 +548,167 @@ export default function TestEchelonProfitPage() {
                           }
                         }
                         
-                                                 // Функция для получения описания транзакции
-                         const getTransactionDescription = (tx: any) => {
-                           const functionName = tx.function.toLowerCase();
-                           
-                           if (functionName.includes('supply_fa')) {
-                             return 'Внесение средств в пул ликвидности';
-                           } else if (functionName.includes('withdraw_fa')) {
-                             return 'Вывод средств из пула ликвидности';
-                           } else if (functionName.includes('claim')) {
-                             return 'Получение наград';
-                           } else if (functionName.includes('swap')) {
-                             return 'Обмен токенов';
-                           } else if (functionName.includes('transfer')) {
-                             return 'Перевод токенов';
-                           } else {
-                             return 'Операция с активами';
-                           }
-                         };
+                        // Функция для получения описания транзакции
+                        const getTransactionDescription = (tx: any) => {
+                          const functionName = tx.function.toLowerCase();
+                          
+                          if (functionName.includes('supply_fa')) {
+                            return 'Внесение средств в пул ликвидности';
+                          } else if (functionName.includes('withdraw_fa')) {
+                            return 'Вывод средств из пула ликвидности';
+                          } else if (functionName.includes('claim')) {
+                            return 'Получение наград';
+                          } else if (functionName.includes('swap')) {
+                            return 'Обмен токенов';
+                          } else if (functionName.includes('transfer')) {
+                            return 'Перевод токенов';
+                          } else {
+                            return 'Операция с активами';
+                          }
+                        };
 
-                         return (
-                           <div key={tx.id} className={`p-4 border rounded-lg ${
-                             isDeposit ? 'bg-red-50 border-red-200' : 
-                             isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
-                           }`}>
-                             <div className="flex justify-between items-center">
-                               <div className="flex items-center gap-3">
-                                 <div className={`w-3 h-3 rounded-full ${
-                                   isDeposit ? 'bg-red-500' : 
-                                   isWithdraw ? 'bg-green-500' : 'bg-gray-500'
-                                 }`}></div>
-                                 <div>
-                                   <div className="font-medium">
-                                     {isDeposit ? 'Списание с кошелька' : 
-                                      isWithdraw ? 'Зачисление на кошелек' : 'Другая операция'}
-                                   </div>
-                                   <div className="text-sm text-gray-600">
-                                     {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
-                                   </div>
-                                   <div className="text-xs text-gray-500">
-                                     TX: {tx.hash}
-                                   </div>
-                                 </div>
-                               </div>
-                               
-                               {/* Центральное описание транзакции */}
-                               <div className="flex-1 text-center mx-4">
-                                 <div className="text-sm font-medium text-gray-700">
-                                   {getTransactionDescription(tx)}
-                                 </div>
-                               </div>
-                               
-                               <div className="text-right">
-                                 <div className={`font-bold text-lg ${
-                                   isDeposit ? 'text-red-600' : 
-                                   isWithdraw ? 'text-green-600' : 'text-gray-600'
-                                 }`}>
-                                   {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
-                                 </div>
-                                 <div className="text-sm text-gray-600">
-                                   {tx.function.includes('supply_fa') ? 'Supply' : 
-                                    tx.function.includes('withdraw_fa') ? 'Withdraw' : 'Other'}
-                                 </div>
-                               </div>
-                             </div>
-                             
+                        return (
+                          <div key={tx.id} className={`p-4 border rounded-lg ${
+                            isDeposit ? 'bg-red-50 border-red-200' : 
+                            isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
+                          }`}>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  isDeposit ? 'bg-red-500' : 
+                                  isWithdraw ? 'bg-green-500' : 'bg-gray-500'
+                                }`}></div>
+                                <div>
+                                  <div className="font-medium">
+                                    {isDeposit ? 'Списание с кошелька' : 
+                                     isWithdraw ? 'Зачисление на кошелек' : 'Другая операция'}
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    TX: {tx.hash}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Центральное описание транзакции */}
+                              <div className="flex-1 text-center mx-4">
+                                <div className="text-sm font-medium text-gray-700">
+                                  {getTransactionDescription(tx)}
+                                </div>
+                              </div>
+                              
+                              <div className="text-right">
+                                <div className={`font-bold text-lg ${
+                                  isDeposit ? 'text-red-600' : 
+                                  isWithdraw ? 'text-green-600' : 'text-gray-600'
+                                }`}>
+                                  {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {tx.function.includes('supply_fa') ? 'Supply' : 
+                                   tx.function.includes('withdraw_fa') ? 'Withdraw' : 'Other'}
+                                </div>
+                              </div>
+                            </div>
+                            
 
-                           </div>
-                         );
+                          </div>
+                        );
                       })}
                   </div>
                 </div>
               </CardContent>
             </Card>
+                    )}
+
+          {/* Echelon Profit Results */}
+          {echelonProfitResults.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Результаты расчета прибыли Echelon</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {echelonProfitResults.map((result, index) => (
+                    <div key={index} className="space-y-4">
+                      <div className="text-lg font-semibold text-blue-600">
+                        Результаты для {result.currency}
+                      </div>
+                      
+                      {/* Основные показатели */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий ввод</div>
+                          <div className="text-lg font-bold text-red-600">
+                            {result.totalSupply.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий вывод</div>
+                          <div className="text-lg font-bold text-green-600">
+                            {result.totalWithdraw.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Net PnL</div>
+                          <div className={`text-lg font-bold ${result.netPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.netPnL >= 0 ? '+' : ''}{result.netPnL.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Total PnL</div>
+                          <div className={`text-lg font-bold ${result.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.totalPnL >= 0 ? '+' : ''}{result.totalPnL.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Дополнительные параметры */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-yellow-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Остаток в пуле</div>
+                          <div className="font-medium">{result.remainingPosition.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Награды</div>
+                          <div className="font-medium">{result.rewards.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-red-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Комиссии</div>
+                          <div className="font-medium">{result.feesPaid.toFixed(6)} {result.currency}</div>
+                        </div>
+                      </div>
+
+                      {/* Краткое резюме */}
+                      <div className="bg-gray-100 p-4 rounded-lg">
+                        <div className="text-sm font-medium text-gray-700">
+                          Итог для {result.currency}: ввод = {result.totalSupply.toFixed(6)} {result.currency}, 
+                          вывод = {result.totalWithdraw.toFixed(6)} {result.currency}, 
+                          netPnL = {result.netPnL.toFixed(6)} {result.currency}.
+                        </div>
+                        <div className="text-sm font-medium text-gray-700 mt-1">
+                          С учётом остатка/нагр./комиссий: totalPnL = {result.totalPnL.toFixed(6)} {result.currency}.
+                        </div>
+                      </div>
+
+
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </>
-      )}
+
+ 
+          </>
+        )}
     </div>
   );
 } 
