@@ -390,69 +390,74 @@ export default function TestEchelonProfitPage() {
                           }
                         }
                         
-                        return (
-                          <div key={tx.id} className={`p-4 border rounded-lg ${
-                            isDeposit ? 'bg-red-50 border-red-200' : 
-                            isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
-                          }`}>
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full ${
-                                  isDeposit ? 'bg-red-500' : 
-                                  isWithdraw ? 'bg-green-500' : 'bg-gray-500'
-                                }`}></div>
-                                <div>
-                                  <div className="font-medium">
-                                    {isDeposit ? 'Списание с кошелька' : 
-                                     isWithdraw ? 'Зачисление на кошелек' : 'Другая операция'}
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    TX: {tx.hash.substring(0, 8)}...{tx.hash.substring(tx.hash.length - 6)}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className={`font-bold text-lg ${
-                                  isDeposit ? 'text-red-600' : 
-                                  isWithdraw ? 'text-green-600' : 'text-gray-600'
-                                }`}>
-                                  {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  {tx.function.includes('supply_fa') ? 'Supply' : 
-                                   tx.function.includes('withdraw_fa') ? 'Withdraw' : 'Other'}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Дополнительная информация о shares */}
-                            {tx._rawData?.events && (
-                              <div className="mt-2 text-xs text-gray-600">
-                                {tx._rawData.events.map((event: any, eventIndex: number) => {
-                                  if (event.type.includes('SupplyEvent') && event.data) {
-                                    return (
-                                      <div key={eventIndex} className="bg-white p-2 rounded border mt-1">
-                                        <div>Shares получено: {parseFloat(event.data.shares)}</div>
-                                        <div>Total shares: {parseFloat(event.data.total_shares)}</div>
-                                      </div>
-                                    );
-                                  } else if (event.type.includes('WithdrawEvent') && event.data) {
-                                    return (
-                                      <div key={eventIndex} className="bg-white p-2 rounded border mt-1">
-                                        <div>Shares выведено: {parseFloat(event.data.shares)}</div>
-                                        <div>Остаток shares: {parseFloat(event.data.user_shares)}</div>
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
+                                                 // Функция для получения описания транзакции
+                         const getTransactionDescription = (tx: any) => {
+                           const functionName = tx.function.toLowerCase();
+                           
+                           if (functionName.includes('supply_fa')) {
+                             return 'Внесение средств в пул ликвидности';
+                           } else if (functionName.includes('withdraw_fa')) {
+                             return 'Вывод средств из пула ликвидности';
+                           } else if (functionName.includes('claim')) {
+                             return 'Получение наград';
+                           } else if (functionName.includes('swap')) {
+                             return 'Обмен токенов';
+                           } else if (functionName.includes('transfer')) {
+                             return 'Перевод токенов';
+                           } else {
+                             return 'Операция с активами';
+                           }
+                         };
+
+                         return (
+                           <div key={tx.id} className={`p-4 border rounded-lg ${
+                             isDeposit ? 'bg-red-50 border-red-200' : 
+                             isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
+                           }`}>
+                             <div className="flex justify-between items-center">
+                               <div className="flex items-center gap-3">
+                                 <div className={`w-3 h-3 rounded-full ${
+                                   isDeposit ? 'bg-red-500' : 
+                                   isWithdraw ? 'bg-green-500' : 'bg-gray-500'
+                                 }`}></div>
+                                 <div>
+                                   <div className="font-medium">
+                                     {isDeposit ? 'Списание с кошелька' : 
+                                      isWithdraw ? 'Зачисление на кошелек' : 'Другая операция'}
+                                   </div>
+                                   <div className="text-sm text-gray-600">
+                                     {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
+                                   </div>
+                                   <div className="text-xs text-gray-500">
+                                     TX: {tx.hash}
+                                   </div>
+                                 </div>
+                               </div>
+                               
+                               {/* Центральное описание транзакции */}
+                               <div className="flex-1 text-center mx-4">
+                                 <div className="text-sm font-medium text-gray-700">
+                                   {getTransactionDescription(tx)}
+                                 </div>
+                               </div>
+                               
+                               <div className="text-right">
+                                 <div className={`font-bold text-lg ${
+                                   isDeposit ? 'text-red-600' : 
+                                   isWithdraw ? 'text-green-600' : 'text-gray-600'
+                                 }`}>
+                                   {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
+                                 </div>
+                                 <div className="text-sm text-gray-600">
+                                   {tx.function.includes('supply_fa') ? 'Supply' : 
+                                    tx.function.includes('withdraw_fa') ? 'Withdraw' : 'Other'}
+                                 </div>
+                               </div>
+                             </div>
+                             
+
+                           </div>
+                         );
                       })}
                   </div>
                 </div>
