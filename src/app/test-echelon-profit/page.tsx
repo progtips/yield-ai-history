@@ -334,10 +334,13 @@ export default function TestEchelonProfitPage() {
     const transactionsByCurrency: { [currency: string]: any[] } = {};
 
     console.log('Начинаем обработку транзакций...');
-    filteredTransactions.forEach((tx, index) => {
-      console.log(`Обрабатываем транзакцию ${index + 1}:`, tx.function, tx.type);
-      // Извлекаем сумму и валюту из транзакции
-      const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
+    
+    try {
+      filteredTransactions.forEach((tx, index) => {
+        try {
+          console.log(`Обрабатываем транзакцию ${index + 1}:`, tx.function, tx.type);
+          // Извлекаем сумму и валюту из транзакции
+          const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
       
       // Ищем события для определения точной суммы
       let actualAmount = extractedAmount;
@@ -388,52 +391,72 @@ export default function TestEchelonProfitPage() {
         transactionsByCurrency[actualToken] = [];
       }
       transactionsByCurrency[actualToken].push(transaction);
-    });
+        } catch (error) {
+          console.error(`Ошибка при обработке транзакции ${index + 1}:`, error);
+          console.error('Данные транзакции:', tx);
+        }
+      });
+    } catch (error) {
+      console.error('Критическая ошибка в цикле обработки транзакций:', error);
+    }
 
     // Рассчитываем прибыль для каждой валюты
-    const results = Object.entries(transactionsByCurrency).map(([currency, transactions]) => {
-      const totalSupply = transactions
-        .filter(tx => tx.type === 'supply')
-        .reduce((sum, tx) => sum + tx.amount, 0);
-      
-      const totalWithdraw = transactions
-        .filter(tx => tx.type === 'withdraw')
-        .reduce((sum, tx) => sum + tx.amount, 0);
-      
-      // Рассчитываем общую плату за газ
-      const totalGasFees = transactions.reduce((sum, tx) => sum + (tx.gasFee || 0), 0);
-      
-      const netPnL = totalWithdraw - totalSupply;
-      const realizedPnL = netPnL;
-      const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
+    let results: any[] = [];
+    try {
+      results = Object.entries(transactionsByCurrency).map(([currency, transactions]) => {
+        const totalSupply = transactions
+          .filter(tx => tx.type === 'supply')
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        
+        const totalWithdraw = transactions
+          .filter(tx => tx.type === 'withdraw')
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        
+        // Рассчитываем общую плату за газ
+        const totalGasFees = transactions.reduce((sum, tx) => sum + (tx.gasFee || 0), 0);
+        
+        const netPnL = totalWithdraw - totalSupply;
+        const realizedPnL = netPnL;
+        const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
 
-      return {
-        currency,
-        totalSupply,
-        totalWithdraw,
-        netPnL,
-        remainingPosition: params.remainingPosition,
-        rewards: params.rewards,
-        feesPaid: params.feesPaid,
-        totalGasFees,
-        totalPnL,
-        transactions
-      };
-    });
+        return {
+          currency,
+          totalSupply,
+          totalWithdraw,
+          netPnL,
+          remainingPosition: params.remainingPosition,
+          rewards: params.rewards,
+          feesPaid: params.feesPaid,
+          totalGasFees,
+          totalPnL,
+          transactions
+        };
+      });
+    } catch (error) {
+      console.error('Ошибка при расчете прибыли:', error);
+      results = [];
+    }
 
     // Сохраняем результаты в состояние
     console.log('Результаты расчета:', results);
     
-    if (results.length === 0) {
-      console.log('Не найдено транзакций для расчета прибыли');
-      setEchelonProfitResults([]);
-      return;
-    }
+    try {
+      if (results.length === 0) {
+        console.log('Не найдено транзакций для расчета прибыли');
+        setEchelonProfitResults([]);
+        return;
+      }
 
-    console.log('Сохраняем результаты в состояние...');
-    setEchelonProfitResults(results);
-    console.log('Расчет прибыли завершен успешно!');
-    return results;
+      // Принудительно обновляем состояние для корректного рендеринга
+      setEchelonProfitResults([]); // Сначала очищаем
+      setTimeout(() => {
+        setEchelonProfitResults(results); // Затем устанавливаем новые результаты
+      }, 100);
+      return results;
+    } catch (error) {
+      console.error('Ошибка при сохранении результатов:', error);
+      setEchelonProfitResults([]);
+    }
   };
 
   return (
@@ -541,6 +564,7 @@ export default function TestEchelonProfitPage() {
                   <div className="space-y-3">
                     {echelonTransactions
                       .filter(tx => tx.type === 'deposit' || tx.type === 'withdraw')
+                      .sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp)) // Сортировка по времени (ранние сверху)
                       .map((tx, index) => {
                         const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
                         const isDeposit = tx.type === 'deposit';
@@ -592,45 +616,30 @@ export default function TestEchelonProfitPage() {
                             isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
                           }`}>
                             <div className="flex justify-between items-center">
+                              {/* Первый столбец: Дата/Время */}
                               <div className="flex items-center gap-3">
                                 <div className={`w-3 h-3 rounded-full ${
                                   isDeposit ? 'bg-red-500' : 
                                   isWithdraw ? 'bg-green-500' : 'bg-gray-500'
                                 }`}></div>
                                 <div>
-                                  <div className="font-medium">
-                                    {isDeposit ? 'Списание с кошелька' : 
-                                     isWithdraw ? 'Зачисление на кошелек' : 'Другая операция'}
-                                  </div>
-                                  <div className="text-sm text-gray-600">
+                                  <div className="text-sm font-medium text-gray-700">
                                     {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
                                   </div>
                                   <div className="text-xs text-gray-500">
-                                    TX: <a 
-                                      href={`https://explorer.aptoslabs.com/txn/${tx.hash}?network=mainnet`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
-                                    >
-                                      {tx.hash}
-                                    </a>
+                                    {isDeposit ? 'Списание' : isWithdraw ? 'Зачисление' : 'Операция'}
                                   </div>
-                                  {/* Плата за газ */}
-                                  {tx._rawData?.gas_used && (
-                                    <div className="text-xs text-orange-600">
-                                      Газ: {parseInt(tx._rawData.gas_used) * (parseInt(tx._rawData.gas_unit_price || '100') / 100000000)} APT
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                               
-                              {/* Центральное описание транзакции */}
+                              {/* Второй столбец: Описание транзакции */}
                               <div className="flex-1 text-center mx-4">
                                 <div className="text-sm font-medium text-gray-700">
                                   {getTransactionDescription(tx)}
                                 </div>
                               </div>
                               
+                              {/* Третий столбец: Сумма и детали */}
                               <div className="text-right">
                                 <div className={`font-bold text-lg ${
                                   isDeposit ? 'text-red-600' : 
@@ -638,10 +647,22 @@ export default function TestEchelonProfitPage() {
                                 }`}>
                                   {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  {tx.function.includes('supply_fa') ? 'Supply' : 
-                                   tx.function.includes('withdraw_fa') ? 'Withdraw' : 'Other'}
+                                <div className="text-xs text-gray-500">
+                                  TX: <a 
+                                    href={`https://explorer.aptoslabs.com/txn/${tx.hash}?network=mainnet`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                                  >
+                                    {tx.hash.substring(0, 8)}...{tx.hash.substring(tx.hash.length - 6)}
+                                  </a>
                                 </div>
+                                {/* Плата за газ */}
+                                {tx._rawData?.gas_used && (
+                                  <div className="text-xs text-orange-600">
+                                    Газ: {parseInt(tx._rawData.gas_used) * (parseInt(tx._rawData.gas_unit_price || '100') / 100000000)} APT
+                                  </div>
+                                )}
                               </div>
                             </div>
                             

@@ -1387,7 +1387,20 @@ export default function TestHistoryPage() {
                               {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {getProtocolNameByFunction(tx.function, tx.to)}
+                              {(() => {
+                                const protocolName = getProtocolNameByFunction(tx.function, tx.to);
+                                if (protocolName === 'Echelon') {
+                                  return (
+                                    <a
+                                      href="/test-echelon-profit"
+                                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                    >
+                                      {protocolName}
+                                    </a>
+                                  );
+                                }
+                                return protocolName;
+                              })()}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {formatFunctionName(tx.function)}
