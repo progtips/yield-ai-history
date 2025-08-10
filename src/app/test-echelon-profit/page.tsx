@@ -32,13 +32,61 @@ export default function TestEchelonProfitPage() {
   const [hasError, setHasError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const [transactions, setTransactions] = React.useState<TransactionType[]>([]);
-  const [walletAddress, setWalletAddress] = React.useState(defaultWalletAddress || "");
+  // Инициализируем адрес кошелька из URL параметров или подключенного кошелька
+  const getInitialWalletAddress = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const walletFromUrl = urlParams.get('wallet');
+      if (walletFromUrl) {
+        return walletFromUrl;
+      }
+    }
+    return defaultWalletAddress || "";
+  };
+
+  const [walletAddress, setWalletAddress] = React.useState(getInitialWalletAddress());
   const [profitData, setProfitData] = React.useState<any>(null);
   const [echelonTransactions, setEchelonTransactions] = React.useState<any[]>([]);
   const [echelonProfitResults, setEchelonProfitResults] = React.useState<any[]>([]);
+  const [hasStartedAnalysis, setHasStartedAnalysis] = React.useState(false);
+
+  // Функция для добавления отладочной информации (отключена)
+  const addDebugInfo = (message: string) => {
+    // Отладочная информация отключена
+  };
+
+  // Читаем адрес кошелька из URL параметров и автоматически запускаем анализ
+  React.useEffect(() => {
+    addDebugInfo('useEffect для чтения URL параметров');
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const walletFromUrl = urlParams.get('wallet');
+      addDebugInfo(`walletFromUrl из URL: ${walletFromUrl}`);
+      addDebugInfo(`текущий walletAddress: ${walletAddress}`);
+      if (walletFromUrl && walletFromUrl !== walletAddress) {
+        addDebugInfo(`Устанавливаем новый walletAddress из URL: ${walletFromUrl}`);
+        setWalletAddress(walletFromUrl);
+        setHasStartedAnalysis(false); // Сбрасываем флаг при изменении адреса
+      }
+    }
+  }, []);
+
+  // Автоматически запускаем анализ истории при изменении адреса кошелька
+  React.useEffect(() => {
+    // Предотвращаем зацикливание - проверяем, что это не первый рендер и анализ еще не запускался
+    if (walletAddress && walletAddress.trim() && !isLoading && !hasStartedAnalysis && echelonProfitResults.length === 0) {
+      addDebugInfo(`useEffect для автоматического запуска: walletAddress = ${walletAddress}, isLoading = ${isLoading}`);
+      addDebugInfo('Запускаем handleRefreshHistory автоматически');
+      setHasStartedAnalysis(true);
+      handleRefreshHistory();
+    } else if (echelonProfitResults.length > 0) {
+      addDebugInfo(`Результаты уже есть (${echelonProfitResults.length}), анализ не запускается`);
+    }
+  }, [walletAddress, isLoading, hasStartedAnalysis, echelonProfitResults.length]);
 
   // Обновляем useEffect для расчета прибыли при изменении транзакций
   React.useEffect(() => {
+    addDebugInfo(`useEffect для обновления echelonTransactions: transactions.length = ${transactions.length}`);
     if (transactions.length > 0) {
       const totalProfitData = calculateTotalProfit(transactions);
       setProfitData(totalProfitData);
@@ -49,19 +97,14 @@ export default function TestEchelonProfitPage() {
         return protocol === 'Echelon';
       });
       
-      console.log('=== Фильтрация Echelon транзакций ===');
-      console.log('Всего транзакций:', transactions.length);
-      console.log('Найдено Echelon транзакций:', echelonOnly.length);
+      addDebugInfo('=== Фильтрация Echelon транзакций ===');
+      addDebugInfo(`Всего транзакций: ${transactions.length}`);
+      addDebugInfo(`Найдено Echelon транзакций: ${echelonOnly.length}`);
       
       // Логируем первые несколько транзакций для отладки
       transactions.slice(0, 3).forEach((tx, index) => {
         const protocol = getProtocolNameByFunction(tx.function, tx.to);
-        console.log(`Транзакция ${index + 1}:`, {
-          function: tx.function,
-          to: tx.to,
-          protocol: protocol,
-          type: tx.type
-        });
+        addDebugInfo(`Транзакция ${index + 1}: function=${tx.function}, to=${tx.to}, protocol=${protocol}, type=${tx.type}`);
       });
       
       setEchelonTransactions(echelonOnly);
@@ -109,6 +152,9 @@ export default function TestEchelonProfitPage() {
   }
 
   const handleRefreshHistory = () => {
+    addDebugInfo('=== ФУНКЦИЯ handleRefreshHistory ВЫЗВАНА ===');
+    addDebugInfo(`walletAddress в handleRefreshHistory: ${walletAddress}`);
+    
     if (!walletAddress.trim()) {
       setHasError(true);
       setErrorMessage("Пожалуйста, введите адрес кошелька");
@@ -119,8 +165,8 @@ export default function TestEchelonProfitPage() {
     setHasError(false);
     setErrorMessage("");
     
-    console.log('=== Starting Echelon profit calculation test ===');
-    console.log('walletAddress:', walletAddress);
+    addDebugInfo('=== Starting Echelon profit calculation test ===');
+    addDebugInfo(`walletAddress: ${walletAddress}`);
     
     // Fetch real transactions from Aptos blockchain
     const fetchRealTransactions = async (address: string) => {
@@ -146,6 +192,8 @@ export default function TestEchelonProfitPage() {
               hasMore = false;
             } else {
               start += limit;
+              // Добавляем задержку между запросами, чтобы избежать ошибки 429
+              await new Promise(resolve => setTimeout(resolve, 100));
             }
           }
           
@@ -153,7 +201,7 @@ export default function TestEchelonProfitPage() {
         };
         
         const data = await fetchAllTransactions(address);
-        console.log(`Fetched ${data.length} transactions for Echelon analysis`);
+        addDebugInfo(`Fetched ${data.length} transactions for Echelon analysis`);
         
         // Transform API data to our format
         const transformedTransactions = data.map((tx: any, index: number) => {
@@ -226,7 +274,7 @@ export default function TestEchelonProfitPage() {
           };
         });
         
-        console.log(`Transformed ${transformedTransactions.length} transactions for Echelon analysis`);
+        addDebugInfo(`Transformed ${transformedTransactions.length} transactions for Echelon analysis`);
         
         // Sort transactions by timestamp in descending order (newest first)
         const sortedTransactions = transformedTransactions.sort((a: any, b: any) => {
@@ -265,7 +313,7 @@ export default function TestEchelonProfitPage() {
         return sortedTransactions;
         
       } catch (error) {
-        console.error('Error fetching transactions:', error);
+        addDebugInfo(`Error fetching transactions: ${error}`);
         throw error;
       }
     };
@@ -273,21 +321,30 @@ export default function TestEchelonProfitPage() {
     // Fetch transactions and calculate profit
     fetchRealTransactions(walletAddress)
       .then((realTransactions) => {
-        console.log(`Fetched ${realTransactions.length} real transactions for Echelon analysis`);
+        addDebugInfo(`Fetched ${realTransactions.length} real transactions for Echelon analysis`);
         setTransactions(realTransactions);
         setIsLoading(false);
         
         // Автоматически рассчитываем прибыль Echelon после загрузки
         setTimeout(() => {
-          console.log('=== Автоматический расчет прибыли Echelon ===');
-          calculateEchelonProfit();
+          addDebugInfo('=== Автоматический расчет прибыли Echelon ===');
+          addDebugInfo(`Передаем ${realTransactions.length} транзакций в расчет прибыли`);
+          
+          // Передаем транзакции напрямую в функцию расчета
+          calculateEchelonProfitWithData(realTransactions);
         }, 1000); // Небольшая задержка для завершения рендеринга
       })
       .catch((error) => {
-        console.error('Failed to fetch transactions:', error);
+        addDebugInfo(`Failed to fetch transactions: ${error}`);
         setHasError(true);
         setErrorMessage(`Ошибка при получении транзакций: ${error.message}`);
         setIsLoading(false);
+        
+        // Если ошибка 429 (Too Many Requests), не запускаем повторный анализ
+        if (error.message.includes('429')) {
+          addDebugInfo('Ошибка 429 - превышен лимит запросов. Анализ остановлен.');
+          setHasStartedAnalysis(true); // Предотвращаем повторные попытки
+        }
       });
   };
 
@@ -302,8 +359,10 @@ export default function TestEchelonProfitPage() {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
-  // Функция для подсчета прибыли по протоколу Echelon
-  const calculateEchelonProfit = () => {
+  // Функция для подсчета прибыли по протоколу Echelon с передачей данных
+  const calculateEchelonProfitWithData = (transactionsData: any[]) => {
+    addDebugInfo('=== ФУНКЦИЯ calculateEchelonProfitWithData ВЫЗВАНА ===');
+    
     // Параметры, которые пользователь может скорректировать
     const params = {
       remainingPosition: 0,   // текущая стоимость активов, которые остались в пуле (в той же валюте)
@@ -311,34 +370,53 @@ export default function TestEchelonProfitPage() {
       feesPaid: 0             // суммарные комиссии (в той же валюте), если известны отдельно
     };
 
-    console.log('=== Начинаем расчет прибыли Echelon ===');
-    console.log('Загруженные транзакции Echelon:', echelonTransactions.length);
-    console.log('Всего загруженных транзакций:', transactions.length);
-
+    addDebugInfo('=== Начинаем расчет прибыли Echelon ===');
+    addDebugInfo(`Переданные транзакции: ${transactionsData.length}`);
+    
+    // Фильтруем только Echelon транзакции
+    const echelonOnly = transactionsData.filter(tx => {
+      const protocol = getProtocolNameByFunction(tx.function, tx.to);
+      return protocol === 'Echelon';
+    });
+    
+    addDebugInfo(`Найдено Echelon транзакций: ${echelonOnly.length}`);
+    
+    // Логируем первые несколько Echelon транзакций для отладки
+    echelonOnly.slice(0, 3).forEach((tx, index) => {
+      addDebugInfo(`Echelon транзакция ${index + 1}: function=${tx.function}, type=${tx.type}`);
+    });
+    
     // Используем данные из состояния React
-    let transactionsToAnalyze = echelonTransactions;
+    let transactionsToAnalyze = echelonOnly;
     
     // Если Echelon транзакции не найдены, используем все транзакции
-    if (echelonTransactions.length === 0 && transactions.length > 0) {
-      console.log('Echelon транзакции не найдены, анализируем все транзакции');
-      transactionsToAnalyze = transactions;
+    if (echelonOnly.length === 0 && transactionsData.length > 0) {
+      addDebugInfo('Echelon транзакции не найдены, анализируем все транзакции');
+      transactionsToAnalyze = transactionsData;
     }
     
     const filteredTransactions = transactionsToAnalyze.filter(tx => 
       tx.type === 'deposit' || tx.type === 'withdraw'
     );
 
-    console.log('Отфильтрованные транзакции deposit/withdraw:', filteredTransactions.length);
+    addDebugInfo(`Отфильтрованные транзакции deposit/withdraw: ${filteredTransactions.length}`);
+    
+    // Логируем типы транзакций для отладки
+    const typeCounts = transactionsToAnalyze.reduce((acc, tx) => {
+      acc[tx.type] = (acc[tx.type] || 0) + 1;
+      return acc;
+    }, {} as any);
+    addDebugInfo(`Распределение типов транзакций: ${JSON.stringify(typeCounts)}`);
 
     // Группируем транзакции по валютам
     const transactionsByCurrency: { [currency: string]: any[] } = {};
 
-    console.log('Начинаем обработку транзакций...');
+    addDebugInfo('Начинаем обработку транзакций...');
     
     try {
       filteredTransactions.forEach((tx, index) => {
         try {
-          console.log(`Обрабатываем транзакцию ${index + 1}:`, tx.function, tx.type);
+          addDebugInfo(`Обрабатываем транзакцию ${index + 1}: ${tx.function} ${tx.type}`);
           // Извлекаем сумму и валюту из транзакции
           const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
       
@@ -392,18 +470,22 @@ export default function TestEchelonProfitPage() {
       }
       transactionsByCurrency[actualToken].push(transaction);
         } catch (error) {
-          console.error(`Ошибка при обработке транзакции ${index + 1}:`, error);
-          console.error('Данные транзакции:', tx);
+          addDebugInfo(`Ошибка при обработке транзакции ${index + 1}: ${error}`);
+          addDebugInfo(`Данные транзакции: ${JSON.stringify(tx)}`);
         }
       });
     } catch (error) {
-      console.error('Критическая ошибка в цикле обработки транзакций:', error);
+      addDebugInfo(`Критическая ошибка в цикле обработки транзакций: ${error}`);
     }
 
     // Рассчитываем прибыль для каждой валюты
     let results: any[] = [];
     try {
+      addDebugInfo(`Начинаем расчет прибыли для ${Object.keys(transactionsByCurrency).length} валют`);
+      addDebugInfo(`Валюты: ${Object.keys(transactionsByCurrency).join(', ')}`);
       results = Object.entries(transactionsByCurrency).map(([currency, transactions]) => {
+        addDebugInfo(`Обрабатываем валюту ${currency}: ${transactions.length} транзакций`);
+        
         const totalSupply = transactions
           .filter(tx => tx.type === 'supply')
           .reduce((sum, tx) => sum + tx.amount, 0);
@@ -419,6 +501,8 @@ export default function TestEchelonProfitPage() {
         const realizedPnL = netPnL;
         const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
 
+        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
+
         return {
           currency,
           totalSupply,
@@ -433,30 +517,42 @@ export default function TestEchelonProfitPage() {
         };
       });
     } catch (error) {
-      console.error('Ошибка при расчете прибыли:', error);
+      addDebugInfo(`Ошибка при расчете прибыли: ${error}`);
       results = [];
     }
 
     // Сохраняем результаты в состояние
-    console.log('Результаты расчета:', results);
+    addDebugInfo(`Результаты расчета: ${JSON.stringify(results)}`);
+    addDebugInfo(`Количество результатов: ${results.length}`);
     
     try {
       if (results.length === 0) {
-        console.log('Не найдено транзакций для расчета прибыли');
+        addDebugInfo('Не найдено транзакций для расчета прибыли');
         setEchelonProfitResults([]);
         return;
       }
 
+      addDebugInfo('Сохраняем результаты в состояние...');
+      addDebugInfo(`Результаты для сохранения: ${JSON.stringify(results)}`);
+      
       // Принудительно обновляем состояние для корректного рендеринга
       setEchelonProfitResults([]); // Сначала очищаем
       setTimeout(() => {
         setEchelonProfitResults(results); // Затем устанавливаем новые результаты
+        addDebugInfo(`Состояние обновлено. Новое значение echelonProfitResults: ${JSON.stringify(results)}`);
+        addDebugInfo('Расчет прибыли завершен успешно!');
       }, 100);
       return results;
     } catch (error) {
-      console.error('Ошибка при сохранении результатов:', error);
+      addDebugInfo(`Ошибка при сохранении результатов: ${error}`);
       setEchelonProfitResults([]);
     }
+  };
+
+  // Функция для подсчета прибыли по протоколу Echelon (для обратной совместимости)
+  const calculateEchelonProfit = () => {
+    addDebugInfo('=== ФУНКЦИЯ calculateEchelonProfit ВЫЗВАНА ===');
+    calculateEchelonProfitWithData(transactions);
   };
 
   return (
@@ -467,33 +563,7 @@ export default function TestEchelonProfitPage() {
         </div>
       ) : (
         <>
-          {/* Connected Wallet Display */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Подключенный кошелек</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium">Статус:</span>
-                    <Badge variant={connected ? "default" : "destructive"}>
-                      {connected ? "Подключен" : "Не подключен"}
-                    </Badge>
-                  </div>
-                  <WalletSelector />
-                </div>
-                {connected && account?.address && (
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium">Адрес:</span>
-                    <code className="bg-gray-100 px-3 py-1 rounded text-sm">
-                      {account.ansName || safeTruncateAddress(account.address.toString())}
-                    </code>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
 
           <Card>
             <CardHeader>
@@ -506,7 +576,10 @@ export default function TestEchelonProfitPage() {
                   <input
                     type="text"
                     value={walletAddress}
-                    onChange={(e) => setWalletAddress(e.target.value)}
+                    onChange={(e) => {
+                      setWalletAddress(e.target.value);
+                      setHasStartedAnalysis(false); // Сбрасываем флаг при изменении адреса
+                    }}
                     placeholder="Введите адрес кошелька"
                     className="flex-1 px-3 py-1 border rounded bg-white"
                   />
@@ -528,10 +601,6 @@ export default function TestEchelonProfitPage() {
                 )}
                 
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={handleRefreshHistory} disabled={isLoading}>
-                    Анализировать историю активов
-                  </Button>
-                  
                   <Button 
                     variant="outline" 
                     onClick={() => {
@@ -543,7 +612,20 @@ export default function TestEchelonProfitPage() {
                     Открыть в Aptos Explorer
                   </Button>
                   
-
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setHasStartedAnalysis(false);
+                      setEchelonProfitResults([]);
+                      setTransactions([]);
+                      setEchelonTransactions([]);
+                      setHasError(false);
+                      setErrorMessage("");
+                    }}
+                    disabled={!walletAddress.trim()}
+                  >
+                    Сбросить и повторить
+                  </Button>
                 </div>
               </div>
             </CardContent>

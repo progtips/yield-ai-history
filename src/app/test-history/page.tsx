@@ -1392,7 +1392,7 @@ export default function TestHistoryPage() {
                                 if (protocolName === 'Echelon') {
                                   return (
                                     <a
-                                      href="/test-echelon-profit"
+                                      href={`/test-echelon-profit?wallet=${encodeURIComponent(walletAddress)}`}
                                       className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                                     >
                                       {protocolName}
