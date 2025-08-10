@@ -727,20 +727,7 @@ export default function TestEchelonProfitPage() {
                         </div>
                       </div>
 
-                      {/* Краткое резюме */}
-                      <div className="bg-gray-100 p-4 rounded-lg">
-                        <div className="text-sm font-medium text-gray-700">
-                          Итог для {result.currency}: ввод = {result.totalSupply.toFixed(6)} {result.currency}, 
-                          вывод = {result.totalWithdraw.toFixed(6)} {result.currency}, 
-                          netPnL = {result.netPnL.toFixed(6)} {result.currency}.
-                        </div>
-                        <div className="text-sm font-medium text-gray-700 mt-1">
-                          С учётом остатка/нагр./комиссий/газа: totalPnL = {result.totalPnL.toFixed(6)} {result.currency}.
-                        </div>
-                        <div className="text-sm text-orange-600 mt-1">
-                          Общая плата за газ: {result.totalGasFees.toFixed(6)} APT
-                        </div>
-                      </div>
+
 
 
                     </div>
