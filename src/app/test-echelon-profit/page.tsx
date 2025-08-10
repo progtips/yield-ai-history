@@ -333,7 +333,9 @@ export default function TestEchelonProfitPage() {
     // Группируем транзакции по валютам
     const transactionsByCurrency: { [currency: string]: any[] } = {};
 
+    console.log('Начинаем обработку транзакций...');
     filteredTransactions.forEach((tx, index) => {
+      console.log(`Обрабатываем транзакцию ${index + 1}:`, tx.function, tx.type);
       // Извлекаем сумму и валюту из транзакции
       const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
       
@@ -364,13 +366,22 @@ export default function TestEchelonProfitPage() {
       // Определяем знак суммы по типу операции
       const signedAmount = operationType === 'supply' ? -Math.abs(actualAmount) : Math.abs(actualAmount);
       
+      // Рассчитываем плату за газ
+      let gasFee = 0;
+      if (tx._rawData?.gas_used && tx._rawData?.gas_unit_price) {
+        const gasUsed = parseInt(tx._rawData.gas_used);
+        const gasUnitPrice = parseInt(tx._rawData.gas_unit_price);
+        gasFee = (gasUsed * gasUnitPrice) / 100000000; // Конвертируем в APT
+      }
+
       const transaction = {
         date: new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU'),
         type: operationType,
         amount: Math.abs(actualAmount),
         signedAmount,
         currency: actualToken,
-        tx: tx.hash
+        tx: tx.hash,
+        gasFee
       };
 
       if (!transactionsByCurrency[actualToken]) {
@@ -389,9 +400,12 @@ export default function TestEchelonProfitPage() {
         .filter(tx => tx.type === 'withdraw')
         .reduce((sum, tx) => sum + tx.amount, 0);
       
+      // Рассчитываем общую плату за газ
+      const totalGasFees = transactions.reduce((sum, tx) => sum + (tx.gasFee || 0), 0);
+      
       const netPnL = totalWithdraw - totalSupply;
       const realizedPnL = netPnL;
-      const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid;
+      const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
 
       return {
         currency,
@@ -401,19 +415,24 @@ export default function TestEchelonProfitPage() {
         remainingPosition: params.remainingPosition,
         rewards: params.rewards,
         feesPaid: params.feesPaid,
+        totalGasFees,
         totalPnL,
         transactions
       };
     });
 
     // Сохраняем результаты в состояние
+    console.log('Результаты расчета:', results);
+    
     if (results.length === 0) {
       console.log('Не найдено транзакций для расчета прибыли');
       setEchelonProfitResults([]);
       return;
     }
 
+    console.log('Сохраняем результаты в состояние...');
     setEchelonProfitResults(results);
+    console.log('Расчет прибыли завершен успешно!');
     return results;
   };
 
@@ -587,8 +606,21 @@ export default function TestEchelonProfitPage() {
                                     {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
                                   </div>
                                   <div className="text-xs text-gray-500">
-                                    TX: {tx.hash}
+                                    TX: <a 
+                                      href={`https://explorer.aptoslabs.com/txn/${tx.hash}?network=mainnet`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                                    >
+                                      {tx.hash}
+                                    </a>
                                   </div>
+                                  {/* Плата за газ */}
+                                  {tx._rawData?.gas_used && (
+                                    <div className="text-xs text-orange-600">
+                                      Газ: {parseInt(tx._rawData.gas_used) * (parseInt(tx._rawData.gas_unit_price || '100') / 100000000)} APT
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               
@@ -639,50 +671,59 @@ export default function TestEchelonProfitPage() {
                       
                       {/* Основные показатели */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600">Общий ввод</div>
-                          <div className="text-lg font-bold text-red-600">
-                            {result.totalSupply.toFixed(6)} {result.currency}
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Остаток в пуле</div>
+                          <div className="text-lg font-bold text-yellow-600">
+                            {result.remainingPosition.toFixed(6)} {result.currency}
                           </div>
                         </div>
                         
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600">Общий вывод</div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Награды</div>
                           <div className="text-lg font-bold text-green-600">
-                            {result.totalWithdraw.toFixed(6)} {result.currency}
+                            {result.rewards.toFixed(6)} {result.currency}
                           </div>
                         </div>
                         
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600">Net PnL</div>
-                          <div className={`text-lg font-bold ${result.netPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {result.netPnL >= 0 ? '+' : ''}{result.netPnL.toFixed(6)} {result.currency}
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Комиссии</div>
+                          <div className="text-lg font-bold text-red-600">
+                            {result.feesPaid.toFixed(6)} {result.currency}
                           </div>
                         </div>
                         
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600">Total PnL</div>
-                          <div className={`text-lg font-bold ${result.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {result.totalPnL >= 0 ? '+' : ''}{result.totalPnL.toFixed(6)} {result.currency}
+                        <div className="bg-orange-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Плата за газ</div>
+                          <div className="text-lg font-bold text-orange-600">
+                            {result.totalGasFees.toFixed(6)} APT
                           </div>
                         </div>
                       </div>
 
                       {/* Дополнительные параметры */}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-yellow-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-600">Остаток в пуле</div>
-                          <div className="font-medium">{result.remainingPosition.toFixed(6)} {result.currency}</div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий ввод</div>
+                          <div className="font-medium text-red-600">{result.totalSupply.toFixed(6)} {result.currency}</div>
                         </div>
                         
-                        <div className="bg-green-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-600">Награды</div>
-                          <div className="font-medium">{result.rewards.toFixed(6)} {result.currency}</div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий вывод</div>
+                          <div className="font-medium text-green-600">{result.totalWithdraw.toFixed(6)} {result.currency}</div>
                         </div>
                         
-                        <div className="bg-red-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-600">Комиссии</div>
-                          <div className="font-medium">{result.feesPaid.toFixed(6)} {result.currency}</div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Net PnL</div>
+                          <div className={`font-medium ${result.netPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.netPnL >= 0 ? '+' : ''}{result.netPnL.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Total PnL</div>
+                          <div className={`font-medium ${result.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.totalPnL >= 0 ? '+' : ''}{result.totalPnL.toFixed(6)} {result.currency}
+                          </div>
                         </div>
                       </div>
 
@@ -694,7 +735,10 @@ export default function TestEchelonProfitPage() {
                           netPnL = {result.netPnL.toFixed(6)} {result.currency}.
                         </div>
                         <div className="text-sm font-medium text-gray-700 mt-1">
-                          С учётом остатка/нагр./комиссий: totalPnL = {result.totalPnL.toFixed(6)} {result.currency}.
+                          С учётом остатка/нагр./комиссий/газа: totalPnL = {result.totalPnL.toFixed(6)} {result.currency}.
+                        </div>
+                        <div className="text-sm text-orange-600 mt-1">
+                          Общая плата за газ: {result.totalGasFees.toFixed(6)} APT
                         </div>
                       </div>
 
