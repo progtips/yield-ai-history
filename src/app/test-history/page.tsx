@@ -127,8 +127,14 @@ export default function TestHistoryPage() {
     }
     
     // If no exact match found, return the original recipient address logic
-    if (!recipientAddress || recipientAddress === 'Unknown' || recipientAddress.startsWith('Pool/Validator ID:') || recipientAddress.startsWith('DEX/Pool ID:') || recipientAddress.startsWith('ID:')) {
-      return recipientAddress;
+    if (!recipientAddress || recipientAddress === 'Unknown') {
+      return 'Unknown';
+    }
+    
+    // Проверяем, что recipientAddress является строкой перед использованием startsWith
+    const recipientStr = String(recipientAddress);
+    if (recipientStr.startsWith('Pool/Validator ID:') || recipientStr.startsWith('DEX/Pool ID:') || recipientStr.startsWith('ID:')) {
+      return recipientStr;
     }
     
     // Try to find protocol by recipient address (old logic)
@@ -819,15 +825,16 @@ export default function TestHistoryPage() {
           }
           
           // Debug: Log all recipient addresses for protocol matching
-          if (recipientAddress !== 'Unknown' && !recipientAddress.startsWith('Pool/Validator ID:') && !recipientAddress.startsWith('DEX/Pool ID:') && !recipientAddress.startsWith('ID:')) {
-            console.log(`📋 Transaction ${tx.version}: recipient address = ${recipientAddress}`);
+          const recipientStr = String(recipientAddress);
+          if (recipientStr !== 'Unknown' && !recipientStr.startsWith('Pool/Validator ID:') && !recipientStr.startsWith('DEX/Pool ID:') && !recipientStr.startsWith('ID:')) {
+            console.log(`📋 Transaction ${tx.version}: recipient address = ${recipientStr}`);
           }
           
           // Debug: log recipientAddress before creating transaction object
           console.log(`🔍 DEBUG: Creating transaction object - recipientAddress type:`, typeof recipientAddress, 'value:', recipientAddress);
           
           // Additional debug: Check if recipientAddress contains [object Object]
-          if (recipientAddress.includes('[object Object]')) {
+          if (recipientStr.includes('[object Object]')) {
             console.log('⚠️ WARNING: recipientAddress contains [object Object] - this should not happen after the fix');
           }
           
@@ -1393,6 +1400,16 @@ export default function TestHistoryPage() {
                                   return (
                                     <a
                                       href={`/test-echelon-profit?wallet=${encodeURIComponent(walletAddress)}`}
+                                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                    >
+                                      {protocolName}
+                                    </a>
+                                  );
+                                }
+                                if (protocolName === 'Hyperion') {
+                                  return (
+                                    <a
+                                      href={`/test-hyperion-profit?wallet=${encodeURIComponent(walletAddress)}`}
                                       className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                                     >
                                       {protocolName}
