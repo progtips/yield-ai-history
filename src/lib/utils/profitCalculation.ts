@@ -250,18 +250,34 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     event.type.includes('fungible_asset::Withdraw')
   );
   
-  // Шаг 2: Ищем PriceEvent для определения токена
-  const priceEvent = tx.events.find((event: any) => 
-    event.type.includes('tiered_oracle::PriceEvent') ||
-    event.type.includes('PriceEvent')
-  );
+  // Шаг 2: Ищем токен из изменений состояния (changes) - более надежный способ для Echelon
+  if (tx.changes) {
+    const marketChange = tx.changes.find((change: any) => 
+      change.data?.type?.includes('lending::Market')
+    );
+    if (marketChange?.data?.data?.asset_name) {
+      const assetName = marketChange.data.data.asset_name;
+      const tokenInfo = getTokenInfoByCoinName(assetName);
+      if (tokenInfo) {
+        token = tokenInfo.symbol;
+        decimals = tokenInfo.decimals;
+      }
+    }
+  }
   
-  // Определяем токен из PriceEvent
-  if (priceEvent && priceEvent.data && priceEvent.data.coin_name) {
-    const tokenInfo = getTokenInfoByCoinName(priceEvent.data.coin_name);
-    if (tokenInfo) {
-      token = tokenInfo.symbol;
-      decimals = tokenInfo.decimals;
+  // Если не нашли в changes, ищем PriceEvent для определения токена
+  if (token === 'APT') {
+    const priceEvent = tx.events.find((event: any) => 
+      event.type.includes('tiered_oracle::PriceEvent') ||
+      event.type.includes('PriceEvent')
+    );
+    
+    if (priceEvent && priceEvent.data && priceEvent.data.coin_name) {
+      const tokenInfo = getTokenInfoByCoinName(priceEvent.data.coin_name);
+      if (tokenInfo) {
+        token = tokenInfo.symbol;
+        decimals = tokenInfo.decimals;
+      }
     }
   }
   
@@ -438,7 +454,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
 }
 
 /**
- * Получает информацию о токене по coin_name
+ * Получает информацию о токене по coin_name или названию токена
  */
 export function getTokenInfoByCoinName(coinName: string): { name: string; symbol: string; decimals: number } | null {
   if (!coinName) return null;
@@ -446,10 +462,25 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   // Убираем префикс @ если есть
   const normalizedCoinName = coinName.replace(/^@/, '');
   
-  // Ищем токен в списке по faAddress
-  const token = tokenList.data.data.find((token: any) => {
+  // Сначала ищем токен в списке по faAddress
+  let token = tokenList.data.data.find((token: any) => {
     return token.faAddress === normalizedCoinName;
   });
+  
+  // Если не нашли по faAddress, ищем по названию токена
+  if (!token) {
+    token = tokenList.data.data.find((token: any) => {
+      return token.name === normalizedCoinName || token.symbol === normalizedCoinName;
+    });
+  }
+  
+  // Если не нашли по названию, ищем по частичному совпадению
+  if (!token) {
+    token = tokenList.data.data.find((token: any) => {
+      return token.name.toLowerCase().includes(normalizedCoinName.toLowerCase()) ||
+             token.symbol.toLowerCase().includes(normalizedCoinName.toLowerCase());
+    });
+  }
   
   if (token) {
     return {

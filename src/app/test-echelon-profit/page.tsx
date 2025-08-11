@@ -28,6 +28,20 @@ export default function TestEchelonProfitPage() {
     setIsClient(true);
   }, []);
 
+  // Тестовая функция для проверки определения токена
+  React.useEffect(() => {
+    console.log('=== Тест определения токена ===');
+    const testToken = getTokenInfoByCoinName('Staked USDe');
+    console.log('Тест для "Staked USDe":', testToken);
+    
+    const testToken2 = getTokenInfoByCoinName('sUSDe');
+    console.log('Тест для "sUSDe":', testToken2);
+    
+    const testToken3 = getTokenInfoByCoinName('0xb30a694a344edee467d9f82330bbe7c3b89f440a1ecd2da1f3bca266560fce69');
+    console.log('Тест для FA адреса:', testToken3);
+    console.log('=== Конец теста ===');
+  }, []);
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
@@ -432,12 +446,30 @@ export default function TestEchelonProfitPage() {
           event.type.includes('WithdrawEvent')
         );
         
+        // Определяем токен из изменений состояния (changes)
+        let tokenDecimals = 6; // По умолчанию для FA токенов
+        if (tx._rawData?.changes) {
+          const marketChange = tx._rawData.changes.find((change: any) => 
+            change.data?.type?.includes('lending::Market')
+          );
+          if (marketChange?.data?.data?.asset_name) {
+            const assetName = marketChange.data.data.asset_name;
+            console.log('Found asset name in market change:', assetName);
+            // Ищем токен в списке по названию
+            const tokenInfo = getTokenInfoByCoinName(assetName);
+            console.log('Token info found:', tokenInfo);
+            if (tokenInfo) {
+              actualToken = tokenInfo.symbol;
+              tokenDecimals = tokenInfo.decimals;
+              console.log('Using token:', actualToken, 'with decimals:', tokenDecimals);
+            }
+          }
+        }
+        
         if (supplyEvent && supplyEvent.data) {
-          actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, 6); // USDt has 6 decimals
-          actualToken = 'USDt';
+          actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, tokenDecimals);
         } else if (withdrawEvent && withdrawEvent.data) {
-          actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, 6);
-          actualToken = 'USDt';
+          actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, tokenDecimals);
         }
       }
 
@@ -664,12 +696,30 @@ export default function TestEchelonProfitPage() {
                             event.type.includes('WithdrawEvent')
                           );
                           
+                          // Определяем токен из изменений состояния (changes)
+                          let tokenDecimals = 6; // По умолчанию для FA токенов
+                          if (tx._rawData?.changes) {
+                            const marketChange = tx._rawData.changes.find((change: any) => 
+                              change.data?.type?.includes('lending::Market')
+                            );
+                            if (marketChange?.data?.data?.asset_name) {
+                              const assetName = marketChange.data.data.asset_name;
+                              console.log('Found asset name in market change:', assetName);
+                              // Ищем токен в списке по названию
+                              const tokenInfo = getTokenInfoByCoinName(assetName);
+                              console.log('Token info found:', tokenInfo);
+                              if (tokenInfo) {
+                                actualToken = tokenInfo.symbol;
+                                tokenDecimals = tokenInfo.decimals;
+                                console.log('Using token:', actualToken, 'with decimals:', tokenDecimals);
+                              }
+                            }
+                          }
+                          
                           if (supplyEvent && supplyEvent.data) {
-                            actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, 6); // USDt has 6 decimals
-                            actualToken = 'USDt';
+                            actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, tokenDecimals);
                           } else if (withdrawEvent && withdrawEvent.data) {
-                            actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, 6);
-                            actualToken = 'USDt';
+                            actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, tokenDecimals);
                           }
                         }
                         
