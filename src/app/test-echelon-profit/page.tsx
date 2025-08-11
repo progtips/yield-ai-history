@@ -232,6 +232,7 @@ export default function TestEchelonProfitPage() {
               type = 'withdraw';
             } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
               type = 'claim';
+              addDebugInfo(`Определена транзакция claim: ${functionName}`);
             } else if (functionName.includes('swap') || functionName.includes('exchange')) {
               type = 'swap';
             } else if (functionName.includes('coin::transfer')) {
@@ -410,10 +411,10 @@ export default function TestEchelonProfitPage() {
     }
     
     const filteredTransactions = transactionsToAnalyze.filter(tx => 
-      tx.type === 'deposit' || tx.type === 'withdraw'
+      tx.type === 'deposit' || tx.type === 'withdraw' || tx.type === 'claim'
     );
 
-    addDebugInfo(`Отфильтрованные транзакции deposit/withdraw: ${filteredTransactions.length}`);
+    addDebugInfo(`Отфильтрованные транзакции deposit/withdraw/claim: ${filteredTransactions.length}`);
     
     // Логируем типы транзакций для отладки
     const typeCounts = transactionsToAnalyze.reduce((acc, tx) => {
@@ -433,6 +434,11 @@ export default function TestEchelonProfitPage() {
           addDebugInfo(`Обрабатываем транзакцию ${index + 1}: ${tx.function} ${tx.type}`);
           // Извлекаем сумму и валюту из транзакции
           const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
+          
+          // Дополнительная отладка для claim транзакций
+          if (tx.type === 'claim') {
+            addDebugInfo(`Claim транзакция: extractedAmount=${extractedAmount}, extractedToken=${extractedToken}`);
+          }
       
       // Ищем события для определения точной суммы
       let actualAmount = extractedAmount;
@@ -486,6 +492,7 @@ export default function TestEchelonProfitPage() {
       } else if (tx.type === 'claim') {
         operationType = 'claim';
         signedAmount = Math.abs(actualAmount); // Награды всегда положительные
+        addDebugInfo(`Обрабатываем claim: amount=${actualAmount}, signedAmount=${signedAmount}, token=${actualToken}`);
       }
       
       // Рассчитываем плату за газ
@@ -535,18 +542,47 @@ export default function TestEchelonProfitPage() {
           .filter(tx => tx.type === 'withdraw')
           .reduce((sum, tx) => sum + tx.amount, 0);
         
-        const totalClaims = transactions
-          .filter(tx => tx.type === 'claim')
-          .reduce((sum, tx) => sum + tx.amount, 0);
+        const claimTransactions = transactions.filter(tx => tx.type === 'claim');
+        addDebugInfo(`Найдено ${claimTransactions.length} транзакций типа claim для ${currency}`);
+        claimTransactions.forEach((tx, index) => {
+          addDebugInfo(`Claim транзакция ${index + 1}: amount=${tx.amount}, signedAmount=${tx.signedAmount}, function=${tx.function}`);
+          
+          // Дополнительная отладка для claim транзакций
+          if (tx._rawData) {
+            addDebugInfo(`Claim ${index + 1} - Events count: ${tx._rawData.events?.length || 0}`);
+            addDebugInfo(`Claim ${index + 1} - Changes count: ${tx._rawData.changes?.length || 0}`);
+            
+            // Логируем события для claim
+            if (tx._rawData.events) {
+              tx._rawData.events.forEach((event: any, eventIndex: number) => {
+                addDebugInfo(`Claim ${index + 1} Event ${eventIndex}: type=${event.type}, data=${JSON.stringify(event.data)}`);
+              });
+            }
+            
+            // Логируем изменения состояния для claim
+            if (tx._rawData.changes) {
+              tx._rawData.changes.forEach((change: any, changeIndex: number) => {
+                addDebugInfo(`Claim ${index + 1} Change ${changeIndex}: type=${change.data?.type}, address=${change.address}`);
+              });
+            }
+          }
+        });
+        
+        const totalClaims = claimTransactions.reduce((sum, tx) => {
+          const amount = parseFloat(tx.amount.toString().replace(/[^\d.-]/g, '')) || 0;
+          addDebugInfo(`Добавляем к totalClaims: ${amount} из транзакции ${tx.tx || tx.hash || 'unknown'}`);
+          addDebugInfo(`Исходное значение tx.amount: ${tx.amount}, тип: ${typeof tx.amount}`);
+          return sum + amount;
+        }, 0);
         
         // Рассчитываем общую плату за газ
         const totalGasFees = transactions.reduce((sum, tx) => sum + (tx.gasFee || 0), 0);
         
         const netPnL = totalWithdraw + totalClaims - totalSupply;
         const realizedPnL = netPnL;
-        const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
+        const totalPnL = netPnL + params.remainingPosition + totalClaims - params.feesPaid - totalGasFees;
 
-        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, claims=${totalClaims}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
+        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, rewards=${totalClaims}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
 
         return {
           currency,
@@ -555,7 +591,7 @@ export default function TestEchelonProfitPage() {
           totalClaims,
           netPnL,
           remainingPosition: params.remainingPosition,
-          rewards: params.rewards,
+          rewards: totalClaims, // Используем totalClaims вместо params.rewards
           feesPaid: params.feesPaid,
           totalGasFees,
           totalPnL,
@@ -672,6 +708,59 @@ export default function TestEchelonProfitPage() {
                   >
                     Сбросить и повторить
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (transactions.length > 0) {
+                        calculateEchelonProfitWithData(transactions);
+                      }
+                    }}
+                    disabled={transactions.length === 0}
+                  >
+                    Пересчитать прибыль
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Блок отладки */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Отладка</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600">
+                  Всего транзакций: {transactions.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Echelon транзакций: {echelonTransactions.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Claim транзакций: {echelonTransactions.filter(tx => tx.type === 'claim').length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Deposit транзакций: {echelonTransactions.filter(tx => tx.type === 'deposit').length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Withdraw транзакций: {echelonTransactions.filter(tx => tx.type === 'withdraw').length}
+                </div>
+                
+                {/* Показываем первые несколько транзакций для отладки */}
+                <div className="mt-4">
+                  <div className="text-sm font-semibold text-gray-700 mb-2">Первые 3 транзакции:</div>
+                  <div className="space-y-2 text-xs">
+                    {echelonTransactions.slice(0, 3).map((tx, index) => (
+                      <div key={index} className="bg-gray-50 p-2 rounded">
+                        <div>Тип: {tx.type}</div>
+                        <div>Функция: {tx.function}</div>
+                        <div>Сумма: {tx.amount}</div>
+                        <div>Hash: {tx.hash.substring(0, 10)}...</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -698,6 +787,11 @@ export default function TestEchelonProfitPage() {
                         const isDeposit = tx.type === 'deposit';
                         const isWithdraw = tx.type === 'withdraw';
                         const isClaim = tx.type === 'claim';
+                        
+                        // Отладочная информация для claim транзакций
+                        if (isClaim) {
+                          addDebugInfo(`Отображаем claim транзакцию: ${tx.function}, amount=${tx.amount}, extractedAmount=${extractedAmount}`);
+                        }
                         
                         // Ищем события для определения точной суммы
                         let actualAmount = extractedAmount;
@@ -859,9 +953,9 @@ export default function TestEchelonProfitPage() {
                           </div>
                         </div>
                         
-                        <div className="bg-green-50 p-4 rounded-lg">
+                        <div className="bg-purple-50 p-4 rounded-lg">
                           <div className="text-sm text-gray-600">Награды</div>
-                          <div className="text-lg font-bold text-green-600">
+                          <div className="text-lg font-bold text-purple-600">
                             {result.rewards.toFixed(6)} {result.currency}
                           </div>
                         </div>
@@ -893,11 +987,6 @@ export default function TestEchelonProfitPage() {
                           <div className="font-medium text-green-600">{result.totalWithdraw.toFixed(6)} {result.currency}</div>
                         </div>
                         
-                        <div className="bg-purple-50 p-3 rounded-lg">
-                          <div className="text-sm text-gray-600">Полученные награды</div>
-                          <div className="font-medium text-purple-600">{result.totalClaims.toFixed(6)} {result.currency}</div>
-                        </div>
-                        
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <div className="text-sm text-gray-600">Net PnL</div>
                           <div className={`font-medium ${result.netPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -913,8 +1002,74 @@ export default function TestEchelonProfitPage() {
                         </div>
                       </div>
 
-
-
+                      {/* Блок отладки для claim транзакций */}
+                      <div className="bg-gray-100 p-4 rounded-lg">
+                        <div className="text-sm font-semibold text-gray-700 mb-3">
+                          Отладка claim транзакций 
+                          <span className="ml-2 text-purple-600">
+                            (Всего: {result.transactions.filter((tx: any) => tx.type === 'claim').length} транзакций)
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-xs">
+                          {/* Сводка по наградам */}
+                          <div className="bg-purple-50 p-3 rounded border-l-4 border-purple-400 mb-3">
+                            <div className="font-medium text-purple-800">Сводка по наградам:</div>
+                            <div className="text-sm text-purple-700">
+                              Общая сумма наград: {result.rewards.toFixed(6)} {result.currency}
+                            </div>
+                            <div className="text-sm text-purple-700">
+                              Количество claim транзакций: {result.transactions.filter((tx: any) => tx.type === 'claim').length}
+                            </div>
+                          </div>
+                          
+                          {result.transactions
+                            .filter((tx: any) => tx.type === 'claim')
+                            .map((tx: any, txIndex: number) => (
+                              <div key={txIndex} className="bg-white p-2 rounded border">
+                                <div className="font-medium">Claim транзакция {txIndex + 1}:</div>
+                                <div>Функция: {tx.function || tx._rawData?.payload?.function || 'N/A'}</div>
+                                <div>Сумма: {tx.amount} {tx.currency}</div>
+                                <div>Signed Amount: {tx.signedAmount}</div>
+                                <div>Hash: {tx.tx || tx.hash}</div>
+                                <div>Тип операции: {tx.type}</div>
+                                
+                                {/* Детальная информация о событиях */}
+                                {tx._rawData?.events && (
+                                  <div className="mt-2">
+                                    <div className="font-medium text-purple-600">События ({tx._rawData.events.length}):</div>
+                                    {tx._rawData.events.map((event: any, eventIndex: number) => (
+                                      <div key={eventIndex} className="ml-2 text-gray-600">
+                                        {eventIndex + 1}. {event.type}
+                                        {event.data && (
+                                          <div className="ml-2 text-gray-500">
+                                            Данные: {JSON.stringify(event.data)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Детальная информация об изменениях состояния */}
+                                {tx._rawData?.changes && (
+                                  <div className="mt-2">
+                                    <div className="font-medium text-blue-600">Изменения состояния ({tx._rawData.changes.length}):</div>
+                                    {tx._rawData.changes.map((change: any, changeIndex: number) => (
+                                      <div key={changeIndex} className="ml-2 text-gray-600">
+                                        {changeIndex + 1}. {change.data?.type || 'Unknown'}
+                                        {change.data?.data && (
+                                          <div className="ml-2 text-gray-500">
+                                            Данные: {JSON.stringify(change.data.data)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
 
                     </div>
                   ))}

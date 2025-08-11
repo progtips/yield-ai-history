@@ -250,7 +250,10 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     event.type.includes('fungible_asset::Withdraw')
   );
   
-  // Шаг 2: Ищем токен из изменений состояния (changes) - более надежный способ для Echelon
+  // Шаг 2: Определяем тип операции и сумму
+  const functionName = tx.payload?.function || '';
+  
+  // Ищем токен из изменений состояния (changes) - более надежный способ для Echelon
   if (tx.changes) {
     const marketChange = tx.changes.find((change: any) => 
       change.data?.type?.includes('lending::Market')
@@ -261,6 +264,31 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
       if (tokenInfo) {
         token = tokenInfo.symbol;
         decimals = tokenInfo.decimals;
+      }
+    }
+    
+    // Для claim транзакций ищем токен в CoinStore изменениях
+    if (token === 'APT' && functionName.includes('claim')) {
+      const coinStoreChange = tx.changes.find((change: any) => 
+        change.data?.type?.includes('CoinStore') &&
+        change.address === userAddress
+      );
+      
+      if (coinStoreChange?.data?.data?.coin?.type) {
+        const coinType = coinStoreChange.data.data.coin.type;
+        console.log(`[DEBUG] Найден тип токена в CoinStore: ${coinType}`);
+        
+        // Определяем токен по типу
+        if (coinType.includes('usde::USDe')) {
+          token = 'USDe';
+          decimals = 6;
+        } else if (coinType.includes('staked_usde::StakedUSDe')) {
+          token = 'sUSDe';
+          decimals = 6;
+        } else if (coinType.includes('aptos_coin::AptosCoin')) {
+          token = 'APT';
+          decimals = 8;
+        }
       }
     }
   }
@@ -281,6 +309,33 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     }
   }
   
+  // Для claim транзакций ищем токен в событиях Deposit/Withdraw
+  if (token === 'APT' && functionName.includes('claim')) {
+    const depositEvent = depositEvents.find((event: any) => 
+      event.data?.store?.includes(userAddress)
+    );
+    
+    if (depositEvent?.type) {
+      // Извлекаем тип токена из события
+      const typeMatch = depositEvent.type.match(/<([^>]+)>/);
+      if (typeMatch) {
+        const coinType = typeMatch[1];
+        console.log(`[DEBUG] Найден тип токена в событии: ${coinType}`);
+        
+        if (coinType.includes('usde::USDe')) {
+          token = 'USDe';
+          decimals = 6;
+        } else if (coinType.includes('staked_usde::StakedUSDe')) {
+          token = 'sUSDe';
+          decimals = 6;
+        } else if (coinType.includes('aptos_coin::AptosCoin')) {
+          token = 'APT';
+          decimals = 8;
+        }
+      }
+    }
+  }
+  
   // Шаг 3: Анализируем изменения в FungibleStore
   const fungibleStoreChanges = tx.changes?.filter((change: any) => 
     change.type?.includes('fungible_asset::FungibleStore') ||
@@ -288,7 +343,6 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
   ) || [];
   
   // Шаг 4: Определяем тип операции и сумму
-  const functionName = tx.payload?.function || '';
   
   if (functionName.includes('supply') || functionName.includes('deposit')) {
     // Операция депозита
@@ -320,16 +374,113 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     }
   } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
     // Операция получения наград
+    console.log(`[DEBUG] Обрабатываем claim операцию: ${functionName}`);
+    console.log(`[DEBUG] Deposit events:`, depositEvents);
+    
+    // Сначала пробуем найти deposit events
     if (depositEvents.length > 0) {
       const depositEvent = depositEvents.find((event: any) => 
         event.data?.store?.includes(userAddress) || 
         event.data?.store === userAddress
       );
       
+      console.log(`[DEBUG] Найденный deposit event:`, depositEvent);
+      
       if (depositEvent?.data?.amount) {
         amount = parseFloat(depositEvent.data.amount);
         amount = amount / Math.pow(10, decimals);
+        console.log(`[DEBUG] Извлеченная сумма для claim из deposit event: ${amount} ${token}`);
       }
+    }
+    
+    // Если не нашли в deposit events, ищем в других событиях
+    if (amount === 0 && tx.events) {
+      console.log(`[DEBUG] Ищем награды в других событиях...`);
+      
+      // Ищем события с наградами
+      const rewardEvents = tx.events.filter((event: any) => 
+        event.type?.includes('Reward') ||
+        event.type?.includes('Claim') ||
+        event.type?.includes('Distribute') ||
+        event.type?.includes('Mint') ||
+        event.type?.includes('Deposit') // Добавляем поиск Deposit событий
+      );
+      
+      console.log(`[DEBUG] Найдено ${rewardEvents.length} событий с наградами:`, rewardEvents);
+      
+      for (const event of rewardEvents) {
+        if (event.data?.amount || event.data?.value || event.data?.reward_amount) {
+          const rewardAmount = event.data.amount || event.data.value || event.data.reward_amount;
+          amount = parseFloat(rewardAmount) / Math.pow(10, decimals);
+          console.log(`[DEBUG] Извлеченная сумма для claim из reward event: ${amount} ${token}`);
+          break;
+        }
+      }
+      
+      // Если все еще не нашли, ищем в изменениях состояния
+      if (amount === 0 && tx.changes) {
+        console.log(`[DEBUG] Ищем награды в изменениях состояния...`);
+        
+        // Ищем изменения в CoinStore для пользователя
+        const coinStoreChanges = tx.changes.filter((change: any) => 
+          change.data?.type?.includes('CoinStore') &&
+          change.data?.data?.coin?.value &&
+          change.address === userAddress
+        );
+        
+        console.log(`[DEBUG] Найдено ${coinStoreChanges.length} изменений CoinStore:`, coinStoreChanges);
+        
+        for (const change of coinStoreChanges) {
+          if (change.data?.data?.coin?.value) {
+            const coinValue = parseFloat(change.data.data.coin.value);
+            if (coinValue > 0) {
+              amount = coinValue / Math.pow(10, decimals);
+              console.log(`[DEBUG] Извлеченная сумма для claim из CoinStore change: ${amount} ${token}`);
+              break;
+            }
+          }
+        }
+        
+        // Если не нашли в CoinStore, ищем в FungibleStore
+        if (amount === 0) {
+          const fungibleStoreChanges = tx.changes.filter((change: any) => 
+            change.data?.type?.includes('FungibleStore') &&
+            change.data?.data?.balance &&
+            change.address === userAddress
+          );
+          
+          console.log(`[DEBUG] Найдено ${fungibleStoreChanges.length} изменений FungibleStore:`, fungibleStoreChanges);
+          
+          for (const change of fungibleStoreChanges) {
+            if (change.data?.data?.balance) {
+              const balanceValue = parseFloat(change.data.data.balance);
+              if (balanceValue > 0) {
+                amount = balanceValue / Math.pow(10, decimals);
+                console.log(`[DEBUG] Извлеченная сумма для claim из FungibleStore change: ${amount} ${token}`);
+                break;
+              }
+            }
+          }
+        }
+      }
+      
+      // Если все еще не нашли, ищем в аргументах транзакции
+      if (amount === 0 && tx.payload?.arguments) {
+        console.log(`[DEBUG] Ищем награды в аргументах транзакции...`);
+        
+        for (const arg of tx.payload.arguments) {
+          if (typeof arg === 'string' && !isNaN(parseFloat(arg)) && parseFloat(arg) > 0) {
+            amount = parseFloat(arg) / Math.pow(10, decimals);
+            console.log(`[DEBUG] Извлеченная сумма для claim из аргумента: ${amount} ${token}`);
+            break;
+          }
+        }
+      }
+    }
+    
+    if (amount === 0) {
+      console.log(`[DEBUG] Не удалось извлечь сумму наград из claim операции`);
+      console.log(`[DEBUG] Полная структура транзакции:`, JSON.stringify(tx, null, 2));
     }
   }
   
