@@ -230,7 +230,7 @@ export default function TestEchelonProfitPage() {
               type = 'deposit';
             } else if (functionName.includes('withdraw') || functionName.includes('redeem')) {
               type = 'withdraw';
-            } else if (functionName.includes('claim') || functionName.includes('reward')) {
+            } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
               type = 'claim';
             } else if (functionName.includes('swap') || functionName.includes('exchange')) {
               type = 'swap';
@@ -474,10 +474,19 @@ export default function TestEchelonProfitPage() {
       }
 
       // Определяем тип операции
-      const operationType = tx.type === 'deposit' ? 'supply' : 'withdraw';
+      let operationType = 'other';
+      let signedAmount = actualAmount;
       
-      // Определяем знак суммы по типу операции
-      const signedAmount = operationType === 'supply' ? -Math.abs(actualAmount) : Math.abs(actualAmount);
+      if (tx.type === 'deposit') {
+        operationType = 'supply';
+        signedAmount = -Math.abs(actualAmount);
+      } else if (tx.type === 'withdraw') {
+        operationType = 'withdraw';
+        signedAmount = Math.abs(actualAmount);
+      } else if (tx.type === 'claim') {
+        operationType = 'claim';
+        signedAmount = Math.abs(actualAmount); // Награды всегда положительные
+      }
       
       // Рассчитываем плату за газ
       let gasFee = 0;
@@ -526,19 +535,24 @@ export default function TestEchelonProfitPage() {
           .filter(tx => tx.type === 'withdraw')
           .reduce((sum, tx) => sum + tx.amount, 0);
         
+        const totalClaims = transactions
+          .filter(tx => tx.type === 'claim')
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        
         // Рассчитываем общую плату за газ
         const totalGasFees = transactions.reduce((sum, tx) => sum + (tx.gasFee || 0), 0);
         
-        const netPnL = totalWithdraw - totalSupply;
+        const netPnL = totalWithdraw + totalClaims - totalSupply;
         const realizedPnL = netPnL;
         const totalPnL = netPnL + params.remainingPosition + params.rewards - params.feesPaid - totalGasFees;
 
-        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
+        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, claims=${totalClaims}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
 
         return {
           currency,
           totalSupply,
           totalWithdraw,
+          totalClaims,
           netPnL,
           remainingPosition: params.remainingPosition,
           rewards: params.rewards,
@@ -677,12 +691,13 @@ export default function TestEchelonProfitPage() {
                   
                   <div className="space-y-3">
                     {echelonTransactions
-                      .filter(tx => tx.type === 'deposit' || tx.type === 'withdraw')
+                      .filter(tx => tx.type === 'deposit' || tx.type === 'withdraw' || tx.type === 'claim')
                       .sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp)) // Сортировка по времени (ранние сверху)
                       .map((tx, index) => {
                         const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
                         const isDeposit = tx.type === 'deposit';
                         const isWithdraw = tx.type === 'withdraw';
+                        const isClaim = tx.type === 'claim';
                         
                         // Ищем события для определения точной суммы
                         let actualAmount = extractedAmount;
@@ -720,6 +735,14 @@ export default function TestEchelonProfitPage() {
                             actualAmount = parseFloat(supplyEvent.data.amount) / Math.pow(10, tokenDecimals);
                           } else if (withdrawEvent && withdrawEvent.data) {
                             actualAmount = parseFloat(withdrawEvent.data.amount) / Math.pow(10, tokenDecimals);
+                          } else if (isClaim) {
+                            // Для операций claim ищем события Deposit
+                            const depositEvent = tx._rawData.events.find((event: any) => 
+                              event.type.includes('Deposit') && event.data?.store?.includes(tx.from)
+                            );
+                            if (depositEvent && depositEvent.data) {
+                              actualAmount = parseFloat(depositEvent.data.amount) / Math.pow(10, tokenDecimals);
+                            }
                           }
                         }
                         
@@ -731,7 +754,9 @@ export default function TestEchelonProfitPage() {
                             return 'Внесение средств в пул ликвидности';
                           } else if (functionName.includes('withdraw_fa')) {
                             return 'Вывод средств из пула ликвидности';
-                          } else if (functionName.includes('claim')) {
+                          } else if (functionName.includes('scripts::claim_reward')) {
+                            return 'Получение наград (claim_reward)';
+                          } else if (functionName.includes('claim') || functionName.includes('reward')) {
                             return 'Получение наград';
                           } else if (functionName.includes('swap')) {
                             return 'Обмен токенов';
@@ -745,21 +770,23 @@ export default function TestEchelonProfitPage() {
                         return (
                           <div key={tx.id} className={`p-4 border rounded-lg ${
                             isDeposit ? 'bg-red-50 border-red-200' : 
-                            isWithdraw ? 'bg-green-50 border-green-200' : 'bg-gray-50'
+                            isWithdraw ? 'bg-green-50 border-green-200' : 
+                            isClaim ? 'bg-purple-50 border-purple-200' : 'bg-gray-50'
                           }`}>
                             <div className="flex justify-between items-center">
                               {/* Первый столбец: Дата/Время */}
                               <div className="flex items-center gap-3">
                                 <div className={`w-3 h-3 rounded-full ${
                                   isDeposit ? 'bg-red-500' : 
-                                  isWithdraw ? 'bg-green-500' : 'bg-gray-500'
+                                  isWithdraw ? 'bg-green-500' : 
+                                  isClaim ? 'bg-purple-500' : 'bg-gray-500'
                                 }`}></div>
                                 <div>
                                   <div className="text-sm font-medium text-gray-700">
                                     {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
                                   </div>
                                   <div className="text-xs text-gray-500">
-                                    {isDeposit ? 'Списание' : isWithdraw ? 'Зачисление' : 'Операция'}
+                                    {isDeposit ? 'Списание' : isWithdraw ? 'Зачисление' : isClaim ? 'Награды' : 'Операция'}
                                   </div>
                                 </div>
                               </div>
@@ -775,9 +802,10 @@ export default function TestEchelonProfitPage() {
                               <div className="text-right">
                                 <div className={`font-bold text-lg ${
                                   isDeposit ? 'text-red-600' : 
-                                  isWithdraw ? 'text-green-600' : 'text-gray-600'
+                                  isWithdraw ? 'text-green-600' : 
+                                  isClaim ? 'text-purple-600' : 'text-gray-600'
                                 }`}>
-                                  {isDeposit ? '-' : isWithdraw ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
+                                  {isDeposit ? '-' : isWithdraw || isClaim ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
                                 </div>
                                 <div className="text-xs text-gray-500">
                                   TX: <a 
@@ -863,6 +891,11 @@ export default function TestEchelonProfitPage() {
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <div className="text-sm text-gray-600">Общий вывод</div>
                           <div className="font-medium text-green-600">{result.totalWithdraw.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-purple-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Полученные награды</div>
+                          <div className="font-medium text-purple-600">{result.totalClaims.toFixed(6)} {result.currency}</div>
                         </div>
                         
                         <div className="bg-gray-50 p-3 rounded-lg">

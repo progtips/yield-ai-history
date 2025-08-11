@@ -318,7 +318,7 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         amount = amount / Math.pow(10, decimals);
       }
     }
-  } else if (functionName.includes('claim') || functionName.includes('reward')) {
+  } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
     // Операция получения наград
     if (depositEvents.length > 0) {
       const depositEvent = depositEvents.find((event: any) => 
