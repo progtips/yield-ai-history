@@ -376,6 +376,46 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     // Операция получения наград
     console.log(`[DEBUG] Обрабатываем claim операцию: ${functionName}`);
     console.log(`[DEBUG] Deposit events:`, depositEvents);
+  } else if (functionName.includes('liquidate') || functionName.includes('flash_loan') || functionName.includes('fee')) {
+    // Операции с комиссиями
+    console.log(`[DEBUG] Обрабатываем операцию с комиссиями: ${functionName}`);
+    
+    // Ищем комиссии в событиях
+    if (tx.events) {
+      const feeEvents = tx.events.filter((event: any) => 
+        event.type?.includes('Fee') ||
+        event.type?.includes('Commission') ||
+        event.type?.includes('Charge')
+      );
+      
+      console.log(`[DEBUG] Найдено ${feeEvents.length} событий с комиссиями:`, feeEvents);
+      
+      for (const event of feeEvents) {
+        if (event.data?.amount || event.data?.fee || event.data?.commission) {
+          const feeAmount = event.data.amount || event.data.fee || event.data.commission;
+          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
+          console.log(`[DEBUG] Извлеченная комиссия из события: ${amount} ${token}`);
+          break;
+        }
+      }
+    }
+    
+    // Если не нашли в событиях, ищем в изменениях состояния
+    if (amount === 0 && tx.changes) {
+      const feeChanges = tx.changes.filter((change: any) => 
+        change.data?.type?.includes('Fee') ||
+        change.data?.type?.includes('Commission')
+      );
+      
+      for (const change of feeChanges) {
+        if (change.data?.data?.amount || change.data?.data?.fee) {
+          const feeAmount = change.data.data.amount || change.data.data.fee;
+          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
+          console.log(`[DEBUG] Извлеченная комиссия из изменений состояния: ${amount} ${token}`);
+          break;
+        }
+      }
+    }
     
     // Сначала пробуем найти deposit events
     if (depositEvents.length > 0) {
