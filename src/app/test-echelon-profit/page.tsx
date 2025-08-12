@@ -63,6 +63,7 @@ export default function TestEchelonProfitPage() {
   const [echelonTransactions, setEchelonTransactions] = React.useState<any[]>([]);
   const [echelonProfitResults, setEchelonProfitResults] = React.useState<any[]>([]);
   const [hasStartedAnalysis, setHasStartedAnalysis] = React.useState(false);
+  const [debugInfo, setDebugInfo] = React.useState<string[]>([]);
 
   // Читаем адрес кошелька из URL параметров и автоматически запускаем анализ
   React.useEffect(() => {
@@ -151,6 +152,7 @@ export default function TestEchelonProfitPage() {
     setIsLoading(true);
     setHasError(false);
     setErrorMessage("");
+    setDebugInfo([]); // Очищаем отладочную информацию при начале нового анализа
     
     // Fetch real transactions from Aptos blockchain
     const fetchRealTransactions = async (address: string) => {
@@ -211,7 +213,9 @@ export default function TestEchelonProfitPage() {
           }
           
           // Используем улучшенную логику извлечения суммы для Echelon
-          const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx, address);
+          const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx, address, (debugMessage) => {
+            setDebugInfo(prev => [...prev, debugMessage]);
+          });
           const amount = `${extractedAmount.toFixed(4)} ${extractedToken}`;
           
           // Improved recipient address extraction
@@ -846,6 +850,33 @@ export default function TestEchelonProfitPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Отладка */}
+          {debugInfo.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Отладка</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {debugInfo.map((message, index) => (
+                    <div key={index} className="text-xs font-mono bg-gray-100 p-2 rounded">
+                      {message}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setDebugInfo([])}
+                    className="w-full"
+                  >
+                    Очистить отладку
+                  </Button>
                 </div>
               </CardContent>
             </Card>

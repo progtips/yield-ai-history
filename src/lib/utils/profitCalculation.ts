@@ -215,7 +215,7 @@ function getProtocolNameByFunction(functionPath: string, recipientAddress: strin
 /**
  * Улучшенная функция извлечения суммы транзакции с учетом специфики протоколов
  */
-export function extractTransactionAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
+export function extractTransactionAmount(tx: any, userAddress: string, debugCallback?: (message: string) => void): { amount: number; token: string; decimals: number } {
   const protocol = getProtocolNameByFunction(tx.payload?.function || '', tx.to || '');
   
   console.log('[DEBUG] extractTransactionAmount - функция:', tx.payload?.function);
@@ -235,8 +235,8 @@ export function extractTransactionAmount(tx: any, userAddress: string): { amount
   
   // Специальная обработка для Echelon
   if (protocol === 'Echelon') {
-    console.log('[DEBUG] Используем extractEchelonAmount');
-    return extractEchelonAmount(tx, userAddress);
+    if (debugCallback) debugCallback('[DEBUG] Используем extractEchelonAmount');
+    return extractEchelonAmount(tx, userAddress, debugCallback);
   }
   
   // Специальная обработка для других протоколов
@@ -264,26 +264,29 @@ export function extractTransactionAmount(tx: any, userAddress: string): { amount
 /**
  * Извлечение суммы для протокола Echelon согласно инструкции
  */
-function extractEchelonAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
-  console.log('[DEBUG] extractEchelonAmount вызвана');
-  console.log('[DEBUG] Функция:', tx.payload?.function);
-  console.log('[DEBUG] Events count:', tx.events?.length || 0);
+function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (message: string) => void): { amount: number; token: string; decimals: number } {
+  if (debugCallback) debugCallback('[DEBUG] extractEchelonAmount вызвана');
+  if (debugCallback) debugCallback(`[DEBUG] Функция: ${tx.payload?.function}`);
+  if (debugCallback) debugCallback(`[DEBUG] Events count: ${tx.events?.length || 0}`);
   
   let amount = 0;
   let token = 'APT';
   let decimals = 8;
   
   if (!tx.events || !Array.isArray(tx.events)) {
-    console.log('[DEBUG] extractEchelonAmount - нет событий, возвращаем значения по умолчанию');
+    if (debugCallback) debugCallback('[DEBUG] extractEchelonAmount - нет событий, возвращаем значения по умолчанию');
     return { amount, token, decimals };
   }
   
-  // Специальная обработка для конкретной транзакции
-  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
-    console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractEchelonAmount ===');
-    console.log('[DEBUG] Все события:', JSON.stringify(tx.events, null, 2));
-    console.log('[DEBUG] Все изменения:', JSON.stringify(tx.changes, null, 2));
-    console.log('[DEBUG] Payload:', JSON.stringify(tx.payload, null, 2));
+  // Специальная обработка для конкретных транзакций
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f' || 
+      tx.hash?.startsWith('0x044617')) {
+    if (debugCallback) debugCallback('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractEchelonAmount ===');
+    if (debugCallback) debugCallback(`[DEBUG] Hash: ${tx.hash}`);
+    if (debugCallback) debugCallback(`[DEBUG] Function: ${tx.payload?.function}`);
+    if (debugCallback) debugCallback(`[DEBUG] Все события: ${JSON.stringify(tx.events, null, 2)}`);
+    if (debugCallback) debugCallback(`[DEBUG] Все изменения: ${JSON.stringify(tx.changes, null, 2)}`);
+    if (debugCallback) debugCallback(`[DEBUG] Payload: ${JSON.stringify(tx.payload, null, 2)}`);
   }
   
   // Шаг 1: Ищем события Deposit и Withdraw
@@ -302,39 +305,90 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
   
   // Ищем токен из изменений состояния (changes) - более надежный способ для Echelon
   if (tx.changes) {
+    if (debugCallback) debugCallback('[DEBUG] Анализируем changes для определения токена...');
+    if (debugCallback) debugCallback(`[DEBUG] Все changes: ${JSON.stringify(tx.changes, null, 2)}`);
+    
     const marketChange = tx.changes.find((change: any) => 
       change.data?.type?.includes('lending::Market')
     );
     if (marketChange?.data?.data?.asset_name) {
       const assetName = marketChange.data.data.asset_name;
-      const tokenInfo = getTokenInfoByCoinName(assetName);
+      if (debugCallback) debugCallback(`[DEBUG] Найден asset_name в Market change: ${assetName}`);
+      const tokenInfo = getTokenInfoByCoinName(assetName, debugCallback);
       if (tokenInfo) {
         token = tokenInfo.symbol;
         decimals = tokenInfo.decimals;
+        if (debugCallback) debugCallback(`[DEBUG] Установлен токен из Market change: ${token}`);
       }
     }
     
-    // Для claim транзакций ищем токен в CoinStore изменениях
-    if (token === 'APT' && functionName.includes('claim')) {
-      const coinStoreChange = tx.changes.find((change: any) => 
-        change.data?.type?.includes('CoinStore') &&
-        change.address === userAddress
-      );
-      
+    // Ищем токен в CoinStore изменениях для всех транзакций Echelon
+    const coinStoreChanges = tx.changes.filter((change: any) => 
+      change.data?.type?.includes('CoinStore') &&
+      change.address === userAddress
+    );
+    
+    if (debugCallback) debugCallback(`[DEBUG] Найдено CoinStore изменений: ${coinStoreChanges.length}`);
+    
+    for (const coinStoreChange of coinStoreChanges) {
       if (coinStoreChange?.data?.data?.coin?.type) {
         const coinType = coinStoreChange.data.data.coin.type;
-        console.log(`[DEBUG] Найден тип токена в CoinStore: ${coinType}`);
+        if (debugCallback) debugCallback(`[DEBUG] Найден тип токена в CoinStore: ${coinType}`);
         
         // Определяем токен по типу
         if (coinType.includes('usde::USDe')) {
           token = 'USDe';
           decimals = 6;
+          if (debugCallback) debugCallback('[DEBUG] Установлен USDe из CoinStore');
+          break;
         } else if (coinType.includes('staked_usde::StakedUSDe')) {
           token = 'sUSDe';
           decimals = 6;
+          if (debugCallback) debugCallback('[DEBUG] Установлен sUSDe из CoinStore');
+          break;
+        } else if (coinType.includes('staking::ThalaAPT')) {
+          token = 'thAPT';
+          decimals = 8;
+          if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из CoinStore');
+          break;
+        } else if (coinType.includes('staking::StakedThalaAPT')) {
+          token = 'sthAPT';
+          decimals = 8;
+          if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из CoinStore');
+          break;
         } else if (coinType.includes('aptos_coin::AptosCoin')) {
           token = 'APT';
           decimals = 8;
+          if (debugCallback) debugCallback('[DEBUG] Установлен APT из CoinStore');
+          break;
+        }
+      }
+    }
+    
+    // Если не нашли в CoinStore, ищем в FungibleStore
+    const fungibleStoreChanges = tx.changes.filter((change: any) => 
+      change.data?.type?.includes('FungibleStore') &&
+      change.address === userAddress
+    );
+    
+    if (debugCallback) debugCallback(`[DEBUG] Найдено FungibleStore изменений: ${fungibleStoreChanges.length}`);
+    
+    for (const fungibleStoreChange of fungibleStoreChanges) {
+      if (fungibleStoreChange?.data?.data?.metadata?.inner) {
+        const metadataInner = fungibleStoreChange.data.data.metadata.inner;
+        if (debugCallback) debugCallback(`[DEBUG] Найден metadata.inner в FungibleStore: ${metadataInner}`);
+        
+        // Проверяем metadata.inner для определения токена
+        if (metadataInner === '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b') {
+          token = 'thAPT';
+          decimals = 8;
+          if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из FungibleStore metadata');
+          break;
+        } else if (metadataInner === '0x1::aptos_coin::AptosCoin') {
+          token = 'APT';
+          decimals = 8;
+          if (debugCallback) debugCallback('[DEBUG] Установлен APT из FungibleStore metadata');
+          break;
         }
       }
     }
@@ -342,16 +396,106 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
   
   // Если не нашли в changes, ищем PriceEvent для определения токена
   if (token === 'APT') {
+    if (debugCallback) debugCallback('[DEBUG] Ищем PriceEvent для определения токена...');
     const priceEvent = tx.events.find((event: any) => 
       event.type.includes('tiered_oracle::PriceEvent') ||
       event.type.includes('PriceEvent')
     );
     
     if (priceEvent && priceEvent.data && priceEvent.data.coin_name) {
-      const tokenInfo = getTokenInfoByCoinName(priceEvent.data.coin_name);
+      if (debugCallback) debugCallback(`[DEBUG] Найден PriceEvent с coin_name: ${priceEvent.data.coin_name}`);
+      const tokenInfo = getTokenInfoByCoinName(priceEvent.data.coin_name, debugCallback);
       if (tokenInfo) {
         token = tokenInfo.symbol;
         decimals = tokenInfo.decimals;
+        if (debugCallback) debugCallback(`[DEBUG] Установлен токен из PriceEvent: ${token}`);
+      }
+    }
+  }
+  
+  // Дополнительная проверка всех событий для определения токена
+  if (token === 'APT' && tx.events) {
+    if (debugCallback) debugCallback('[DEBUG] Анализируем все события для определения токена...');
+    if (debugCallback) debugCallback(`[DEBUG] Все события: ${JSON.stringify(tx.events, null, 2)}`);
+    
+    for (const event of tx.events) {
+      if (event.type) {
+        // Ищем токены Thala в типах событий
+        if (event.type.includes('staking::ThalaAPT')) {
+          token = 'thAPT';
+          decimals = 8;
+          if (debugCallback) debugCallback(`[DEBUG] Установлен thAPT из типа события: ${event.type}`);
+          break;
+        } else if (event.type.includes('staking::StakedThalaAPT')) {
+          token = 'sthAPT';
+          decimals = 8;
+          if (debugCallback) debugCallback(`[DEBUG] Установлен sthAPT из типа события: ${event.type}`);
+          break;
+        }
+        
+        // Ищем в generic типах событий
+        const typeMatch = event.type.match(/<([^>]+)>/);
+        if (typeMatch) {
+          const coinType = typeMatch[1];
+          if (debugCallback) debugCallback(`[DEBUG] Найден generic тип в событии: ${coinType}`);
+          
+          if (coinType.includes('staking::ThalaAPT')) {
+            token = 'thAPT';
+            decimals = 8;
+            if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из generic типа события');
+            break;
+          } else if (coinType.includes('staking::StakedThalaAPT')) {
+            token = 'sthAPT';
+            decimals = 8;
+            if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из generic типа события');
+            break;
+          }
+        }
+        
+        // Ищем токен в данных события
+        if (event.data) {
+          if (debugCallback) debugCallback(`[DEBUG] Анализируем данные события: ${JSON.stringify(event.data, null, 2)}`);
+          
+          // Ищем токен в различных полях данных события
+          const possibleTokenFields = [
+            event.data.token,
+            event.data.coin_type,
+            event.data.asset_type,
+            event.data.token_type,
+            event.data.coin_name,
+            event.data.asset_name
+          ];
+          
+          for (const tokenField of possibleTokenFields) {
+            if (tokenField) {
+              if (debugCallback) debugCallback(`[DEBUG] Найден токен в данных события: ${tokenField}`);
+              
+              if (typeof tokenField === 'string') {
+                if (tokenField.includes('staking::ThalaAPT')) {
+                  token = 'thAPT';
+                  decimals = 8;
+                  if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из данных события');
+                  break;
+                } else if (tokenField.includes('staking::StakedThalaAPT')) {
+                  token = 'sthAPT';
+                  decimals = 8;
+                  if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из данных события');
+                  break;
+                }
+              } else if (tokenField.inner) {
+                const tokenInfo = getTokenInfoByCoinName(tokenField.inner, debugCallback);
+                if (tokenInfo) {
+                  token = tokenInfo.symbol;
+                  decimals = tokenInfo.decimals;
+                  if (debugCallback) debugCallback(`[DEBUG] Установлен токен из данных события: ${token}`);
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (token !== 'APT') break; // Если нашли токен, выходим из цикла
+        }
       }
     }
   }
@@ -367,7 +511,7 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
       const typeMatch = depositEvent.type.match(/<([^>]+)>/);
       if (typeMatch) {
         const coinType = typeMatch[1];
-        console.log(`[DEBUG] Найден тип токена в событии: ${coinType}`);
+        if (debugCallback) debugCallback(`[DEBUG] Найден тип токена в событии: ${coinType}`);
         
         if (coinType.includes('usde::USDe')) {
           token = 'USDe';
@@ -378,7 +522,44 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         } else if (coinType.includes('aptos_coin::AptosCoin')) {
           token = 'APT';
           decimals = 8;
+        } else if (coinType.includes('staking::ThalaAPT')) {
+          token = 'thAPT';
+          decimals = 8;
+        } else if (coinType.includes('staking::StakedThalaAPT')) {
+          token = 'sthAPT';
+          decimals = 8;
         }
+      }
+    }
+  }
+  
+  // Дополнительная проверка type_arguments в payload
+  if (token === 'APT' && tx.payload?.type_arguments) {
+    if (debugCallback) debugCallback(`[DEBUG] Анализируем type_arguments: ${JSON.stringify(tx.payload.type_arguments, null, 2)}`);
+    
+    for (const typeArg of tx.payload.type_arguments) {
+      if (debugCallback) debugCallback(`[DEBUG] Проверяем type_argument: ${typeArg}`);
+      
+      if (typeArg.includes('staking::ThalaAPT')) {
+        token = 'thAPT';
+        decimals = 8;
+        if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из type_arguments');
+        break;
+      } else if (typeArg.includes('staking::StakedThalaAPT')) {
+        token = 'sthAPT';
+        decimals = 8;
+        if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из type_arguments');
+        break;
+      } else if (typeArg.includes('usde::USDe')) {
+        token = 'USDe';
+        decimals = 6;
+        if (debugCallback) debugCallback('[DEBUG] Установлен USDe из type_arguments');
+        break;
+      } else if (typeArg.includes('staked_usde::StakedUSDe')) {
+        token = 'sUSDe';
+        decimals = 6;
+        if (debugCallback) debugCallback('[DEBUG] Установлен sUSDe из type_arguments');
+        break;
       }
     }
   }
@@ -421,8 +602,8 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     }
   } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
     // Операция получения наград
-    console.log(`[DEBUG] Обрабатываем claim операцию: ${functionName}`);
-    console.log(`[DEBUG] Deposit events:`, depositEvents);
+    if (debugCallback) debugCallback(`[DEBUG] Обрабатываем claim операцию: ${functionName}`);
+    if (debugCallback) debugCallback(`[DEBUG] Deposit events: ${JSON.stringify(depositEvents, null, 2)}`);
     
     // Сначала пробуем найти deposit events
     if (depositEvents.length > 0) {
@@ -431,18 +612,18 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         event.data?.store === userAddress
       );
       
-      console.log(`[DEBUG] Найденный deposit event:`, depositEvent);
+      if (debugCallback) debugCallback(`[DEBUG] Найденный deposit event: ${JSON.stringify(depositEvent, null, 2)}`);
       
       if (depositEvent?.data?.amount) {
         amount = parseFloat(depositEvent.data.amount);
         amount = amount / Math.pow(10, decimals);
-        console.log(`[DEBUG] Извлеченная сумма для claim из deposit event: ${amount} ${token}`);
+        if (debugCallback) debugCallback(`[DEBUG] Извлеченная сумма для claim из deposit event: ${amount} ${token}`);
       }
     }
     
     // Если не нашли в deposit events, ищем в других событиях
     if (amount === 0 && tx.events) {
-      console.log(`[DEBUG] Ищем награды в других событиях...`);
+      if (debugCallback) debugCallback(`[DEBUG] Ищем награды в других событиях...`);
       
       // Ищем события с наградами
       const rewardEvents = tx.events.filter((event: any) => 
@@ -453,20 +634,20 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         event.type?.includes('Deposit') // Добавляем поиск Deposit событий
       );
       
-      console.log(`[DEBUG] Найдено ${rewardEvents.length} событий с наградами:`, rewardEvents);
+      if (debugCallback) debugCallback(`[DEBUG] Найдено ${rewardEvents.length} событий с наградами: ${JSON.stringify(rewardEvents, null, 2)}`);
       
       for (const event of rewardEvents) {
         if (event.data?.amount || event.data?.value || event.data?.reward_amount) {
           const rewardAmount = event.data.amount || event.data.value || event.data.reward_amount;
           amount = parseFloat(rewardAmount) / Math.pow(10, decimals);
-          console.log(`[DEBUG] Извлеченная сумма для claim из reward event: ${amount} ${token}`);
+          if (debugCallback) debugCallback(`[DEBUG] Извлеченная сумма для claim из reward event: ${amount} ${token}`);
           break;
         }
       }
       
       // Если все еще не нашли, ищем в изменениях состояния
       if (amount === 0 && tx.changes) {
-        console.log(`[DEBUG] Ищем награды в изменениях состояния...`);
+        if (debugCallback) debugCallback(`[DEBUG] Ищем награды в изменениях состояния...`);
         
         // Ищем изменения в CoinStore для пользователя
         const coinStoreChanges = tx.changes.filter((change: any) => 
@@ -475,14 +656,14 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
           change.address === userAddress
         );
         
-        console.log(`[DEBUG] Найдено ${coinStoreChanges.length} изменений CoinStore:`, coinStoreChanges);
+        if (debugCallback) debugCallback(`[DEBUG] Найдено ${coinStoreChanges.length} изменений CoinStore: ${JSON.stringify(coinStoreChanges, null, 2)}`);
         
         for (const change of coinStoreChanges) {
           if (change.data?.data?.coin?.value) {
             const coinValue = parseFloat(change.data.data.coin.value);
             if (coinValue > 0) {
               amount = coinValue / Math.pow(10, decimals);
-              console.log(`[DEBUG] Извлеченная сумма для claim из CoinStore change: ${amount} ${token}`);
+              if (debugCallback) debugCallback(`[DEBUG] Извлеченная сумма для claim из CoinStore change: ${amount} ${token}`);
               break;
             }
           }
@@ -496,14 +677,14 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
             change.address === userAddress
           );
           
-          console.log(`[DEBUG] Найдено ${fungibleStoreChanges.length} изменений FungibleStore:`, fungibleStoreChanges);
+          if (debugCallback) debugCallback(`[DEBUG] Найдено ${fungibleStoreChanges.length} изменений FungibleStore: ${JSON.stringify(fungibleStoreChanges, null, 2)}`);
           
           for (const change of fungibleStoreChanges) {
             if (change.data?.data?.balance) {
               const balanceValue = parseFloat(change.data.data.balance);
               if (balanceValue > 0) {
                 amount = balanceValue / Math.pow(10, decimals);
-                console.log(`[DEBUG] Извлеченная сумма для claim из FungibleStore change: ${amount} ${token}`);
+                if (debugCallback) debugCallback(`[DEBUG] Извлеченная сумма для claim из FungibleStore change: ${amount} ${token}`);
                 break;
               }
             }
@@ -513,12 +694,12 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
       
       // Если все еще не нашли, ищем в аргументах транзакции
       if (amount === 0 && tx.payload?.arguments) {
-        console.log(`[DEBUG] Ищем награды в аргументах транзакции...`);
+        if (debugCallback) debugCallback(`[DEBUG] Ищем награды в аргументах транзакции...`);
         
         for (const arg of tx.payload.arguments) {
           if (typeof arg === 'string' && !isNaN(parseFloat(arg)) && parseFloat(arg) > 0) {
             amount = parseFloat(arg) / Math.pow(10, decimals);
-            console.log(`[DEBUG] Извлеченная сумма для claim из аргумента: ${amount} ${token}`);
+            if (debugCallback) debugCallback(`[DEBUG] Извлеченная сумма для claim из аргумента: ${amount} ${token}`);
             break;
           }
         }
@@ -526,12 +707,12 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     }
     
     if (amount === 0) {
-      console.log(`[DEBUG] Не удалось извлечь сумму наград из claim операции`);
-      console.log(`[DEBUG] Полная структура транзакции:`, JSON.stringify(tx, null, 2));
+      if (debugCallback) debugCallback(`[DEBUG] Не удалось извлечь сумму наград из claim операции`);
+      if (debugCallback) debugCallback(`[DEBUG] Полная структура транзакции: ${JSON.stringify(tx, null, 2)}`);
     }
   } else if (functionName.includes('liquidate') || functionName.includes('flash_loan') || functionName.includes('fee')) {
     // Операции с комиссиями
-    console.log(`[DEBUG] Обрабатываем операцию с комиссиями: ${functionName}`);
+    if (debugCallback) debugCallback(`[DEBUG] Обрабатываем операцию с комиссиями: ${functionName}`);
     
     // Ищем комиссии в событиях
     if (tx.events) {
@@ -541,13 +722,13 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         event.type?.includes('Charge')
       );
       
-      console.log(`[DEBUG] Найдено ${feeEvents.length} событий с комиссиями:`, feeEvents);
+      if (debugCallback) debugCallback(`[DEBUG] Найдено ${feeEvents.length} событий с комиссиями: ${JSON.stringify(feeEvents, null, 2)}`);
       
       for (const event of feeEvents) {
         if (event.data?.amount || event.data?.fee || event.data?.commission) {
           const feeAmount = event.data.amount || event.data.fee || event.data.commission;
           amount = parseFloat(feeAmount) / Math.pow(10, decimals);
-          console.log(`[DEBUG] Извлеченная комиссия из события: ${amount} ${token}`);
+          if (debugCallback) debugCallback(`[DEBUG] Извлеченная комиссия из события: ${amount} ${token}`);
           break;
         }
       }
@@ -564,14 +745,16 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
         if (change.data?.data?.amount || change.data?.data?.fee) {
           const feeAmount = change.data.data.amount || change.data.data.fee;
           amount = parseFloat(feeAmount) / Math.pow(10, decimals);
-          console.log(`[DEBUG] Извлеченная комиссия из изменений состояния: ${amount} ${token}`);
+          if (debugCallback) debugCallback(`[DEBUG] Извлеченная комиссия из изменений состояния: ${amount} ${token}`);
           break;
         }
       }
     }
   }
   
-  console.log('[DEBUG] extractEchelonAmount возвращает:', { amount, token, decimals });
+  if (debugCallback) debugCallback(`[DEBUG] extractEchelonAmount возвращает: ${amount} ${token} (decimals: ${decimals})`);
+  if (debugCallback) debugCallback(`[DEBUG] Финальный токен: ${token}, сумма: ${amount}, decimals: ${decimals}`);
+  if (debugCallback) debugCallback('[DEBUG] === КОНЕЦ extractEchelonAmount ===');
   return { amount, token, decimals };
 }
 
@@ -1335,20 +1518,20 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
 /**
  * Получает информацию о токене по coin_name или названию токена
  */
-export function getTokenInfoByCoinName(coinName: string): { name: string; symbol: string; decimals: number } | null {
+export function getTokenInfoByCoinName(coinName: string, debugCallback?: (message: string) => void): { name: string; symbol: string; decimals: number } | null {
   if (!coinName) return null;
   
-  console.log('[DEBUG] getTokenInfoByCoinName вызвана с:', coinName);
+  if (debugCallback) debugCallback(`[DEBUG] getTokenInfoByCoinName вызвана с: ${coinName}`);
   
   // Специальная обработка для известных адресов stAPT
   if (coinName.includes('stapt') || coinName.includes('StakedApt') || coinName.includes('0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627')) {
-    console.log('[DEBUG] Обнаружен stAPT адрес:', coinName);
+    if (debugCallback) debugCallback(`[DEBUG] Обнаружен stAPT адрес: ${coinName}`);
     return { name: 'Staked Aptos Coin', symbol: 'stAPT', decimals: 8 };
   }
   
   // Убираем префикс @ если есть
   const normalizedCoinName = coinName.replace(/^@/, '');
-  console.log('[DEBUG] Нормализованное имя:', normalizedCoinName);
+  if (debugCallback) debugCallback(`[DEBUG] Нормализованное имя: ${normalizedCoinName}`);
   
   // Сначала ищем токен в списке по faAddress
   let token = tokenList.data.data.find((token: any) => {
@@ -1356,7 +1539,7 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   });
   
   if (token) {
-    console.log('[DEBUG] Найден токен по faAddress:', token.symbol);
+    if (debugCallback) debugCallback(`[DEBUG] Найден токен по faAddress: ${token.symbol}`);
     return {
       name: token.name,
       symbol: token.symbol,
@@ -1372,7 +1555,7 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   }
   
   if (token) {
-    console.log('[DEBUG] Найден токен по tokenAddress:', token.symbol);
+    if (debugCallback) debugCallback(`[DEBUG] Найден токен по tokenAddress: ${token.symbol}`);
     return {
       name: token.name,
       symbol: token.symbol,
@@ -1396,7 +1579,7 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   }
   
   if (token) {
-    console.log('[DEBUG] Найден токен по частичному совпадению:', token.symbol);
+    if (debugCallback) debugCallback(`[DEBUG] Найден токен по частичному совпадению: ${token.symbol}`);
     return {
       name: token.name,
       symbol: token.symbol,
@@ -1406,62 +1589,78 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   
   // Специальная обработка для известных токенов
   if (!token) {
-    console.log('[DEBUG] Пробуем специальную обработку для:', normalizedCoinName);
+    if (debugCallback) debugCallback(`[DEBUG] Пробуем специальную обработку для: ${normalizedCoinName}`);
     // Проверяем известные FA адреса
     if (normalizedCoinName === '0xa') {
-      console.log('[DEBUG] Найден APT по специальной обработке');
+      if (debugCallback) debugCallback('[DEBUG] Найден APT по специальной обработке');
       return { name: 'Aptos Coin', symbol: 'APT', decimals: 8 };
     }
     if (normalizedCoinName === '0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627') {
-      console.log('[DEBUG] Найден stAPT по специальной обработке');
+      if (debugCallback) debugCallback('[DEBUG] Найден stAPT по специальной обработке');
       return { name: 'Staked Aptos Coin', symbol: 'stAPT', decimals: 8 };
     }
     if (normalizedCoinName === '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b') {
-      console.log('[DEBUG] Найден USDt по специальной обработке');
+      if (debugCallback) debugCallback('[DEBUG] Найден USDt по специальной обработке');
       return { name: 'Tether USD', symbol: 'USDt', decimals: 6 };
     }
     if (normalizedCoinName === '0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b') {
-      console.log('[DEBUG] Найден USDC по специальной обработке');
+      if (debugCallback) debugCallback('[DEBUG] Найден USDC по специальной обработке');
       return { name: 'USDC', symbol: 'USDC', decimals: 6 };
+    }
+    if (normalizedCoinName === '0xa0d9d647c5737a5aed08d2cfeb39c31cf901d44bc4aa024eaa7e5e68b804e011') {
+      if (debugCallback) debugCallback('[DEBUG] Найден thAPT по специальной обработке');
+      return { name: 'Thala APT', symbol: 'thAPT', decimals: 8 };
+    }
+    if (normalizedCoinName === '0x0a9ce1bddf93b074697ec5e483bc5050bc64cff2acd31e1ccfd8ac8cae5e4abe') {
+      if (debugCallback) debugCallback('[DEBUG] Найден sthAPT по специальной обработке');
+      return { name: 'Staked Thala APT', symbol: 'sthAPT', decimals: 8 };
     }
   }
   
-  console.log('[DEBUG] Токен не найден для:', coinName);
+  if (debugCallback) debugCallback(`[DEBUG] Токен не найден для: ${coinName}`);
   return null;
 }
 
 /**
  * Определяет токен из события или аргументов
  */
-function determineTokenFromEvent(event: any, typeArguments: string[]): string {
-  console.log('[DEBUG] determineTokenFromEvent вызвана с:', { eventType: event.type, typeArguments });
+function determineTokenFromEvent(event: any, typeArguments: string[], debugCallback?: (message: string) => void): string {
+  if (debugCallback) debugCallback(`[DEBUG] determineTokenFromEvent вызвана с: ${JSON.stringify({ eventType: event.type, typeArguments })}`);
   
   // Пытаемся определить токен из типа события
   if (event.type) {
     const typeMatch = event.type.match(/<([^>]+)>/);
     if (typeMatch) {
       const tokenType = typeMatch[1];
-      console.log('[DEBUG] Найден тип токена в событии:', tokenType);
+      if (debugCallback) debugCallback(`[DEBUG] Найден тип токена в событии: ${tokenType}`);
       
       if (tokenType.includes('aptos_coin::AptosCoin')) {
-        console.log('[DEBUG] Определен APT из типа события');
+        if (debugCallback) debugCallback('[DEBUG] Определен APT из типа события');
         return 'APT';
       }
       if (tokenType.includes('usda::USDA')) {
-        console.log('[DEBUG] Определен USDA из типа события');
+        if (debugCallback) debugCallback('[DEBUG] Определен USDA из типа события');
         return 'USDA';
       }
       if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
-        console.log('[DEBUG] Определен stAPT из типа события');
+        if (debugCallback) debugCallback('[DEBUG] Определен stAPT из типа события');
         return 'stAPT';
       }
       if (tokenType.includes('usde::USDe')) {
-        console.log('[DEBUG] Определен USDe из типа события');
+        if (debugCallback) debugCallback('[DEBUG] Определен USDe из типа события');
         return 'USDe';
       }
       if (tokenType.includes('staked_usde::StakedUSDe')) {
-        console.log('[DEBUG] Определен sUSDe из типа события');
+        if (debugCallback) debugCallback('[DEBUG] Определен sUSDe из типа события');
         return 'sUSDe';
+      }
+      if (tokenType.includes('staking::ThalaAPT')) {
+        if (debugCallback) debugCallback('[DEBUG] Определен thAPT из типа события');
+        return 'thAPT';
+      }
+      if (tokenType.includes('staking::StakedThalaAPT')) {
+        if (debugCallback) debugCallback('[DEBUG] Определен sthAPT из типа события');
+        return 'sthAPT';
       }
       // Добавьте другие токены по необходимости
     }
@@ -1475,17 +1674,19 @@ function determineTokenFromEvent(event: any, typeArguments: string[]): string {
     if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) return 'stAPT';
     if (tokenType.includes('usde::USDe')) return 'USDe';
     if (tokenType.includes('staked_usde::StakedUSDe')) return 'sUSDe';
+    if (tokenType.includes('staking::ThalaAPT')) return 'thAPT';
+    if (tokenType.includes('staking::StakedThalaAPT')) return 'sthAPT';
   }
   
-  console.log('[DEBUG] determineTokenFromEvent возвращает APT по умолчанию');
+  if (debugCallback) debugCallback('[DEBUG] determineTokenFromEvent возвращает APT по умолчанию');
   return 'APT'; // По умолчанию
 }
 
 /**
  * Получает количество десятичных знаков для токена
  */
-function getTokenDecimals(token: string): number {
-  console.log('[DEBUG] getTokenDecimals вызвана с:', token);
+function getTokenDecimals(token: string, debugCallback?: (message: string) => void): number {
+  if (debugCallback) debugCallback(`[DEBUG] getTokenDecimals вызвана с: ${token}`);
   
   const decimalsMap: { [key: string]: number } = {
     'APT': 8,
@@ -1504,7 +1705,7 @@ function getTokenDecimals(token: string): number {
   };
   
   const decimals = decimalsMap[token] || 8; // По умолчанию 8
-  console.log('[DEBUG] getTokenDecimals возвращает:', decimals);
+  if (debugCallback) debugCallback(`[DEBUG] getTokenDecimals возвращает: ${decimals}`);
   return decimals;
 }
 
