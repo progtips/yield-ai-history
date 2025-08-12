@@ -546,7 +546,7 @@ export default function TestHyperionProfitPage() {
         );
         
         // Определяем токен из изменений состояния (changes)
-        let tokenDecimals = 6; // По умолчанию для FA токенов
+        let tokenDecimals = 8; // По умолчанию для APT токенов
         if (tx._rawData?.changes) {
           const poolChange = tx._rawData.changes.find((change: any) => 
             change.data?.type?.includes('Pool')
@@ -994,7 +994,7 @@ export default function TestHyperionProfitPage() {
                           );
                           
                           // Определяем токен из изменений состояния (changes)
-                          let tokenDecimals = 6; // По умолчанию для FA токенов
+                          let tokenDecimals = 8; // По умолчанию для APT токенов
                           if (tx._rawData?.changes) {
                             const poolChange = tx._rawData.changes.find((change: any) => 
                               change.data?.type?.includes('Pool')

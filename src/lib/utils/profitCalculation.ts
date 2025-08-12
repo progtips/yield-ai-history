@@ -271,7 +271,7 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
   
   let amount = 0;
   let token = 'APT';
-  let decimals = 8;
+  let decimals = getTokenDecimals('APT', debugCallback);
   
   if (!tx.events || !Array.isArray(tx.events)) {
     if (debugCallback) debugCallback('[DEBUG] extractEchelonAmount - нет событий, возвращаем значения по умолчанию');
@@ -348,17 +348,17 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
           break;
         } else if (coinType.includes('staking::ThalaAPT')) {
           token = 'thAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('thAPT', debugCallback);
           if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из CoinStore');
           break;
         } else if (coinType.includes('staking::StakedThalaAPT')) {
           token = 'sthAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('sthAPT', debugCallback);
           if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из CoinStore');
           break;
         } else if (coinType.includes('aptos_coin::AptosCoin')) {
           token = 'APT';
-          decimals = 8;
+          decimals = getTokenDecimals('APT', debugCallback);
           if (debugCallback) debugCallback('[DEBUG] Установлен APT из CoinStore');
           break;
         }
@@ -381,12 +381,12 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
         // Проверяем metadata.inner для определения токена
         if (metadataInner === '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b') {
           token = 'thAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('thAPT', debugCallback);
           if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из FungibleStore metadata');
           break;
         } else if (metadataInner === '0x1::aptos_coin::AptosCoin') {
           token = 'APT';
-          decimals = 8;
+          decimals = getTokenDecimals('APT', debugCallback);
           if (debugCallback) debugCallback('[DEBUG] Установлен APT из FungibleStore metadata');
           break;
         }
@@ -423,12 +423,12 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
         // Ищем токены Thala в типах событий
         if (event.type.includes('staking::ThalaAPT')) {
           token = 'thAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('thAPT', debugCallback);
           if (debugCallback) debugCallback(`[DEBUG] Установлен thAPT из типа события: ${event.type}`);
           break;
         } else if (event.type.includes('staking::StakedThalaAPT')) {
           token = 'sthAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('sthAPT', debugCallback);
           if (debugCallback) debugCallback(`[DEBUG] Установлен sthAPT из типа события: ${event.type}`);
           break;
         }
@@ -473,12 +473,12 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
               if (typeof tokenField === 'string') {
                 if (tokenField.includes('staking::ThalaAPT')) {
                   token = 'thAPT';
-                  decimals = 8;
+                  decimals = getTokenDecimals('thAPT', debugCallback);
                   if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из данных события');
                   break;
                 } else if (tokenField.includes('staking::StakedThalaAPT')) {
                   token = 'sthAPT';
-                  decimals = 8;
+                  decimals = getTokenDecimals('sthAPT', debugCallback);
                   if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из данных события');
                   break;
                 }
@@ -521,13 +521,13 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
           decimals = 6;
         } else if (coinType.includes('aptos_coin::AptosCoin')) {
           token = 'APT';
-          decimals = 8;
+          decimals = getTokenDecimals('APT', debugCallback);
         } else if (coinType.includes('staking::ThalaAPT')) {
           token = 'thAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('thAPT', debugCallback);
         } else if (coinType.includes('staking::StakedThalaAPT')) {
           token = 'sthAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('sthAPT', debugCallback);
         }
       }
     }
@@ -542,12 +542,12 @@ function extractEchelonAmount(tx: any, userAddress: string, debugCallback?: (mes
       
       if (typeArg.includes('staking::ThalaAPT')) {
         token = 'thAPT';
-        decimals = 8;
+        decimals = getTokenDecimals('thAPT', debugCallback);
         if (debugCallback) debugCallback('[DEBUG] Установлен thAPT из type_arguments');
         break;
       } else if (typeArg.includes('staking::StakedThalaAPT')) {
         token = 'sthAPT';
-        decimals = 8;
+        decimals = getTokenDecimals('sthAPT', debugCallback);
         if (debugCallback) debugCallback('[DEBUG] Установлен sthAPT из type_arguments');
         break;
       } else if (typeArg.includes('usde::USDe')) {
@@ -768,7 +768,7 @@ function extractJouleAmount(tx: any, userAddress: string): { amount: number; tok
   
   let amount = 0;
   let token = 'APT';
-  let decimals = 8;
+  let decimals = getTokenDecimals('APT');
   
   if (!tx.events || !Array.isArray(tx.events)) {
     console.log('[DEBUG] extractJouleAmount - нет событий, возвращаем значения по умолчанию');
@@ -834,7 +834,7 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
   
   let amount = 0;
   let token = 'APT';
-  let decimals = 8;
+  let decimals = getTokenDecimals('APT');
   
   if (!tx.events || !Array.isArray(tx.events)) {
     console.log('[DEBUG] Нет событий, возвращаем значения по умолчанию');
@@ -855,7 +855,7 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
     // Ищем stAPT в function name
     if (functionName.includes('stapt') || functionName.includes('StakedApt')) {
       token = 'stAPT';
-      decimals = 8;
+      decimals = getTokenDecimals('stAPT');
       console.log('[DEBUG] Определен stAPT из function name');
     }
     
@@ -864,7 +864,7 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
       for (const typeArg of tx.payload.type_arguments) {
         if (typeArg.includes('stapt') || typeArg.includes('StakedApt')) {
           token = 'stAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('stAPT');
           console.log('[DEBUG] Определен stAPT из type_arguments');
           break;
         }
@@ -979,7 +979,7 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
             
             if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
               token = 'stAPT';
-              decimals = 8;
+              decimals = getTokenDecimals('stAPT');
               console.log('[DEBUG] Определен stAPT из типа события');
             }
           }
@@ -993,7 +993,7 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
           console.log(`[DEBUG] Type argument ${index}:`, typeArg);
           if (typeArg.includes('stapt::StakedApt') || typeArg.includes('stapt_token::StakedApt')) {
             token = 'stAPT';
-            decimals = 8;
+            decimals = getTokenDecimals('stAPT');
             console.log('[DEBUG] Определен stAPT из type_arguments');
           }
         });
@@ -1211,7 +1211,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
   
   let amount = 0;
   let token = 'APT';
-  let decimals = 8;
+  let decimals = getTokenDecimals('APT');
   
   if (!tx.events || !Array.isArray(tx.events)) {
     console.log('[DEBUG] extractGenericAmount - нет событий, возвращаем значения по умолчанию');
@@ -1318,7 +1318,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
         console.log(`[DEBUG] Type argument ${index}:`, typeArg);
         if (typeArg.includes('stapt::StakedApt') || typeArg.includes('stapt_token::StakedApt')) {
           token = 'stAPT';
-          decimals = 8;
+          decimals = getTokenDecimals('stAPT');
           console.log('[DEBUG] Определен stAPT из type_arguments в extractGenericAmount');
         }
       });
@@ -1327,7 +1327,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
     // Ищем токен в function name
     if (tx.payload?.function && (tx.payload.function.includes('stapt') || tx.payload.function.includes('StakedApt'))) {
       token = 'stAPT';
-      decimals = 8;
+      decimals = getTokenDecimals('stAPT');
       console.log('[DEBUG] Определен stAPT из function name в extractGenericAmount');
     }
   }
@@ -1429,7 +1429,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
             
             if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
               token = 'stAPT';
-              decimals = 8;
+              decimals = getTokenDecimals('stAPT');
               console.log('[DEBUG] Определен stAPT из типа события в extractGenericAmount');
             }
           }
@@ -1478,7 +1478,7 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
           
           if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
             token = 'stAPT';
-            decimals = 8;
+            decimals = getTokenDecimals('stAPT');
             console.log('[DEBUG] Определен stAPT из типа события в extractGenericAmount');
           }
         }

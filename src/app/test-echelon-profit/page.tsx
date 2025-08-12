@@ -386,7 +386,7 @@ export default function TestEchelonProfitPage() {
         );
         
         // Определяем токен из изменений состояния (changes)
-        let tokenDecimals = 6; // По умолчанию для FA токенов
+        let tokenDecimals = 8; // По умолчанию для APT токенов
         if (tx._rawData?.changes) {
           const marketChange = tx._rawData.changes.find((change: any) => 
             change.data?.type?.includes('lending::Market')
@@ -655,7 +655,7 @@ export default function TestEchelonProfitPage() {
                           );
                           
                           // Определяем токен из изменений состояния (changes)
-                          let tokenDecimals = 6; // По умолчанию для FA токенов
+                          let tokenDecimals = 8; // По умолчанию для APT токенов
                           if (tx._rawData?.changes) {
                             const marketChange = tx._rawData.changes.find((change: any) => 
                               change.data?.type?.includes('lending::Market')
@@ -855,32 +855,7 @@ export default function TestEchelonProfitPage() {
             </Card>
           )}
 
-          {/* Отладка */}
-          {debugInfo.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Отладка</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {debugInfo.map((message, index) => (
-                    <div key={index} className="text-xs font-mono bg-gray-100 p-2 rounded">
-                      {message}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setDebugInfo([])}
-                    className="w-full"
-                  >
-                    Очистить отладку
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
         </>
       )}
