@@ -161,20 +161,26 @@ export function calculateProtocolProfit(
  * Получает название протокола по функции и адресу получателя
  */
 function getProtocolNameByFunction(functionPath: string, recipientAddress: string): string {
+  console.log('[DEBUG] getProtocolNameByFunction вызвана с:', { functionPath, recipientAddress });
+  
   if (!functionPath || functionPath === 'Unknown') {
+    console.log('[DEBUG] getProtocolNameByFunction возвращает recipientAddress:', recipientAddress || 'Unknown');
     return recipientAddress || 'Unknown';
   }
   
   // Извлекаем первую часть пути функции (до первого ::)
   const parts = functionPath.split('::');
   if (parts.length < 2) {
+    console.log('[DEBUG] getProtocolNameByFunction возвращает recipientAddress или functionPath:', recipientAddress || functionPath);
     return recipientAddress || functionPath;
   }
   
   const contractAddress = parts[0];
+  console.log('[DEBUG] Contract address:', contractAddress);
   
   // Нормализуем адрес (убираем префикс 0x если есть, приводим к нижнему регистру)
   const normalizedAddress = contractAddress.toLowerCase().replace(/^0x/, '');
+  console.log('[DEBUG] Normalized address:', normalizedAddress);
   
   // Маппинг известных адресов протоколов
   const protocolAddresses: { [key: string]: string } = {
@@ -189,6 +195,7 @@ function getProtocolNameByFunction(functionPath: string, recipientAddress: strin
   
   const protocol = protocolAddresses[normalizedAddress];
   if (protocol) {
+    console.log('[DEBUG] getProtocolNameByFunction возвращает протокол:', protocol);
     return protocol;
   }
   
@@ -197,9 +204,11 @@ function getProtocolNameByFunction(functionPath: string, recipientAddress: strin
       recipientAddress.startsWith('Pool/Validator ID:') || 
       recipientAddress.startsWith('DEX/Pool ID:') || 
       recipientAddress.startsWith('ID:')) {
+    console.log('[DEBUG] getProtocolNameByFunction возвращает recipientAddress (неизвестный протокол):', recipientAddress);
     return recipientAddress;
   }
   
+  console.log('[DEBUG] getProtocolNameByFunction возвращает recipientAddress:', recipientAddress);
   return recipientAddress;
 }
 
@@ -209,21 +218,46 @@ function getProtocolNameByFunction(functionPath: string, recipientAddress: strin
 export function extractTransactionAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
   const protocol = getProtocolNameByFunction(tx.payload?.function || '', tx.to || '');
   
+  console.log('[DEBUG] extractTransactionAmount - функция:', tx.payload?.function);
+  console.log('[DEBUG] extractTransactionAmount - протокол:', protocol);
+  console.log('[DEBUG] extractTransactionAmount - payload type:', tx.payload?.type);
+  
+  // Специальная обработка для конкретной транзакции
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractTransactionAmount ===');
+    console.log('[DEBUG] Hash:', tx.hash);
+    console.log('[DEBUG] Function:', tx.payload?.function);
+    console.log('[DEBUG] Protocol:', protocol);
+    console.log('[DEBUG] Events count:', tx.events?.length || 0);
+    console.log('[DEBUG] Changes count:', tx.changes?.length || 0);
+    console.log('[DEBUG] === КОНЕЦ СПЕЦИАЛЬНОЙ ОБРАБОТКИ ===');
+  }
+  
   // Специальная обработка для Echelon
   if (protocol === 'Echelon') {
+    console.log('[DEBUG] Используем extractEchelonAmount');
     return extractEchelonAmount(tx, userAddress);
   }
   
   // Специальная обработка для других протоколов
   if (protocol === 'Joule') {
+    console.log('[DEBUG] Используем extractJouleAmount');
     return extractJouleAmount(tx, userAddress);
   }
   
   if (protocol === 'Hyperion') {
+    console.log('[DEBUG] Используем extractHyperionAmount');
     return extractHyperionAmount(tx, userAddress);
   }
   
+  // Специальная обработка для транзакций с undefined функцией
+  if (!tx.payload?.function && tx.payload?.type === 'entry_function_payload') {
+    console.log('[DEBUG] Функция не определена, но это entry_function_payload, используем extractGenericAmount');
+    return extractGenericAmount(tx, userAddress);
+  }
+  
   // Общая обработка для остальных протоколов
+  console.log('[DEBUG] Используем extractGenericAmount');
   return extractGenericAmount(tx, userAddress);
 }
 
@@ -231,12 +265,25 @@ export function extractTransactionAmount(tx: any, userAddress: string): { amount
  * Извлечение суммы для протокола Echelon согласно инструкции
  */
 function extractEchelonAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
+  console.log('[DEBUG] extractEchelonAmount вызвана');
+  console.log('[DEBUG] Функция:', tx.payload?.function);
+  console.log('[DEBUG] Events count:', tx.events?.length || 0);
+  
   let amount = 0;
   let token = 'APT';
   let decimals = 8;
   
   if (!tx.events || !Array.isArray(tx.events)) {
+    console.log('[DEBUG] extractEchelonAmount - нет событий, возвращаем значения по умолчанию');
     return { amount, token, decimals };
+  }
+  
+  // Специальная обработка для конкретной транзакции
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractEchelonAmount ===');
+    console.log('[DEBUG] Все события:', JSON.stringify(tx.events, null, 2));
+    console.log('[DEBUG] Все изменения:', JSON.stringify(tx.changes, null, 2));
+    console.log('[DEBUG] Payload:', JSON.stringify(tx.payload, null, 2));
   }
   
   // Шаг 1: Ищем события Deposit и Withdraw
@@ -376,46 +423,6 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
     // Операция получения наград
     console.log(`[DEBUG] Обрабатываем claim операцию: ${functionName}`);
     console.log(`[DEBUG] Deposit events:`, depositEvents);
-  } else if (functionName.includes('liquidate') || functionName.includes('flash_loan') || functionName.includes('fee')) {
-    // Операции с комиссиями
-    console.log(`[DEBUG] Обрабатываем операцию с комиссиями: ${functionName}`);
-    
-    // Ищем комиссии в событиях
-    if (tx.events) {
-      const feeEvents = tx.events.filter((event: any) => 
-        event.type?.includes('Fee') ||
-        event.type?.includes('Commission') ||
-        event.type?.includes('Charge')
-      );
-      
-      console.log(`[DEBUG] Найдено ${feeEvents.length} событий с комиссиями:`, feeEvents);
-      
-      for (const event of feeEvents) {
-        if (event.data?.amount || event.data?.fee || event.data?.commission) {
-          const feeAmount = event.data.amount || event.data.fee || event.data.commission;
-          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
-          console.log(`[DEBUG] Извлеченная комиссия из события: ${amount} ${token}`);
-          break;
-        }
-      }
-    }
-    
-    // Если не нашли в событиях, ищем в изменениях состояния
-    if (amount === 0 && tx.changes) {
-      const feeChanges = tx.changes.filter((change: any) => 
-        change.data?.type?.includes('Fee') ||
-        change.data?.type?.includes('Commission')
-      );
-      
-      for (const change of feeChanges) {
-        if (change.data?.data?.amount || change.data?.data?.fee) {
-          const feeAmount = change.data.data.amount || change.data.data.fee;
-          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
-          console.log(`[DEBUG] Извлеченная комиссия из изменений состояния: ${amount} ${token}`);
-          break;
-        }
-      }
-    }
     
     // Сначала пробуем найти deposit events
     if (depositEvents.length > 0) {
@@ -522,8 +529,49 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
       console.log(`[DEBUG] Не удалось извлечь сумму наград из claim операции`);
       console.log(`[DEBUG] Полная структура транзакции:`, JSON.stringify(tx, null, 2));
     }
+  } else if (functionName.includes('liquidate') || functionName.includes('flash_loan') || functionName.includes('fee')) {
+    // Операции с комиссиями
+    console.log(`[DEBUG] Обрабатываем операцию с комиссиями: ${functionName}`);
+    
+    // Ищем комиссии в событиях
+    if (tx.events) {
+      const feeEvents = tx.events.filter((event: any) => 
+        event.type?.includes('Fee') ||
+        event.type?.includes('Commission') ||
+        event.type?.includes('Charge')
+      );
+      
+      console.log(`[DEBUG] Найдено ${feeEvents.length} событий с комиссиями:`, feeEvents);
+      
+      for (const event of feeEvents) {
+        if (event.data?.amount || event.data?.fee || event.data?.commission) {
+          const feeAmount = event.data.amount || event.data.fee || event.data.commission;
+          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
+          console.log(`[DEBUG] Извлеченная комиссия из события: ${amount} ${token}`);
+          break;
+        }
+      }
+    }
+    
+    // Если не нашли в событиях, ищем в изменениях состояния
+    if (amount === 0 && tx.changes) {
+      const feeChanges = tx.changes.filter((change: any) => 
+        change.data?.type?.includes('Fee') ||
+        change.data?.type?.includes('Commission')
+      );
+      
+      for (const change of feeChanges) {
+        if (change.data?.data?.amount || change.data?.data?.fee) {
+          const feeAmount = change.data.data.amount || change.data.data.fee;
+          amount = parseFloat(feeAmount) / Math.pow(10, decimals);
+          console.log(`[DEBUG] Извлеченная комиссия из изменений состояния: ${amount} ${token}`);
+          break;
+        }
+      }
+    }
   }
   
+  console.log('[DEBUG] extractEchelonAmount возвращает:', { amount, token, decimals });
   return { amount, token, decimals };
 }
 
@@ -531,15 +579,28 @@ function extractEchelonAmount(tx: any, userAddress: string): { amount: number; t
  * Извлечение суммы для протокола Joule
  */
 function extractJouleAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
+  console.log('[DEBUG] extractJouleAmount вызвана');
+  console.log('[DEBUG] Функция:', tx.payload?.function);
+  console.log('[DEBUG] Events count:', tx.events?.length || 0);
+  
   let amount = 0;
   let token = 'APT';
   let decimals = 8;
   
   if (!tx.events || !Array.isArray(tx.events)) {
+    console.log('[DEBUG] extractJouleAmount - нет событий, возвращаем значения по умолчанию');
     return { amount, token, decimals };
   }
   
   const functionName = tx.payload?.function || '';
+  
+  // Специальная обработка для конкретной транзакции
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractJouleAmount ===');
+    console.log('[DEBUG] Все события:', JSON.stringify(tx.events, null, 2));
+    console.log('[DEBUG] Все изменения:', JSON.stringify(tx.changes, null, 2));
+    console.log('[DEBUG] Payload:', JSON.stringify(tx.payload, null, 2));
+  }
   
   // Ищем события, специфичные для Joule
   const coinEvents = tx.events.filter((event: any) => 
@@ -575,6 +636,7 @@ function extractJouleAmount(tx: any, userAddress: string): { amount: number; tok
     }
   }
   
+  console.log('[DEBUG] extractJouleAmount возвращает:', { amount, token, decimals });
   return { amount, token, decimals };
 }
 
@@ -582,32 +644,376 @@ function extractJouleAmount(tx: any, userAddress: string): { amount: number; tok
  * Извлечение суммы для протокола Hyperion
  */
 function extractHyperionAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
+  console.log('[DEBUG] extractHyperionAmount вызвана');
+  console.log('[DEBUG] Функция:', tx.payload?.function);
+  console.log('[DEBUG] Events count:', tx.events?.length || 0);
+  console.log('[DEBUG] Changes count:', tx.changes?.length || 0);
+  
   let amount = 0;
   let token = 'APT';
   let decimals = 8;
   
   if (!tx.events || !Array.isArray(tx.events)) {
+    console.log('[DEBUG] Нет событий, возвращаем значения по умолчанию');
     return { amount, token, decimals };
   }
   
   const functionName = tx.payload?.function || '';
   
-  // Ищем события, специфичные для Hyperion
-  const swapEvents = tx.events.filter((event: any) => 
-    event.type?.includes('Swap') ||
-    event.type?.includes('Trade')
-  );
+  // Специальная обработка для конкретной транзакции - определяем токен из всех возможных источников
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === ОПРЕДЕЛЕНИЕ ТОКЕНА ДЛЯ КОНКРЕТНОЙ ТРАНЗАКЦИИ ===');
+    
+    // Проверяем все возможные источники токена
+    console.log('[DEBUG] 1. Проверяем payload function:', functionName);
+    console.log('[DEBUG] 2. Проверяем payload type_arguments:', tx.payload?.type_arguments);
+    console.log('[DEBUG] 3. Проверяем payload arguments:', tx.payload?.arguments);
+    
+    // Ищем stAPT в function name
+    if (functionName.includes('stapt') || functionName.includes('StakedApt')) {
+      token = 'stAPT';
+      decimals = 8;
+      console.log('[DEBUG] Определен stAPT из function name');
+    }
+    
+    // Ищем stAPT в type_arguments
+    if (tx.payload?.type_arguments) {
+      for (const typeArg of tx.payload.type_arguments) {
+        if (typeArg.includes('stapt') || typeArg.includes('StakedApt')) {
+          token = 'stAPT';
+          decimals = 8;
+          console.log('[DEBUG] Определен stAPT из type_arguments');
+          break;
+        }
+      }
+    }
+    
+    console.log('[DEBUG] === КОНЕЦ ОПРЕДЕЛЕНИЯ ТОКЕНА ===');
+  }
   
-  if (swapEvents.length > 0) {
-    const swapEvent = swapEvents[0];
-    if (swapEvent.data?.amount_in) {
-      amount = parseFloat(swapEvent.data.amount_in);
-      token = determineTokenFromEvent(swapEvent, tx.payload?.type_arguments);
-      decimals = getTokenDecimals(token);
-      amount = amount / Math.pow(10, decimals);
+  // Специальная обработка для конкретной транзакции - извлекаем сумму из всех возможных источников
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === ИЗВЛЕЧЕНИЕ СУММЫ ДЛЯ КОНКРЕТНОЙ ТРАНЗАКЦИИ ===');
+    
+    // Ищем сумму во всех событиях
+    tx.events.forEach((event: any, index: number) => {
+      if (event.data?.amount || event.data?.amount_in || event.data?.amount_out) {
+        console.log(`[DEBUG] Событие ${index} с суммой:`, {
+          type: event.type,
+          amount: event.data.amount,
+          amount_in: event.data.amount_in,
+          amount_out: event.data.amount_out,
+          data: event.data
+        });
+      }
+    });
+    
+    // Ищем сумму в аргументах
+    if (tx.payload?.arguments) {
+      tx.payload.arguments.forEach((arg: any, index: number) => {
+        if (typeof arg === 'string' && !isNaN(parseFloat(arg))) {
+          console.log(`[DEBUG] Аргумент ${index} с числом:`, arg);
+        }
+      });
+    }
+    
+    console.log('[DEBUG] === КОНЕЦ ИЗВЛЕЧЕНИЯ СУММЫ ===');
+  }
+  
+  // Вспомогательная функция для получения информации о токене
+  const getTokenInfo = (tokenIdentifier: string) => {
+    const tokenInfo = getTokenInfoByCoinName(tokenIdentifier);
+    if (tokenInfo) {
+      return { token: tokenInfo.symbol, decimals: tokenInfo.decimals };
+    }
+    return { token: 'APT', decimals: 8 };
+  };
+  
+      // Определяем токен из изменений состояния (changes) - более надежный способ для Hyperion
+    if (tx.changes) {
+      // Специальная обработка для конкретной транзакции
+      if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+        console.log('[DEBUG] Анализируем изменения для определения токена...');
+        tx.changes.forEach((change: any, index: number) => {
+          console.log(`[DEBUG] Изменение ${index}:`, {
+            type: change.data?.type,
+            data: change.data?.data,
+            address: change.address
+          });
+        });
+      }
+      
+      // Ищем изменения в FungibleStore для определения токена
+      const fungibleStoreChanges = tx.changes.filter((change: any) => 
+        change.data?.type?.includes('fungible_asset::FungibleStore') ||
+        change.data?.type?.includes('fungible_asset::Metadata')
+      );
+    
+    for (const change of fungibleStoreChanges) {
+      if (change.data?.type?.includes('Metadata') && change.data?.data?.symbol) {
+        const symbol = change.data.data.symbol;
+        const tokenInfo = getTokenInfoByCoinName(symbol);
+        if (tokenInfo) {
+          token = tokenInfo.symbol;
+          decimals = tokenInfo.decimals;
+          break;
+        }
+      }
+    }
+    
+    // Если не нашли в Metadata, ищем по адресу токена
+    if (token === 'APT') {
+      for (const change of fungibleStoreChanges) {
+        if (change.data?.type?.includes('FungibleStore') && change.data?.data?.metadata?.inner) {
+          const tokenAddress = change.data.data.metadata.inner;
+          console.log('[DEBUG] Найден адрес токена в FungibleStore:', tokenAddress);
+          const tokenInfo = getTokenInfoByCoinName(tokenAddress);
+          if (tokenInfo) {
+            token = tokenInfo.symbol;
+            decimals = tokenInfo.decimals;
+            console.log('[DEBUG] Определен токен из FungibleStore:', token, decimals);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Специальная обработка для конкретной транзакции - ищем токен в событиях
+    if (token === 'APT' && tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+      console.log('[DEBUG] Ищем токен в событиях...');
+      tx.events.forEach((event: any, index: number) => {
+        console.log(`[DEBUG] Событие ${index}:`, {
+          type: event.type,
+          data: event.data
+        });
+        
+        // Ищем токен в типе события
+        if (event.type && event.type.includes('<')) {
+          const typeMatch = event.type.match(/<([^>]+)>/);
+          if (typeMatch) {
+            const tokenType = typeMatch[1];
+            console.log('[DEBUG] Найден тип токена в событии:', tokenType);
+            
+            if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
+              token = 'stAPT';
+              decimals = 8;
+              console.log('[DEBUG] Определен stAPT из типа события');
+            }
+          }
+        }
+      });
+      
+      // Ищем токен в type_arguments payload
+      if (tx.payload?.type_arguments && tx.payload.type_arguments.length > 0) {
+        console.log('[DEBUG] Type arguments в payload:', tx.payload.type_arguments);
+        tx.payload.type_arguments.forEach((typeArg: string, index: number) => {
+          console.log(`[DEBUG] Type argument ${index}:`, typeArg);
+          if (typeArg.includes('stapt::StakedApt') || typeArg.includes('stapt_token::StakedApt')) {
+            token = 'stAPT';
+            decimals = 8;
+            console.log('[DEBUG] Определен stAPT из type_arguments');
+          }
+        });
+      }
+      
+      // Ищем токен в аргументах функции
+      if (tx.payload?.arguments && tx.payload.arguments.length > 0) {
+        console.log('[DEBUG] Arguments в payload:', tx.payload.arguments);
+        tx.payload.arguments.forEach((arg: any, index: number) => {
+          console.log(`[DEBUG] Argument ${index}:`, arg);
+          if (typeof arg === 'string' && arg.includes('0x')) {
+            const tokenInfo = getTokenInfoByCoinName(arg);
+            if (tokenInfo) {
+              console.log('[DEBUG] Найден токен в аргументах:', tokenInfo.symbol);
+            }
+          }
+        });
+      }
     }
   }
   
+  // Обрабатываем разные типы операций Hyperion
+  if (functionName.includes('remove_liquidity')) {
+    // Операция удаления ликвидности
+    const removeLiquidityEvents = tx.events.filter((event: any) => 
+      event.type?.includes('RemoveLiquidityEventV3')
+    );
+    
+    const depositEvents = tx.events.filter((event: any) => 
+      event.type === '0x1::fungible_asset::Deposit'
+    );
+    
+    // Приоритет: основная операция удаления ликвидности
+    for (const event of removeLiquidityEvents) {
+      if (event.data?.amount) {
+        amount = parseFloat(event.data.amount);
+        amount = amount / Math.pow(10, decimals);
+        break;
+      }
+    }
+    
+    // Если не нашли в RemoveLiquidityEventV3, ищем в Deposit событиях
+    if (amount === 0) {
+      for (const depositEvent of depositEvents) {
+        if (depositEvent.data?.amount && depositEvent.data?.store?.includes(userAddress)) {
+          amount = parseFloat(depositEvent.data.amount);
+          amount = amount / Math.pow(10, decimals);
+          break;
+        }
+      }
+    }
+    
+  } else if (functionName.includes('add_liquidity')) {
+    // Операция добавления ликвидности
+    const addLiquidityEvents = tx.events.filter((event: any) => 
+      event.type?.includes('AddLiquidityEventV3')
+    );
+    
+    const withdrawEvents = tx.events.filter((event: any) => 
+      event.type === '0x1::fungible_asset::Withdraw'
+    );
+    
+    // Приоритет: основная операция добавления ликвидности
+    for (const event of addLiquidityEvents) {
+      if (event.data?.amount) {
+        amount = parseFloat(event.data.amount);
+        amount = amount / Math.pow(10, decimals);
+        break;
+      }
+    }
+    
+    // Если не нашли в AddLiquidityEventV3, ищем в Withdraw событиях
+    if (amount === 0) {
+      for (const withdrawEvent of withdrawEvents) {
+        if (withdrawEvent.data?.amount && withdrawEvent.data?.store?.includes(userAddress)) {
+          amount = parseFloat(withdrawEvent.data.amount);
+          amount = amount / Math.pow(10, decimals);
+          break;
+        }
+      }
+    }
+    
+  } else if (functionName.includes('swap')) {
+    // Операция свопа
+    console.log('[DEBUG] Обрабатываем swap транзакцию');
+    console.log('[DEBUG] Events:', tx.events);
+    console.log('[DEBUG] Changes:', tx.changes);
+    
+    // Специальная обработка для конкретной транзакции
+    if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+      console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА SWAP ТРАНЗАКЦИИ ===');
+      console.log('[DEBUG] Все события:', JSON.stringify(tx.events, null, 2));
+      console.log('[DEBUG] Все изменения:', JSON.stringify(tx.changes, null, 2));
+      console.log('[DEBUG] Payload:', JSON.stringify(tx.payload, null, 2));
+    }
+    
+    const swapEvents = tx.events.filter((event: any) => 
+      event.type?.includes('SwapEvent')
+    );
+    
+    console.log('[DEBUG] Найденные SwapEvent:', swapEvents);
+    
+    if (swapEvents.length > 0) {
+      const swapEvent = swapEvents[0];
+      console.log('[DEBUG] SwapEvent data:', swapEvent.data);
+      
+      // Пытаемся определить токен из SwapEvent
+      if (swapEvent.data?.token_in) {
+        const tokenIn = swapEvent.data.token_in;
+        console.log('[DEBUG] Token in from SwapEvent:', tokenIn);
+        
+        // Определяем токен из token_in
+        if (tokenIn.inner) {
+          const tokenInfo = getTokenInfoByCoinName(tokenIn.inner);
+          if (tokenInfo) {
+            token = tokenInfo.symbol;
+            decimals = tokenInfo.decimals;
+            console.log('[DEBUG] Определен токен из token_in:', token, decimals);
+          }
+        }
+      }
+      
+      if (swapEvent.data?.amount_in) {
+        amount = parseFloat(swapEvent.data.amount_in);
+        amount = amount / Math.pow(10, decimals);
+        console.log('[DEBUG] Извлеченная сумма для swap:', amount, token);
+      }
+      
+      // Специальная обработка для конкретной транзакции
+      if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+        console.log('[DEBUG] SwapEvent data детально:', JSON.stringify(swapEvent.data, null, 2));
+        console.log('[DEBUG] amount_in:', swapEvent.data?.amount_in);
+        console.log('[DEBUG] token_in:', swapEvent.data?.token_in);
+        console.log('[DEBUG] amount_out:', swapEvent.data?.amount_out);
+        console.log('[DEBUG] token_out:', swapEvent.data?.token_out);
+      }
+    }
+    
+    // Если не нашли в SwapEvent, ищем в других событиях
+    if (amount === 0) {
+      console.log('[DEBUG] Ищем сумму в других событиях для swap');
+      
+      const depositEvents = tx.events.filter((event: any) => 
+        event.type === '0x1::fungible_asset::Deposit'
+      );
+      
+      const withdrawEvents = tx.events.filter((event: any) => 
+        event.type === '0x1::fungible_asset::Withdraw'
+      );
+      
+      console.log('[DEBUG] Deposit events:', depositEvents);
+      console.log('[DEBUG] Withdraw events:', withdrawEvents);
+      
+      // Для swap берем сумму из Withdraw (токены, которые были потрачены)
+      for (const withdrawEvent of withdrawEvents) {
+        if (withdrawEvent.data?.amount && withdrawEvent.data?.store?.includes(userAddress)) {
+          amount = parseFloat(withdrawEvent.data.amount);
+          amount = amount / Math.pow(10, decimals);
+          console.log('[DEBUG] Найдена сумма в Withdraw event:', amount, token);
+          break;
+        }
+      }
+      
+      // Специальная обработка для конкретной транзакции
+      if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+        console.log('[DEBUG] Анализируем все события для поиска суммы...');
+        tx.events.forEach((event: any, index: number) => {
+          if (event.data?.amount) {
+            console.log(`[DEBUG] Событие ${index} с amount:`, {
+              type: event.type,
+              amount: event.data.amount,
+              store: event.data.store
+            });
+          }
+        });
+      }
+    }
+  } else if (functionName.includes('claim')) {
+    // Операция получения наград
+    const claimFeesEvents = tx.events.filter((event: any) => 
+      event.type?.includes('ClaimFeesEventV2')
+    );
+    
+    for (const claimEvent of claimFeesEvents) {
+      if (claimEvent.data?.amount) {
+        const feeAmount = parseFloat(claimEvent.data.amount);
+        const feeToken = claimEvent.data.token?.inner;
+        
+        if (feeToken) {
+          const tokenInfo = getTokenInfoByCoinName(feeToken);
+          if (tokenInfo) {
+            return {
+              amount: feeAmount / Math.pow(10, tokenInfo.decimals),
+              token: tokenInfo.symbol,
+              decimals: tokenInfo.decimals
+            };
+          }
+        }
+      }
+    }
+  }
+  
+  console.log('[DEBUG] extractHyperionAmount возвращает:', { amount, token, decimals });
   return { amount, token, decimals };
 }
 
@@ -615,12 +1021,78 @@ function extractHyperionAmount(tx: any, userAddress: string): { amount: number; 
  * Общая обработка для остальных протоколов
  */
 function extractGenericAmount(tx: any, userAddress: string): { amount: number; token: string; decimals: number } {
+  console.log('[DEBUG] extractGenericAmount вызвана');
+  console.log('[DEBUG] Функция:', tx.payload?.function);
+  console.log('[DEBUG] Events count:', tx.events?.length || 0);
+  console.log('[DEBUG] Changes count:', tx.changes?.length || 0);
+  
   let amount = 0;
   let token = 'APT';
   let decimals = 8;
   
   if (!tx.events || !Array.isArray(tx.events)) {
+    console.log('[DEBUG] extractGenericAmount - нет событий, возвращаем значения по умолчанию');
     return { amount, token, decimals };
+  }
+  
+  // Специальная обработка для конкретной транзакции
+  if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОБРАБОТКА В extractGenericAmount ===');
+    console.log('[DEBUG] Все события:', JSON.stringify(tx.events, null, 2));
+    console.log('[DEBUG] Все изменения:', JSON.stringify(tx.changes, null, 2));
+    console.log('[DEBUG] Payload:', JSON.stringify(tx.payload, null, 2));
+    
+    // Детальный анализ всех событий для поиска суммы
+    console.log('[DEBUG] === ДЕТАЛЬНЫЙ АНАЛИЗ СОБЫТИЙ ===');
+    tx.events.forEach((event: any, index: number) => {
+      console.log(`[DEBUG] Событие ${index}:`, {
+        type: event.type,
+        data: event.data,
+        sequence_number: event.sequence_number,
+        guid: event.guid
+      });
+      
+      // Ищем любые числовые значения в данных события
+      if (event.data) {
+        const allKeys = Object.keys(event.data);
+        console.log(`[DEBUG] Ключи в событии ${index}:`, allKeys);
+        
+        allKeys.forEach(key => {
+          const value = event.data[key];
+          if (typeof value === 'string' && !isNaN(parseFloat(value)) && parseFloat(value) > 0) {
+            console.log(`[DEBUG] Найдено числовое значение в событии ${index}, ключ ${key}:`, value);
+          }
+        });
+      }
+    });
+    
+    // Детальный анализ всех изменений для поиска суммы
+    console.log('[DEBUG] === ДЕТАЛЬНЫЙ АНАЛИЗ ИЗМЕНЕНИЙ ===');
+    if (tx.changes) {
+      tx.changes.forEach((change: any, index: number) => {
+        console.log(`[DEBUG] Изменение ${index}:`, {
+          type: change.data?.type,
+          data: change.data?.data,
+          address: change.address,
+          resource: change.resource
+        });
+        
+        // Ищем любые числовые значения в данных изменения
+        if (change.data?.data) {
+          const allKeys = Object.keys(change.data.data);
+          console.log(`[DEBUG] Ключи в изменении ${index}:`, allKeys);
+          
+          allKeys.forEach(key => {
+            const value = change.data.data[key];
+            if (typeof value === 'string' && !isNaN(parseFloat(value)) && parseFloat(value) > 0) {
+              console.log(`[DEBUG] Найдено числовое значение в изменении ${index}, ключ ${key}:`, value);
+            }
+          });
+        }
+      });
+    }
+    
+    console.log('[DEBUG] === КОНЕЦ ДЕТАЛЬНОГО АНАЛИЗА ===');
   }
   
   // Ищем любые события с amount
@@ -638,9 +1110,225 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
       token = determineTokenFromEvent(event, tx.payload?.type_arguments);
       decimals = getTokenDecimals(token);
       amount = amount / Math.pow(10, decimals);
+      
+      // Специальная обработка для конкретной транзакции
+      if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+        console.log('[DEBUG] Найдено событие с суммой:', {
+          eventType: event.type,
+          amountData,
+          parsedAmount: amount,
+          token,
+          decimals
+        });
+      }
     }
   }
   
+  // Специальная обработка для конкретной транзакции - если не найдено событий с суммой
+  if (amountEvents.length === 0 && tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+    console.log('[DEBUG] Не найдено событий с суммой, анализируем все события...');
+    
+    // Ищем токен в type_arguments payload
+    if (tx.payload?.type_arguments && tx.payload.type_arguments.length > 0) {
+      console.log('[DEBUG] Type arguments в payload:', tx.payload.type_arguments);
+      tx.payload.type_arguments.forEach((typeArg: string, index: number) => {
+        console.log(`[DEBUG] Type argument ${index}:`, typeArg);
+        if (typeArg.includes('stapt::StakedApt') || typeArg.includes('stapt_token::StakedApt')) {
+          token = 'stAPT';
+          decimals = 8;
+          console.log('[DEBUG] Определен stAPT из type_arguments в extractGenericAmount');
+        }
+      });
+    }
+    
+    // Ищем токен в function name
+    if (tx.payload?.function && (tx.payload.function.includes('stapt') || tx.payload.function.includes('StakedApt'))) {
+      token = 'stAPT';
+      decimals = 8;
+      console.log('[DEBUG] Определен stAPT из function name в extractGenericAmount');
+    }
+  }
+  
+  // Специальная обработка для swap транзакций
+  if ((tx.payload?.function && tx.payload.function.includes('swap')) || 
+      (tx.payload?.function === undefined && tx.payload?.type === 'entry_function_payload')) {
+    console.log('[DEBUG] Обрабатываем swap транзакцию');
+    
+    // Если функция не определена, пытаемся определить тип операции по событиям
+    if (!tx.payload?.function) {
+      console.log('[DEBUG] Функция не определена, анализируем события для определения типа операции...');
+      
+      const hasSwapEvents = tx.events.some((event: any) => 
+        event.type.includes('swap') || 
+        event.type.includes('Swap') ||
+        event.type.includes('trade') ||
+        event.type.includes('Trade')
+      );
+      
+      if (!hasSwapEvents) {
+        console.log('[DEBUG] Не найдены swap события, возвращаем значения по умолчанию');
+        return { amount, token, decimals };
+      }
+    }
+    
+    // Ищем события swap
+    const swapEvents = tx.events.filter((event: any) => 
+      event.type.includes('swap') || 
+      event.type.includes('Swap') ||
+      event.type.includes('trade') ||
+      event.type.includes('Trade')
+    );
+    
+    if (swapEvents.length > 0) {
+      const swapEvent = swapEvents[0];
+      console.log('[DEBUG] Найдено swap событие:', swapEvent);
+      
+      // Ищем сумму в swap событии
+      if (swapEvent.data) {
+        const swapAmounts = [
+          swapEvent.data.amount_in,
+          swapEvent.data.amount_out,
+          swapEvent.data.amount,
+          swapEvent.data.value,
+          swapEvent.data.quantity
+        ];
+        
+        for (const swapAmount of swapAmounts) {
+          if (swapAmount && !isNaN(parseFloat(swapAmount))) {
+            console.log('[DEBUG] Найдена сумма в swap событии:', {
+              eventType: swapEvent.type,
+              amount: swapAmount,
+              parsed: parseFloat(swapAmount)
+            });
+            amount = parseFloat(swapAmount) / Math.pow(10, decimals);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Если не нашли в swap событиях, ищем в любых событиях с суммой
+    if (amount === 0) {
+      console.log('[DEBUG] Не найдена сумма в swap событиях, ищем в других событиях...');
+      
+      // Ищем в changes для определения суммы
+      if (tx.changes && tx.changes.length > 0) {
+        console.log('[DEBUG] Анализируем changes для поиска суммы...');
+        tx.changes.forEach((change: any, index: number) => {
+          console.log(`[DEBUG] Change ${index}:`, change);
+          
+          // Ищем изменения в CoinStore или FungibleStore
+          if (change.data?.type?.includes('CoinStore') || change.data?.type?.includes('FungibleStore')) {
+            if (change.data?.data?.coin?.value) {
+              const coinValue = parseFloat(change.data.data.coin.value);
+              if (!isNaN(coinValue) && coinValue > 0) {
+                console.log('[DEBUG] Найдена сумма в CoinStore change:', coinValue);
+                amount = coinValue / Math.pow(10, decimals);
+              }
+            }
+          }
+        });
+      }
+      
+      // Ищем сумму во всех событиях
+      tx.events.forEach((event: any, index: number) => {
+        console.log(`[DEBUG] Событие ${index}:`, {
+          type: event.type,
+          data: event.data
+        });
+        
+        // Ищем токен в типе события
+        if (event.type && event.type.includes('<')) {
+          const typeMatch = event.type.match(/<([^>]+)>/);
+          if (typeMatch) {
+            const tokenType = typeMatch[1];
+            console.log('[DEBUG] Найден тип токена в событии:', tokenType);
+            
+            if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
+              token = 'stAPT';
+              decimals = 8;
+              console.log('[DEBUG] Определен stAPT из типа события в extractGenericAmount');
+            }
+          }
+        }
+        
+        // Ищем сумму в данных события
+        if (event.data) {
+          const possibleAmounts = [
+            event.data.amount,
+            event.data.value,
+            event.data.coin_amount,
+            event.data.amount_in,
+            event.data.amount_out,
+            event.data.quantity,
+            event.data.volume
+          ];
+          
+          for (const possibleAmount of possibleAmounts) {
+            if (possibleAmount && !isNaN(parseFloat(possibleAmount))) {
+              console.log('[DEBUG] Найдена возможная сумма в событии:', {
+                eventType: event.type,
+                amount: possibleAmount,
+                parsed: parseFloat(possibleAmount)
+              });
+              amount = parseFloat(possibleAmount) / Math.pow(10, decimals);
+              break;
+            }
+          }
+        }
+      });
+    }
+  } else {
+    // Обычная обработка для не-swap транзакций
+    tx.events.forEach((event: any, index: number) => {
+      console.log(`[DEBUG] Событие ${index}:`, {
+        type: event.type,
+        data: event.data
+      });
+      
+      // Ищем токен в типе события
+      if (event.type && event.type.includes('<')) {
+        const typeMatch = event.type.match(/<([^>]+)>/);
+        if (typeMatch) {
+          const tokenType = typeMatch[1];
+          console.log('[DEBUG] Найден тип токена в событии:', tokenType);
+          
+          if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
+            token = 'stAPT';
+            decimals = 8;
+            console.log('[DEBUG] Определен stAPT из типа события в extractGenericAmount');
+          }
+        }
+      }
+      
+      // Ищем сумму в данных события
+      if (event.data) {
+        const possibleAmounts = [
+          event.data.amount,
+          event.data.value,
+          event.data.coin_amount,
+          event.data.amount_in,
+          event.data.amount_out,
+          event.data.quantity,
+          event.data.volume
+        ];
+        
+        for (const possibleAmount of possibleAmounts) {
+          if (possibleAmount && !isNaN(parseFloat(possibleAmount))) {
+            console.log('[DEBUG] Найдена возможная сумма в событии:', {
+              eventType: event.type,
+              amount: possibleAmount,
+              parsed: parseFloat(possibleAmount)
+            });
+            amount = parseFloat(possibleAmount) / Math.pow(10, decimals);
+            break;
+          }
+        }
+      }
+    });
+  }
+  
+  console.log('[DEBUG] extractGenericAmount возвращает:', { amount, token, decimals });
   return { amount, token, decimals };
 }
 
@@ -650,15 +1338,49 @@ function extractGenericAmount(tx: any, userAddress: string): { amount: number; t
 export function getTokenInfoByCoinName(coinName: string): { name: string; symbol: string; decimals: number } | null {
   if (!coinName) return null;
   
+  console.log('[DEBUG] getTokenInfoByCoinName вызвана с:', coinName);
+  
+  // Специальная обработка для известных адресов stAPT
+  if (coinName.includes('stapt') || coinName.includes('StakedApt') || coinName.includes('0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627')) {
+    console.log('[DEBUG] Обнаружен stAPT адрес:', coinName);
+    return { name: 'Staked Aptos Coin', symbol: 'stAPT', decimals: 8 };
+  }
+  
   // Убираем префикс @ если есть
   const normalizedCoinName = coinName.replace(/^@/, '');
+  console.log('[DEBUG] Нормализованное имя:', normalizedCoinName);
   
   // Сначала ищем токен в списке по faAddress
   let token = tokenList.data.data.find((token: any) => {
     return token.faAddress === normalizedCoinName;
   });
   
-  // Если не нашли по faAddress, ищем по названию токена
+  if (token) {
+    console.log('[DEBUG] Найден токен по faAddress:', token.symbol);
+    return {
+      name: token.name,
+      symbol: token.symbol,
+      decimals: token.decimals
+    };
+  }
+  
+  // Если не нашли по faAddress, ищем по tokenAddress
+  if (!token) {
+    token = tokenList.data.data.find((token: any) => {
+      return token.tokenAddress === normalizedCoinName;
+    });
+  }
+  
+  if (token) {
+    console.log('[DEBUG] Найден токен по tokenAddress:', token.symbol);
+    return {
+      name: token.name,
+      symbol: token.symbol,
+      decimals: token.decimals
+    };
+  }
+  
+  // Если не нашли по tokenAddress, ищем по названию токена
   if (!token) {
     token = tokenList.data.data.find((token: any) => {
       return token.name === normalizedCoinName || token.symbol === normalizedCoinName;
@@ -674,6 +1396,7 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
   }
   
   if (token) {
+    console.log('[DEBUG] Найден токен по частичному совпадению:', token.symbol);
     return {
       name: token.name,
       symbol: token.symbol,
@@ -681,6 +1404,29 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
     };
   }
   
+  // Специальная обработка для известных токенов
+  if (!token) {
+    console.log('[DEBUG] Пробуем специальную обработку для:', normalizedCoinName);
+    // Проверяем известные FA адреса
+    if (normalizedCoinName === '0xa') {
+      console.log('[DEBUG] Найден APT по специальной обработке');
+      return { name: 'Aptos Coin', symbol: 'APT', decimals: 8 };
+    }
+    if (normalizedCoinName === '0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627') {
+      console.log('[DEBUG] Найден stAPT по специальной обработке');
+      return { name: 'Staked Aptos Coin', symbol: 'stAPT', decimals: 8 };
+    }
+    if (normalizedCoinName === '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b') {
+      console.log('[DEBUG] Найден USDt по специальной обработке');
+      return { name: 'Tether USD', symbol: 'USDt', decimals: 6 };
+    }
+    if (normalizedCoinName === '0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b') {
+      console.log('[DEBUG] Найден USDC по специальной обработке');
+      return { name: 'USDC', symbol: 'USDC', decimals: 6 };
+    }
+  }
+  
+  console.log('[DEBUG] Токен не найден для:', coinName);
   return null;
 }
 
@@ -688,14 +1434,35 @@ export function getTokenInfoByCoinName(coinName: string): { name: string; symbol
  * Определяет токен из события или аргументов
  */
 function determineTokenFromEvent(event: any, typeArguments: string[]): string {
+  console.log('[DEBUG] determineTokenFromEvent вызвана с:', { eventType: event.type, typeArguments });
+  
   // Пытаемся определить токен из типа события
   if (event.type) {
     const typeMatch = event.type.match(/<([^>]+)>/);
     if (typeMatch) {
       const tokenType = typeMatch[1];
-      if (tokenType.includes('aptos_coin::AptosCoin')) return 'APT';
-      if (tokenType.includes('usda::USDA')) return 'USDA';
-      if (tokenType.includes('stapt::StakedAptos')) return 'stAPT';
+      console.log('[DEBUG] Найден тип токена в событии:', tokenType);
+      
+      if (tokenType.includes('aptos_coin::AptosCoin')) {
+        console.log('[DEBUG] Определен APT из типа события');
+        return 'APT';
+      }
+      if (tokenType.includes('usda::USDA')) {
+        console.log('[DEBUG] Определен USDA из типа события');
+        return 'USDA';
+      }
+      if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) {
+        console.log('[DEBUG] Определен stAPT из типа события');
+        return 'stAPT';
+      }
+      if (tokenType.includes('usde::USDe')) {
+        console.log('[DEBUG] Определен USDe из типа события');
+        return 'USDe';
+      }
+      if (tokenType.includes('staked_usde::StakedUSDe')) {
+        console.log('[DEBUG] Определен sUSDe из типа события');
+        return 'sUSDe';
+      }
       // Добавьте другие токены по необходимости
     }
   }
@@ -705,9 +1472,12 @@ function determineTokenFromEvent(event: any, typeArguments: string[]): string {
     const tokenType = typeArguments[0];
     if (tokenType.includes('aptos_coin::AptosCoin')) return 'APT';
     if (tokenType.includes('usda::USDA')) return 'USDA';
-    if (tokenType.includes('stapt::StakedAptos')) return 'stAPT';
+    if (tokenType.includes('stapt::StakedApt') || tokenType.includes('stapt_token::StakedApt')) return 'stAPT';
+    if (tokenType.includes('usde::USDe')) return 'USDe';
+    if (tokenType.includes('staked_usde::StakedUSDe')) return 'sUSDe';
   }
   
+  console.log('[DEBUG] determineTokenFromEvent возвращает APT по умолчанию');
   return 'APT'; // По умолчанию
 }
 
@@ -715,15 +1485,27 @@ function determineTokenFromEvent(event: any, typeArguments: string[]): string {
  * Получает количество десятичных знаков для токена
  */
 function getTokenDecimals(token: string): number {
+  console.log('[DEBUG] getTokenDecimals вызвана с:', token);
+  
   const decimalsMap: { [key: string]: number } = {
     'APT': 8,
     'USDA': 6,
     'stAPT': 8,
     'amAPT': 8,
+    'USDe': 6,
+    'sUSDe': 6,
+    'USDC': 6,
+    'USDt': 6,
+    'WBTC': 8,
+    'thAPT': 8,
+    'sthAPT': 8,
+    'kAPT': 8,
     // Добавьте другие токены по необходимости
   };
   
-  return decimalsMap[token] || 8; // По умолчанию 8
+  const decimals = decimalsMap[token] || 8; // По умолчанию 8
+  console.log('[DEBUG] getTokenDecimals возвращает:', decimals);
+  return decimals;
 }
 
 /**

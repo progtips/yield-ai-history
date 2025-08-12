@@ -64,21 +64,12 @@ export default function TestEchelonProfitPage() {
   const [echelonProfitResults, setEchelonProfitResults] = React.useState<any[]>([]);
   const [hasStartedAnalysis, setHasStartedAnalysis] = React.useState(false);
 
-  // Функция для добавления отладочной информации (отключена)
-  const addDebugInfo = (message: string) => {
-    // Отладочная информация отключена
-  };
-
   // Читаем адрес кошелька из URL параметров и автоматически запускаем анализ
   React.useEffect(() => {
-    addDebugInfo('useEffect для чтения URL параметров');
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const walletFromUrl = urlParams.get('wallet');
-      addDebugInfo(`walletFromUrl из URL: ${walletFromUrl}`);
-      addDebugInfo(`текущий walletAddress: ${walletAddress}`);
       if (walletFromUrl && walletFromUrl !== walletAddress) {
-        addDebugInfo(`Устанавливаем новый walletAddress из URL: ${walletFromUrl}`);
         setWalletAddress(walletFromUrl);
         setHasStartedAnalysis(false); // Сбрасываем флаг при изменении адреса
       }
@@ -89,18 +80,13 @@ export default function TestEchelonProfitPage() {
   React.useEffect(() => {
     // Предотвращаем зацикливание - проверяем, что это не первый рендер и анализ еще не запускался
     if (walletAddress && walletAddress.trim() && !isLoading && !hasStartedAnalysis && echelonProfitResults.length === 0) {
-      addDebugInfo(`useEffect для автоматического запуска: walletAddress = ${walletAddress}, isLoading = ${isLoading}`);
-      addDebugInfo('Запускаем handleRefreshHistory автоматически');
       setHasStartedAnalysis(true);
       handleRefreshHistory();
-    } else if (echelonProfitResults.length > 0) {
-      addDebugInfo(`Результаты уже есть (${echelonProfitResults.length}), анализ не запускается`);
     }
   }, [walletAddress, isLoading, hasStartedAnalysis, echelonProfitResults.length]);
 
   // Обновляем useEffect для расчета прибыли при изменении транзакций
   React.useEffect(() => {
-    addDebugInfo(`useEffect для обновления echelonTransactions: transactions.length = ${transactions.length}`);
     if (transactions.length > 0) {
       const totalProfitData = calculateTotalProfit(transactions);
       setProfitData(totalProfitData);
@@ -109,16 +95,6 @@ export default function TestEchelonProfitPage() {
       const echelonOnly = transactions.filter(tx => {
         const protocol = getProtocolNameByFunction(tx.function, tx.to);
         return protocol === 'Echelon';
-      });
-      
-      addDebugInfo('=== Фильтрация Echelon транзакций ===');
-      addDebugInfo(`Всего транзакций: ${transactions.length}`);
-      addDebugInfo(`Найдено Echelon транзакций: ${echelonOnly.length}`);
-      
-      // Логируем первые несколько транзакций для отладки
-      transactions.slice(0, 3).forEach((tx, index) => {
-        const protocol = getProtocolNameByFunction(tx.function, tx.to);
-        addDebugInfo(`Транзакция ${index + 1}: function=${tx.function}, to=${tx.to}, protocol=${protocol}, type=${tx.type}`);
       });
       
       setEchelonTransactions(echelonOnly);
@@ -166,9 +142,6 @@ export default function TestEchelonProfitPage() {
   }
 
   const handleRefreshHistory = () => {
-    addDebugInfo('=== ФУНКЦИЯ handleRefreshHistory ВЫЗВАНА ===');
-    addDebugInfo(`walletAddress в handleRefreshHistory: ${walletAddress}`);
-    
     if (!walletAddress.trim()) {
       setHasError(true);
       setErrorMessage("Пожалуйста, введите адрес кошелька");
@@ -178,9 +151,6 @@ export default function TestEchelonProfitPage() {
     setIsLoading(true);
     setHasError(false);
     setErrorMessage("");
-    
-    addDebugInfo('=== Starting Echelon profit calculation test ===');
-    addDebugInfo(`walletAddress: ${walletAddress}`);
     
     // Fetch real transactions from Aptos blockchain
     const fetchRealTransactions = async (address: string) => {
@@ -215,7 +185,6 @@ export default function TestEchelonProfitPage() {
         };
         
         const data = await fetchAllTransactions(address);
-        addDebugInfo(`Fetched ${data.length} transactions for Echelon analysis`);
         
         // Transform API data to our format
         const transformedTransactions = data.map((tx: any, index: number) => {
@@ -232,7 +201,6 @@ export default function TestEchelonProfitPage() {
               type = 'withdraw';
             } else if (functionName.includes('claim') || functionName.includes('reward') || functionName.includes('scripts::claim_reward')) {
               type = 'claim';
-              addDebugInfo(`Определена транзакция claim: ${functionName}`);
             } else if (functionName.includes('swap') || functionName.includes('exchange')) {
               type = 'swap';
             } else if (functionName.includes('coin::transfer')) {
@@ -289,8 +257,6 @@ export default function TestEchelonProfitPage() {
           };
         });
         
-        addDebugInfo(`Transformed ${transformedTransactions.length} transactions for Echelon analysis`);
-        
         // Sort transactions by timestamp in descending order (newest first)
         const sortedTransactions = transformedTransactions.sort((a: any, b: any) => {
           const getTimestamp = (timestamp: any) => {
@@ -328,7 +294,6 @@ export default function TestEchelonProfitPage() {
         return sortedTransactions;
         
       } catch (error) {
-        addDebugInfo(`Error fetching transactions: ${error}`);
         throw error;
       }
     };
@@ -336,28 +301,22 @@ export default function TestEchelonProfitPage() {
     // Fetch transactions and calculate profit
     fetchRealTransactions(walletAddress)
       .then((realTransactions) => {
-        addDebugInfo(`Fetched ${realTransactions.length} real transactions for Echelon analysis`);
         setTransactions(realTransactions);
         setIsLoading(false);
         
         // Автоматически рассчитываем прибыль Echelon после загрузки
         setTimeout(() => {
-          addDebugInfo('=== Автоматический расчет прибыли Echelon ===');
-          addDebugInfo(`Передаем ${realTransactions.length} транзакций в расчет прибыли`);
-          
           // Передаем транзакции напрямую в функцию расчета
           calculateEchelonProfitWithData(realTransactions);
         }, 1000); // Небольшая задержка для завершения рендеринга
       })
       .catch((error) => {
-        addDebugInfo(`Failed to fetch transactions: ${error}`);
         setHasError(true);
         setErrorMessage(`Ошибка при получении транзакций: ${error.message}`);
         setIsLoading(false);
         
         // Если ошибка 429 (Too Many Requests), не запускаем повторный анализ
         if (error.message.includes('429')) {
-          addDebugInfo('Ошибка 429 - превышен лимит запросов. Анализ остановлен.');
           setHasStartedAnalysis(true); // Предотвращаем повторные попытки
         }
       });
@@ -376,17 +335,12 @@ export default function TestEchelonProfitPage() {
 
   // Функция для подсчета прибыли по протоколу Echelon с передачей данных
   const calculateEchelonProfitWithData = (transactionsData: any[]) => {
-    addDebugInfo('=== ФУНКЦИЯ calculateEchelonProfitWithData ВЫЗВАНА ===');
-    
     // Параметры, которые пользователь может скорректировать
     const params = {
       remainingPosition: 0,   // текущая стоимость активов, которые остались в пуле (в той же валюте)
       rewards: 0,             // начисленные награды (в той же валюте), если UI их не показывает отдельной транзакцией
       feesPaid: 0             // суммарные комиссии (в той же валюте), если известны отдельно
     };
-
-    addDebugInfo('=== Начинаем расчет прибыли Echelon ===');
-    addDebugInfo(`Переданные транзакции: ${transactionsData.length}`);
     
     // Фильтруем только Echelon транзакции
     const echelonOnly = transactionsData.filter(tx => {
@@ -394,19 +348,11 @@ export default function TestEchelonProfitPage() {
       return protocol === 'Echelon';
     });
     
-    addDebugInfo(`Найдено Echelon транзакций: ${echelonOnly.length}`);
-    
-    // Логируем первые несколько Echelon транзакций для отладки
-    echelonOnly.slice(0, 3).forEach((tx, index) => {
-      addDebugInfo(`Echelon транзакция ${index + 1}: function=${tx.function}, type=${tx.type}`);
-    });
-    
     // Используем данные из состояния React
     let transactionsToAnalyze = echelonOnly;
     
     // Если Echelon транзакции не найдены, используем все транзакции
     if (echelonOnly.length === 0 && transactionsData.length > 0) {
-      addDebugInfo('Echelon транзакции не найдены, анализируем все транзакции');
       transactionsToAnalyze = transactionsData;
     }
     
@@ -414,31 +360,14 @@ export default function TestEchelonProfitPage() {
       tx.type === 'deposit' || tx.type === 'withdraw' || tx.type === 'claim' || tx.type === 'fee'
     );
 
-    addDebugInfo(`Отфильтрованные транзакции deposit/withdraw/claim: ${filteredTransactions.length}`);
-    
-    // Логируем типы транзакций для отладки
-    const typeCounts = transactionsToAnalyze.reduce((acc, tx) => {
-      acc[tx.type] = (acc[tx.type] || 0) + 1;
-      return acc;
-    }, {} as any);
-    addDebugInfo(`Распределение типов транзакций: ${JSON.stringify(typeCounts)}`);
-
     // Группируем транзакции по валютам
     const transactionsByCurrency: { [currency: string]: any[] } = {};
-
-    addDebugInfo('Начинаем обработку транзакций...');
     
     try {
       filteredTransactions.forEach((tx, index) => {
         try {
-          addDebugInfo(`Обрабатываем транзакцию ${index + 1}: ${tx.function} ${tx.type}`);
           // Извлекаем сумму и валюту из транзакции
           const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
-          
-          // Дополнительная отладка для claim транзакций
-          if (tx.type === 'claim') {
-            addDebugInfo(`Claim транзакция: extractedAmount=${extractedAmount}, extractedToken=${extractedToken}`);
-          }
       
       // Ищем события для определения точной суммы
       let actualAmount = extractedAmount;
@@ -492,11 +421,9 @@ export default function TestEchelonProfitPage() {
       } else if (tx.type === 'claim') {
         operationType = 'claim';
         signedAmount = Math.abs(actualAmount); // Награды всегда положительные
-        addDebugInfo(`Обрабатываем claim: amount=${actualAmount}, signedAmount=${signedAmount}, token=${actualToken}`);
       } else if (tx.type === 'fee') {
         operationType = 'fee';
         signedAmount = -Math.abs(actualAmount); // Комиссии всегда отрицательные (расход)
-        addDebugInfo(`Обрабатываем fee: amount=${actualAmount}, signedAmount=${signedAmount}, token=${actualToken}`);
       }
       
       // Рассчитываем плату за газ
@@ -522,22 +449,17 @@ export default function TestEchelonProfitPage() {
       }
       transactionsByCurrency[actualToken].push(transaction);
         } catch (error) {
-          addDebugInfo(`Ошибка при обработке транзакции ${index + 1}: ${error}`);
-          addDebugInfo(`Данные транзакции: ${JSON.stringify(tx)}`);
+          console.error(`Ошибка при обработке транзакции ${index + 1}:`, error);
         }
       });
     } catch (error) {
-      addDebugInfo(`Критическая ошибка в цикле обработки транзакций: ${error}`);
+      console.error('Критическая ошибка в цикле обработки транзакций:', error);
     }
 
     // Рассчитываем прибыль для каждой валюты
     let results: any[] = [];
     try {
-      addDebugInfo(`Начинаем расчет прибыли для ${Object.keys(transactionsByCurrency).length} валют`);
-      addDebugInfo(`Валюты: ${Object.keys(transactionsByCurrency).join(', ')}`);
       results = Object.entries(transactionsByCurrency).map(([currency, transactions]) => {
-        addDebugInfo(`Обрабатываем валюту ${currency}: ${transactions.length} транзакций`);
-        
         const totalSupply = transactions
           .filter(tx => tx.type === 'supply')
           .reduce((sum, tx) => sum + tx.amount, 0);
@@ -548,42 +470,14 @@ export default function TestEchelonProfitPage() {
         
         const claimTransactions = transactions.filter(tx => tx.type === 'claim');
         const feeTransactions = transactions.filter(tx => tx.type === 'fee');
-        addDebugInfo(`Найдено ${claimTransactions.length} транзакций типа claim для ${currency}`);
-        addDebugInfo(`Найдено ${feeTransactions.length} транзакций типа fee для ${currency}`);
-        claimTransactions.forEach((tx, index) => {
-          addDebugInfo(`Claim транзакция ${index + 1}: amount=${tx.amount}, signedAmount=${tx.signedAmount}, function=${tx.function}`);
-          
-          // Дополнительная отладка для claim транзакций
-          if (tx._rawData) {
-            addDebugInfo(`Claim ${index + 1} - Events count: ${tx._rawData.events?.length || 0}`);
-            addDebugInfo(`Claim ${index + 1} - Changes count: ${tx._rawData.changes?.length || 0}`);
-            
-            // Логируем события для claim
-            if (tx._rawData.events) {
-              tx._rawData.events.forEach((event: any, eventIndex: number) => {
-                addDebugInfo(`Claim ${index + 1} Event ${eventIndex}: type=${event.type}, data=${JSON.stringify(event.data)}`);
-              });
-            }
-            
-            // Логируем изменения состояния для claim
-            if (tx._rawData.changes) {
-              tx._rawData.changes.forEach((change: any, changeIndex: number) => {
-                addDebugInfo(`Claim ${index + 1} Change ${changeIndex}: type=${change.data?.type}, address=${change.address}`);
-              });
-            }
-          }
-        });
         
         const totalClaims = claimTransactions.reduce((sum, tx) => {
           const amount = parseFloat(tx.amount.toString().replace(/[^\d.-]/g, '')) || 0;
-          addDebugInfo(`Добавляем к totalClaims: ${amount} из транзакции ${tx.tx || tx.hash || 'unknown'}`);
-          addDebugInfo(`Исходное значение tx.amount: ${tx.amount}, тип: ${typeof tx.amount}`);
           return sum + amount;
         }, 0);
         
         const totalFees = feeTransactions.reduce((sum, tx) => {
           const amount = parseFloat(tx.amount.toString().replace(/[^\d.-]/g, '')) || 0;
-          addDebugInfo(`Добавляем к totalFees: ${amount} из транзакции ${tx.tx || tx.hash || 'unknown'}`);
           return sum + amount;
         }, 0);
         
@@ -593,8 +487,6 @@ export default function TestEchelonProfitPage() {
         const netPnL = totalWithdraw + totalClaims - totalSupply;
         const realizedPnL = netPnL;
         const totalPnL = netPnL + params.remainingPosition + totalClaims - totalFees - totalGasFees;
-
-        addDebugInfo(`Результаты для ${currency}: supply=${totalSupply}, withdraw=${totalWithdraw}, rewards=${totalClaims}, fees=${totalFees}, netPnL=${netPnL}, totalPnL=${totalPnL}`);
 
         return {
           currency,
@@ -611,41 +503,31 @@ export default function TestEchelonProfitPage() {
         };
       });
     } catch (error) {
-      addDebugInfo(`Ошибка при расчете прибыли: ${error}`);
+      console.error('Ошибка при расчете прибыли:', error);
       results = [];
     }
 
     // Сохраняем результаты в состояние
-    addDebugInfo(`Результаты расчета: ${JSON.stringify(results)}`);
-    addDebugInfo(`Количество результатов: ${results.length}`);
-    
     try {
       if (results.length === 0) {
-        addDebugInfo('Не найдено транзакций для расчета прибыли');
         setEchelonProfitResults([]);
         return;
       }
 
-      addDebugInfo('Сохраняем результаты в состояние...');
-      addDebugInfo(`Результаты для сохранения: ${JSON.stringify(results)}`);
-      
       // Принудительно обновляем состояние для корректного рендеринга
       setEchelonProfitResults([]); // Сначала очищаем
       setTimeout(() => {
         setEchelonProfitResults(results); // Затем устанавливаем новые результаты
-        addDebugInfo(`Состояние обновлено. Новое значение echelonProfitResults: ${JSON.stringify(results)}`);
-        addDebugInfo('Расчет прибыли завершен успешно!');
       }, 100);
       return results;
     } catch (error) {
-      addDebugInfo(`Ошибка при сохранении результатов: ${error}`);
+      console.error('Ошибка при сохранении результатов:', error);
       setEchelonProfitResults([]);
     }
   };
 
   // Функция для подсчета прибыли по протоколу Echelon (для обратной совместимости)
   const calculateEchelonProfit = () => {
-    addDebugInfo('=== ФУНКЦИЯ calculateEchelonProfit ВЫЗВАНА ===');
     calculateEchelonProfitWithData(transactions);
   };
 
@@ -657,7 +539,6 @@ export default function TestEchelonProfitPage() {
         </div>
       ) : (
         <>
-
 
           <Card>
             <CardHeader>
@@ -685,8 +566,6 @@ export default function TestEchelonProfitPage() {
                     {isLoading ? "Загрузка..." : "Готов"}
                   </Badge>
                 </div>
-                
-
                 
                 {hasError && (
                   <div className="text-sm text-red-600">
@@ -737,47 +616,6 @@ export default function TestEchelonProfitPage() {
             </CardContent>
           </Card>
 
-          {/* Блок отладки */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Отладка</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="text-sm text-gray-600">
-                  Всего транзакций: {transactions.length}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Echelon транзакций: {echelonTransactions.length}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Claim транзакций: {echelonTransactions.filter(tx => tx.type === 'claim').length}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Deposit транзакций: {echelonTransactions.filter(tx => tx.type === 'deposit').length}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Withdraw транзакций: {echelonTransactions.filter(tx => tx.type === 'withdraw').length}
-                </div>
-                
-                {/* Показываем первые несколько транзакций для отладки */}
-                <div className="mt-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-2">Первые 3 транзакции:</div>
-                  <div className="space-y-2 text-xs">
-                    {echelonTransactions.slice(0, 3).map((tx, index) => (
-                      <div key={index} className="bg-gray-50 p-2 rounded">
-                        <div>Тип: {tx.type}</div>
-                        <div>Функция: {tx.function}</div>
-                        <div>Сумма: {tx.amount}</div>
-                        <div>Hash: {tx.hash.substring(0, 10)}...</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Echelon Asset Flow History */}
           {echelonTransactions.length > 0 && (
             <Card>
@@ -799,11 +637,6 @@ export default function TestEchelonProfitPage() {
                         const isDeposit = tx.type === 'deposit';
                         const isWithdraw = tx.type === 'withdraw';
                         const isClaim = tx.type === 'claim';
-                        
-                        // Отладочная информация для claim транзакций
-                        if (isClaim) {
-                          addDebugInfo(`Отображаем claim транзакцию: ${tx.function}, amount=${tx.amount}, extractedAmount=${extractedAmount}`);
-                        }
                         
                         // Ищем события для определения точной суммы
                         let actualAmount = extractedAmount;
@@ -931,8 +764,6 @@ export default function TestEchelonProfitPage() {
                                 )}
                               </div>
                             </div>
-                            
-
                           </div>
                         );
                       })}
@@ -940,7 +771,7 @@ export default function TestEchelonProfitPage() {
                 </div>
               </CardContent>
             </Card>
-                    )}
+          )}
 
           {/* Echelon Profit Results */}
           {echelonProfitResults.length > 0 && (
@@ -1013,129 +844,6 @@ export default function TestEchelonProfitPage() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Блок отладки для claim и fee транзакций */}
-                      <div className="bg-gray-100 p-4 rounded-lg">
-                        <div className="text-sm font-semibold text-gray-700 mb-3">
-                          Отладка claim и fee транзакций 
-                          <span className="ml-2 text-purple-600">
-                            (Claim: {result.transactions.filter((tx: any) => tx.type === 'claim').length}, 
-                            Fee: {result.transactions.filter((tx: any) => tx.type === 'fee').length})
-                          </span>
-                        </div>
-                        <div className="space-y-2 text-xs">
-                          {/* Сводка по наградам и комиссиям */}
-                          <div className="bg-purple-50 p-3 rounded border-l-4 border-purple-400 mb-3">
-                            <div className="font-medium text-purple-800">Сводка по наградам и комиссиям:</div>
-                            <div className="text-sm text-purple-700">
-                              Общая сумма наград: {result.rewards.toFixed(6)} {result.currency}
-                            </div>
-                            <div className="text-sm text-purple-700">
-                              Общая сумма комиссий: {result.feesPaid.toFixed(6)} {result.currency}
-                            </div>
-                            <div className="text-sm text-purple-700">
-                              Claim транзакций: {result.transactions.filter((tx: any) => tx.type === 'claim').length}, 
-                              Fee транзакций: {result.transactions.filter((tx: any) => tx.type === 'fee').length}
-                            </div>
-                          </div>
-                          
-                          {result.transactions
-                            .filter((tx: any) => tx.type === 'claim')
-                            .map((tx: any, txIndex: number) => (
-                              <div key={txIndex} className="bg-white p-2 rounded border">
-                                <div className="font-medium">Claim транзакция {txIndex + 1}:</div>
-                                <div>Функция: {tx.function || tx._rawData?.payload?.function || 'N/A'}</div>
-                                <div>Сумма: {tx.amount} {tx.currency}</div>
-                                <div>Signed Amount: {tx.signedAmount}</div>
-                                <div>Hash: {tx.tx || tx.hash}</div>
-                                <div>Тип операции: {tx.type}</div>
-                                
-                                {/* Детальная информация о событиях */}
-                                {tx._rawData?.events && (
-                                  <div className="mt-2">
-                                    <div className="font-medium text-purple-600">События ({tx._rawData.events.length}):</div>
-                                    {tx._rawData.events.map((event: any, eventIndex: number) => (
-                                      <div key={eventIndex} className="ml-2 text-gray-600">
-                                        {eventIndex + 1}. {event.type}
-                                        {event.data && (
-                                          <div className="ml-2 text-gray-500">
-                                            Данные: {JSON.stringify(event.data)}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                                
-                                {/* Детальная информация об изменениях состояния */}
-                                {tx._rawData?.changes && (
-                                  <div className="mt-2">
-                                    <div className="font-medium text-blue-600">Изменения состояния ({tx._rawData.changes.length}):</div>
-                                    {tx._rawData.changes.map((change: any, changeIndex: number) => (
-                                      <div key={changeIndex} className="ml-2 text-gray-600">
-                                        {changeIndex + 1}. {change.data?.type || 'Unknown'}
-                                        {change.data?.data && (
-                                          <div className="ml-2 text-gray-500">
-                                            Данные: {JSON.stringify(change.data.data)}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                            
-                            {/* Fee транзакции */}
-                            {result.transactions
-                              .filter((tx: any) => tx.type === 'fee')
-                              .map((tx: any, txIndex: number) => (
-                                <div key={`fee-${txIndex}`} className="bg-white p-2 rounded border border-red-200">
-                                  <div className="font-medium text-red-600">Fee транзакция {txIndex + 1}:</div>
-                                  <div>Функция: {tx.function || tx._rawData?.payload?.function || 'N/A'}</div>
-                                  <div>Сумма: {tx.amount} {tx.currency}</div>
-                                  <div>Signed Amount: {tx.signedAmount}</div>
-                                  <div>Hash: {tx.tx || tx.hash}</div>
-                                  <div>Тип операции: {tx.type}</div>
-                                  
-                                  {/* Детальная информация о событиях */}
-                                  {tx._rawData?.events && (
-                                    <div className="mt-2">
-                                      <div className="font-medium text-red-600">События ({tx._rawData.events.length}):</div>
-                                      {tx._rawData.events.map((event: any, eventIndex: number) => (
-                                        <div key={eventIndex} className="ml-2 text-gray-600">
-                                          {eventIndex + 1}. {event.type}
-                                          {event.data && (
-                                            <div className="ml-2 text-gray-500">
-                                              Данные: {JSON.stringify(event.data)}
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                  
-                                  {/* Детальная информация об изменениях состояния */}
-                                  {tx._rawData?.changes && (
-                                    <div className="mt-2">
-                                      <div className="font-medium text-red-600">Изменения состояния ({tx._rawData.changes.length}):</div>
-                                      {tx._rawData.changes.map((change: any, changeIndex: number) => (
-                                        <div key={changeIndex} className="ml-2 text-gray-600">
-                                          {changeIndex + 1}. {change.data?.type || 'Unknown'}
-                                          {change.data?.data && (
-                                            <div className="ml-2 text-gray-500">
-                                              Данные: {JSON.stringify(change.data.data)}
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                        </div>
-                      </div>
-
                     </div>
                   ))}
                 </div>
@@ -1143,9 +851,8 @@ export default function TestEchelonProfitPage() {
             </Card>
           )}
 
- 
-          </>
-        )}
+        </>
+      )}
     </div>
   );
 } 

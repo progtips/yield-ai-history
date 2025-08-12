@@ -39,6 +39,17 @@ export default function TestHyperionProfitPage() {
     
     const testToken3 = getTokenInfoByCoinName('0xb30a694a344edee467d9f82330bbe7c3b89f440a1ecd2da1f3bca266560fce69');
     console.log('Тест для FA адреса:', testToken3);
+    
+    // Тестируем stAPT
+    const testStAPT = getTokenInfoByCoinName('0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627');
+    console.log('Тест для stAPT FA адреса:', testStAPT);
+    
+    const testStAPT2 = getTokenInfoByCoinName('stAPT');
+    console.log('Тест для "stAPT":', testStAPT2);
+    
+    const testStAPT3 = getTokenInfoByCoinName('Staked Aptos Coin');
+    console.log('Тест для "Staked Aptos Coin":', testStAPT3);
+    
     console.log('=== Конец теста ===');
   }, []);
 
@@ -226,19 +237,62 @@ export default function TestHyperionProfitPage() {
           if (tx.payload?.type === 'entry_function_payload') {
             const functionName = tx.payload.function;
             
-            if (functionName.includes('add_liquidity') || functionName.includes('deposit')) {
+            if (functionName && functionName.includes('add_liquidity') || functionName && functionName.includes('deposit')) {
               type = 'deposit';
-            } else if (functionName.includes('remove_liquidity') || functionName.includes('withdraw')) {
+            } else if (functionName && functionName.includes('remove_liquidity') || functionName && functionName.includes('withdraw')) {
               type = 'withdraw';
-            } else if (functionName.includes('claim') || functionName.includes('reward')) {
+            } else if (functionName && functionName.includes('claim') || functionName && functionName.includes('reward')) {
               type = 'claim';
               addDebugInfo(`Определена транзакция claim: ${functionName}`);
-            } else if (functionName.includes('swap') || functionName.includes('exchange')) {
+            } else if (functionName && functionName.includes('swap') || functionName && functionName.includes('exchange')) {
               type = 'swap';
-            } else if (functionName.includes('coin::transfer')) {
+            } else if (functionName && functionName.includes('coin::transfer')) {
               type = 'transfer';
             } else {
-              type = 'other';
+              // Если функция не определена, пытаемся определить тип по событиям
+              if (tx.events && tx.events.length > 0) {
+                const hasSwapEvents = tx.events.some((event: any) => 
+                  event.type.includes('swap') || 
+                  event.type.includes('Swap') ||
+                  event.type.includes('trade') ||
+                  event.type.includes('Trade')
+                );
+                
+                const hasDepositEvents = tx.events.some((event: any) => 
+                  event.type.includes('deposit') || 
+                  event.type.includes('Deposit')
+                );
+                
+                const hasWithdrawEvents = tx.events.some((event: any) => 
+                  event.type.includes('withdraw') || 
+                  event.type.includes('Withdraw')
+                );
+                
+                const hasClaimEvents = tx.events.some((event: any) => 
+                  event.type.includes('claim') || 
+                  event.type.includes('Claim') ||
+                  event.type.includes('reward') ||
+                  event.type.includes('Reward')
+                );
+                
+                if (hasSwapEvents) {
+                  type = 'swap';
+                  addDebugInfo(`Определена swap транзакция по событиям`);
+                } else if (hasDepositEvents) {
+                  type = 'deposit';
+                  addDebugInfo(`Определена deposit транзакция по событиям`);
+                } else if (hasWithdrawEvents) {
+                  type = 'withdraw';
+                  addDebugInfo(`Определена withdraw транзакция по событиям`);
+                } else if (hasClaimEvents) {
+                  type = 'claim';
+                  addDebugInfo(`Определена claim транзакция по событиям`);
+                }
+              }
+              
+              if (type === 'transfer') {
+                type = 'other';
+              }
             }
           }
           
@@ -284,7 +338,13 @@ export default function TestHyperionProfitPage() {
             hash: tx.hash || `0x${(index * 12345).toString(16).padStart(16, '0')}...`,
             from: String(tx.sender || 'Unknown'),
             to: recipientAddress,
-            function: tx.payload?.function || 'N/A',
+            function: tx.payload?.function || (tx.payload?.type === 'entry_function_payload' ? 
+              (tx.events?.some((e: any) => e.type.includes('swap') || e.type.includes('Swap') || e.type.includes('trade') || e.type.includes('Trade')) ? 'swap_function' : 
+               tx.events?.some((e: any) => e.type.includes('deposit') || e.type.includes('Deposit')) ? 'deposit_function' :
+               tx.events?.some((e: any) => e.type.includes('withdraw') || e.type.includes('Withdraw')) ? 'withdraw_function' :
+               tx.events?.some((e: any) => e.type.includes('claim') || e.type.includes('Claim')) ? 'claim_function' :
+               'Unknown Function') : 
+              'N/A'),
             _rawData: tx // Store raw API data for debugging
           };
         });
@@ -438,6 +498,39 @@ export default function TestHyperionProfitPage() {
           // Дополнительная отладка для claim транзакций
           if (tx.type === 'claim') {
             addDebugInfo(`Claim транзакция: extractedAmount=${extractedAmount}, extractedToken=${extractedToken}`);
+          }
+          
+          // Дополнительная отладка для всех транзакций
+          addDebugInfo(`Транзакция ${index + 1}: extractedAmount=${extractedAmount}, extractedToken=${extractedToken}`);
+          
+          // Специальная отладка для конкретной транзакции
+          if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+            console.log('[DEBUG] === СПЕЦИАЛЬНАЯ ОТЛАДКА ДЛЯ КОНКРЕТНОЙ ТРАНЗАКЦИИ ===');
+            console.log('[DEBUG] Hash:', tx.hash);
+            console.log('[DEBUG] Function:', tx.function);
+            console.log('[DEBUG] Type:', tx.type);
+            console.log('[DEBUG] Extracted Amount:', extractedAmount);
+            console.log('[DEBUG] Extracted Token:', extractedToken);
+            console.log('[DEBUG] Raw Data Events:', tx._rawData?.events);
+            console.log('[DEBUG] Raw Data Changes:', tx._rawData?.changes);
+            console.log('[DEBUG] Raw Data Payload:', tx._rawData?.payload);
+            console.log('[DEBUG] === КОНЕЦ СПЕЦИАЛЬНОЙ ОТЛАДКИ ===');
+          }
+          
+          // Логируем в консоль для детальной отладки
+          console.log(`[DEBUG] Транзакция ${index + 1}:`, {
+            function: tx.function,
+            type: tx.type,
+            extractedAmount,
+            extractedToken,
+            rawData: tx._rawData
+          });
+          
+          // Дополнительная отладка для claim транзакций
+          if (tx.type === 'claim') {
+            console.log(`[DEBUG] Claim транзакция ${index + 1} - Events:`, tx._rawData?.events);
+            console.log(`[DEBUG] Claim транзакция ${index + 1} - Changes:`, tx._rawData?.changes);
+            console.log(`[DEBUG] Claim транзакция ${index + 1} - Payload:`, tx._rawData?.payload);
           }
       
       // Ищем события для определения точной суммы
@@ -775,6 +868,17 @@ export default function TestHyperionProfitPage() {
                   Swap транзакций: {hyperionTransactions.filter(tx => tx.type === 'swap').length}
                 </div>
                 
+                {/* Тестовая секция для проверки обработки токенов */}
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="text-sm font-semibold text-blue-700 mb-2">Тест обработки токенов:</div>
+                  <div className="space-y-2 text-xs">
+                    <div>APT: {getTokenInfoByCoinName('0xa')?.symbol || 'Не найден'}</div>
+                    <div>stAPT: {getTokenInfoByCoinName('0xb614bfdf9edc39b330bbf9c3c5bcd0473eee2f6d4e21748629cc367869ece627')?.symbol || 'Не найден'}</div>
+                    <div>USDC: {getTokenInfoByCoinName('0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b')?.symbol || 'Не найден'}</div>
+                    <div>USDt: {getTokenInfoByCoinName('0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b')?.symbol || 'Не найден'}</div>
+                  </div>
+                </div>
+                
                 {/* Показываем первые несколько транзакций для отладки */}
                 <div className="mt-4">
                   <div className="text-sm font-semibold text-gray-700 mb-2">Первые 3 транзакции:</div>
@@ -819,6 +923,62 @@ export default function TestHyperionProfitPage() {
                         // Отладочная информация для claim транзакций
                         if (isClaim) {
                           addDebugInfo(`Отображаем claim транзакцию: ${tx.function}, amount=${tx.amount}, extractedAmount=${extractedAmount}`);
+                        }
+                        
+                        // Отладочная информация для swap транзакций
+                        if (isSwap) {
+                          addDebugInfo(`Отображаем swap транзакцию: ${tx.function}, amount=${tx.amount}, extractedAmount=${extractedAmount}`);
+                          console.log('[DEBUG] Swap транзакция:', {
+                            function: tx.function,
+                            amount: tx.amount,
+                            extractedAmount,
+                            extractedToken,
+                            rawData: tx._rawData
+                          });
+                          
+                          // Специальная обработка для проблемной транзакции
+                          if (tx.hash === '0xf96adf5f9270a8e6d1f0bcca38d6678ed4153e0289474d1832ff4394f1cb043f') {
+                            addDebugInfo(`=== СПЕЦИАЛЬНАЯ ОБРАБОТКА ПРОБЛЕМНОЙ ТРАНЗАКЦИИ ===`);
+                            addDebugInfo(`Hash: ${tx.hash}`);
+                            addDebugInfo(`Function: ${tx.function}`);
+                            addDebugInfo(`Amount: ${tx.amount}`);
+                            addDebugInfo(`Extracted Amount: ${extractedAmount}`);
+                            addDebugInfo(`Extracted Token: ${extractedToken}`);
+                            addDebugInfo(`Events count: ${tx._rawData?.events?.length || 0}`);
+                            addDebugInfo(`Changes count: ${tx._rawData?.changes?.length || 0}`);
+                            
+                            // Детальный анализ событий
+                            if (tx._rawData?.events) {
+                              tx._rawData.events.forEach((event: any, index: number) => {
+                                addDebugInfo(`Событие ${index}: ${event.type}`);
+                                if (event.data) {
+                                  Object.keys(event.data).forEach(key => {
+                                    const value = event.data[key];
+                                    if (typeof value === 'string' && !isNaN(parseFloat(value)) && parseFloat(value) > 0) {
+                                      addDebugInfo(`  ${key}: ${value}`);
+                                    }
+                                  });
+                                }
+                              });
+                            }
+                            
+                            // Детальный анализ изменений
+                            if (tx._rawData?.changes) {
+                              tx._rawData.changes.forEach((change: any, index: number) => {
+                                addDebugInfo(`Изменение ${index}: ${change.data?.type}`);
+                                if (change.data?.data) {
+                                  Object.keys(change.data.data).forEach(key => {
+                                    const value = change.data.data[key];
+                                    if (typeof value === 'string' && !isNaN(parseFloat(value)) && parseFloat(value) > 0) {
+                                      addDebugInfo(`  ${key}: ${value}`);
+                                    }
+                                  });
+                                }
+                              });
+                            }
+                            
+                            addDebugInfo(`=== КОНЕЦ СПЕЦИАЛЬНОЙ ОБРАБОТКИ ===`);
+                          }
                         }
                         
                         // Ищем события для определения точной суммы
@@ -1218,6 +1378,25 @@ export default function TestHyperionProfitPage() {
  
           </>
         )}
+
+        {/* Блок отладки */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="text-lg">Отладка</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gray-100 p-4 rounded text-sm font-mono">
+              <div className="font-bold mb-2">Отладочная информация:</div>
+              <div>Откройте консоль браузера (F12) для просмотра детальной отладочной информации</div>
+              <div className="mt-2">
+                <div>• extractTransactionAmount - показывает какую функцию извлечения используется</div>
+                <div>• extractHyperionAmount - показывает детали обработки Hyperion транзакций</div>
+                <div>• getTokenInfoByCoinName - показывает процесс поиска токенов</div>
+                <div>• Swap транзакции - показывают детали SwapEvent и другие события</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
     </div>
   );
 }

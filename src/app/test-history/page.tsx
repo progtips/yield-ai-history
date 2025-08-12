@@ -1438,22 +1438,17 @@ export default function TestHistoryPage() {
                 {/* Protocol Profit/Loss Summary - Заменяем на новую версию */}
                 {profitData && !isLoading && (
                   <div className="mt-6 space-y-6">
-                    {/* Общая сводка по прибыли */}
-                    <ProfitSummaryCard
-                      protocolBreakdown={profitData.protocolBreakdown}
-                      totalProfit={profitData.totalProfit}
-                      overallStats={profitData.overallStats}
-                    />
-                    
                     {/* Детальная информация по каждому протоколу */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {profitData.protocolBreakdown.map((protocol: any) => (
-                        <ProtocolProfitCard
-                          key={protocol.protocolName}
-                          protocolName={protocol.protocolName}
-                          profitData={protocol.profitData}
-                        />
-                      ))}
+                      {profitData.protocolBreakdown
+                        .filter((protocol: any) => protocol.protocolName !== 'Echelon')
+                        .map((protocol: any) => (
+                          <ProtocolProfitCard
+                            key={protocol.protocolName}
+                            protocolName={protocol.protocolName}
+                            profitData={protocol.profitData}
+                          />
+                        ))}
                     </div>
                   </div>
                 )}
