@@ -413,31 +413,58 @@ export default function TestHistoryPage() {
         const fetchAllTransactions = async (address: string) => {
           let allTransactions: any[] = [];
           let start = 0;
-          const limit = 1000;
+          const limit = 100; // Уменьшаем лимит до 100, так как API ограничивает
           let hasMore = true;
           let pageCount = 0;
+          let totalFetched = 0;
+          
+          console.log(`Starting to fetch transactions for address: ${address}`);
           
           while (hasMore) {
             pageCount++;
+            console.log(`Fetching page ${pageCount}, start=${start}, limit=${limit}`);
             
-            const response = await fetch(`https://indexer.mainnet.aptoslabs.com/v1/accounts/${address}/transactions?start=${start}&limit=${limit}&include_events=true&include_payload=true&order=desc`);
-            
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            allTransactions = allTransactions.concat(data);
-            
-            // If we got less than the limit, we've reached the end
-            if (data.length < limit) {
-              hasMore = false;
-            } else {
-              start += limit;
+            try {
+              const response = await fetch(`https://indexer.mainnet.aptoslabs.com/v1/accounts/${address}/transactions?start=${start}&limit=${limit}&include_events=true&include_payload=true&order=desc`);
+              
+              if (!response.ok) {
+                console.error(`HTTP error on page ${pageCount}: ${response.status} ${response.statusText}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              const data = await response.json();
+              console.log(`Page ${pageCount}: received ${data.length} transactions`);
+              
+              allTransactions = allTransactions.concat(data);
+              totalFetched += data.length;
+              
+              console.log(`Total fetched so far: ${totalFetched} transactions`);
+              
+              // If we got less than the limit, we've reached the end
+              if (data.length < limit) {
+                console.log(`Reached end of transactions. Got ${data.length} < ${limit}`);
+                hasMore = false;
+              } else {
+                start += limit;
+                console.log(`Moving to next page, new start=${start}`);
+                
+                // Add a small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 200));
+              }
+              
+              // Safety check to prevent infinite loops - увеличиваем лимит для получения всех 500 транзакций
+              if (pageCount > 20) {
+                console.warn(`Reached maximum page count (20), stopping to prevent infinite loop`);
+                hasMore = false;
+              }
+              
+            } catch (error) {
+              console.error(`Error fetching page ${pageCount}:`, error);
+              throw error;
             }
           }
           
+          console.log(`Finished fetching. Total pages: ${pageCount}, Total transactions: ${allTransactions.length}`);
           return allTransactions;
         };
         
@@ -478,8 +505,9 @@ export default function TestHistoryPage() {
         console.log('=== Comparison with Aptos Explorer ===');
         console.log(`To verify in Aptos Explorer, visit:`);
         console.log(`https://explorer.aptoslabs.com/account/${address}?network=mainnet`);
-        console.log(`Expected: 7 transactions, Actual: ${data.length} transactions`);
-        console.log(`Difference: ${7 - data.length} transactions missing`);
+        console.log(`Actual: ${data.length} transactions`);
+        console.log(`Expected: ~500 transactions (based on Explorer)`);
+        console.log(`Difference: ${500 - data.length} transactions missing`);
         
         // Additional debug: Log transaction types to understand what we're getting
         const transactionTypes = data.reduce((acc: any, tx: any) => {
@@ -1177,6 +1205,15 @@ export default function TestHistoryPage() {
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setWalletAddress("0x0a579b20dee8811721a730c5f16a0650183aa2931099cfcd62b20d22326e3d6d");
+                    }}
+                  >
+                    Мой кошелек
+                  </Button>
+                  
+                  <Button 
                     variant="outline"
                     onClick={() => setWalletAddress("0x56ff2fc971deecd286314fe99b8ffd6a5e72e62eacdc46ae9b234c5282985f97")}
                   >
@@ -1232,6 +1269,24 @@ export default function TestHistoryPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={handleRefreshHistory} disabled={isLoading}>
                     Refresh History
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleRefreshHistory} 
+                    disabled={isLoading}
+                    title="Принудительно получить все транзакции с подробной отладкой"
+                  >
+                    Получить все транзакции
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleRefreshHistory} 
+                    disabled={isLoading}
+                    title="Попытаться получить максимальное количество транзакций (до 20 страниц)"
+                  >
+                    Получить максимум транзакций
                   </Button>
                   
                   {/* Button to open in Aptos Explorer */}

@@ -897,176 +897,243 @@ export default function TestHyperionProfitPage() {
           </Card>
 
           {/* История транзакций Hyperion */}
-          {hyperionTransactions.length > 0 && (
+          {(hyperionTransactions.length > 0 || hyperionProfitResults.length > 0) && (
             <Card>
               <CardHeader>
                 <CardTitle>История транзакций Hyperion</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {hyperionTransactions
-                    .sort((a, b) => {
-                      // Сортировка по дате: ранние операции сначала
-                      const dateA = new Date(parseInt(a.timestamp) / 1000);
-                      const dateB = new Date(parseInt(b.timestamp) / 1000);
-                      return dateA.getTime() - dateB.getTime();
-                    })
-                    .map((tx, index) => {
-                    // Извлекаем сумму и токен
-                    const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
-                    const actualAmount = Math.abs(extractedAmount);
-                    const actualToken = extractedToken;
+                  {(() => {
+                    // Создаем массив всех транзакций
+                    const allTransactions: any[] = [];
                     
-                    // Определяем тип операции
-                    const isDeposit = tx.type === 'deposit';
-                    const isWithdraw = tx.type === 'withdraw';
-                    const isClaim = tx.type === 'claim';
-                    const isSwap = tx.type === 'swap';
+                    // Добавляем транзакции из hyperionTransactions
+                    hyperionTransactions.forEach(tx => {
+                      allTransactions.push({
+                        ...tx,
+                        source: 'hyperionTransactions',
+                        displayDate: new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU'),
+                        timestamp: parseInt(tx.timestamp)
+                      });
+                    });
                     
-                    // Функция для получения описания транзакции
-                    const getTransactionDescription = (tx: any) => {
-                      const functionName = tx.function.toLowerCase();
-                      if (functionName.includes('supply') || functionName.includes('deposit')) {
-                        return 'Ввод активов';
-                      } else if (functionName.includes('withdraw') || functionName.includes('redeem')) {
-                        return 'Вывод активов';
-                      } else if (functionName.includes('claim') || functionName.includes('reward')) {
-                        return 'Получение наград';
-                      } else if (functionName.includes('swap') || functionName.includes('exchange')) {
-                        return 'Обмен токенов';
-                      } else if (functionName.includes('transfer')) {
-                        return 'Перевод токенов';
-                      } else {
-                        return 'Операция с активами';
-                      }
-                    };
+                    // Добавляем транзакции из hyperionProfitResults
+                    hyperionProfitResults.forEach(result => {
+                      result.transactions.forEach((tx: any) => {
+                        allTransactions.push({
+                          ...tx,
+                          source: 'hyperionProfitResults',
+                          displayDate: tx.date,
+                          timestamp: new Date(tx.date).getTime()
+                        });
+                      });
+                    });
+                    
+                    // Сортируем по дате: ранние операции сначала
+                    return allTransactions
+                      .sort((a, b) => a.timestamp - b.timestamp)
+                      .map((tx, index) => {
+                        // Определяем тип операции
+                        const isDeposit = tx.type === 'deposit' || tx.type === 'add_liquidity';
+                        const isWithdraw = tx.type === 'withdraw' || tx.type === 'remove_liquidity';
+                        const isClaim = tx.type === 'claim';
+                        const isSwap = tx.type === 'swap';
+                        
+                        // Получаем сумму и токен
+                        let actualAmount = 0;
+                        let actualToken = 'Unknown';
+                        
+                        if (tx.source === 'hyperionTransactions') {
+                          const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
+                          actualAmount = Math.abs(extractedAmount);
+                          actualToken = extractedToken;
+                        } else {
+                          // Для транзакций из hyperionProfitResults
+                          const amount = tx.signedAmount !== null && tx.signedAmount !== undefined ? tx.signedAmount : tx.amount || 0;
+                          actualAmount = Math.abs(amount);
+                          actualToken = tx.currency || 'Unknown';
+                        }
+                        
+                        // Функция для получения описания транзакции
+                        const getTransactionDescription = (tx: any) => {
+                          if (tx.source === 'hyperionTransactions') {
+                            const functionName = tx.function.toLowerCase();
+                            if (functionName.includes('supply') || functionName.includes('deposit')) {
+                              return 'Ввод активов';
+                            } else if (functionName.includes('withdraw') || functionName.includes('redeem')) {
+                              return 'Вывод активов';
+                            } else if (functionName.includes('claim') || functionName.includes('reward')) {
+                              return 'Получение наград';
+                            } else if (functionName.includes('swap') || functionName.includes('exchange')) {
+                              return 'Обмен токенов';
+                            } else if (functionName.includes('transfer')) {
+                              return 'Перевод токенов';
+                            } else {
+                              return 'Операция с активами';
+                            }
+                          } else {
+                            // Для транзакций из hyperionProfitResults
+                            switch (tx.type) {
+                              case 'add_liquidity': return 'Ввод активов';
+                              case 'remove_liquidity': return 'Вывод активов';
+                              case 'claim': return 'Получение наград';
+                              case 'swap': return 'Обмен токенов';
+                              case 'fee': return 'Комиссия';
+                              default: return 'Операция с активами';
+                            }
+                          }
+                        };
 
-                    return (
-                      <div key={tx.id} className={`p-4 border rounded-lg ${
-                        isDeposit ? 'bg-red-50 border-red-200' : 
-                        isWithdraw ? 'bg-green-50 border-green-200' : 
-                        isClaim ? 'bg-purple-50 border-purple-200' : 
-                        isSwap ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
-                      }`}>
-                        <div className="flex justify-between items-center">
-                          {/* Первый столбец: Дата/Время */}
-                          <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full ${
-                              isDeposit ? 'bg-red-500' : 
-                              isWithdraw ? 'bg-green-500' : 
-                              isClaim ? 'bg-purple-500' : 
-                              isSwap ? 'bg-blue-500' : 'bg-gray-500'
-                            }`}></div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-700">
-                                {new Date(parseInt(tx.timestamp) / 1000).toLocaleString('ru-RU')}
+                        return (
+                          <div key={`${tx.source}-${index}`} className={`p-4 border rounded-lg ${
+                            isDeposit ? 'bg-red-50 border-red-200' : 
+                            isWithdraw ? 'bg-green-50 border-green-200' : 
+                            isClaim ? 'bg-purple-50 border-purple-200' : 
+                            isSwap ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
+                          }`}>
+                            <div className="flex justify-between items-center">
+                              {/* Первый столбец: Дата/Время */}
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  isDeposit ? 'bg-red-500' : 
+                                  isWithdraw ? 'bg-green-500' : 
+                                  isClaim ? 'bg-purple-500' : 
+                                  isSwap ? 'bg-blue-500' : 'bg-gray-500'
+                                }`}></div>
+                                <div>
+                                  <div className="text-sm font-medium text-gray-700">
+                                    {tx.displayDate}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {isDeposit ? 'Списание' : 
+                                     isWithdraw ? 'Зачисление' : 
+                                     isClaim ? 'Награды' : 
+                                     isSwap ? 'Обмен' : 'Операция'}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {isDeposit ? 'Списание' : 
-                                 isWithdraw ? 'Зачисление' : 
-                                 isClaim ? 'Награды' : 
-                                 isSwap ? 'Обмен' : 'Операция'}
+                              
+                              {/* Второй столбец: Описание транзакции */}
+                              <div className="flex-1 text-center mx-4">
+                                <div className="text-sm font-medium text-gray-700">
+                                  {getTransactionDescription(tx)}
+                                </div>
+                              </div>
+                              
+                              {/* Третий столбец: Сумма и детали */}
+                              <div className="text-right">
+                                <div className={`font-bold text-lg ${
+                                  isDeposit ? 'text-red-600' : 
+                                  isWithdraw ? 'text-green-600' : 
+                                  isClaim ? 'text-purple-600' : 
+                                  isSwap ? 'text-blue-600' : 'text-gray-600'
+                                }`}>
+                                  {isDeposit ? '-' : isWithdraw || isClaim ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  TX: <a 
+                                    href={`https://explorer.aptoslabs.com/txn/${tx.hash || tx.tx}?network=mainnet`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                                  >
+                                    {(tx.hash || tx.tx).substring(0, 8)}...{(tx.hash || tx.tx).substring((tx.hash || tx.tx).length - 6)}
+                                  </a>
+                                </div>
+                                {/* Плата за газ */}
+                                {(tx._rawData?.gas_used || tx.gasFee > 0) && (
+                                  <div className="text-xs text-orange-600">
+                                    Газ: {tx.gasFee > 0 ? tx.gasFee.toFixed(6) : 
+                                          parseInt(tx._rawData.gas_used) * (parseInt(tx._rawData.gas_unit_price || '100') / 100000000)} APT
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                          
-                          {/* Второй столбец: Описание транзакции */}
-                          <div className="flex-1 text-center mx-4">
-                            <div className="text-sm font-medium text-gray-700">
-                              {getTransactionDescription(tx)}
-                            </div>
-                          </div>
-                          
-                          {/* Третий столбец: Сумма и детали */}
-                          <div className="text-right">
-                            <div className={`font-bold text-lg ${
-                              isDeposit ? 'text-red-600' : 
-                              isWithdraw ? 'text-green-600' : 
-                              isClaim ? 'text-purple-600' : 
-                              isSwap ? 'text-blue-600' : 'text-gray-600'
-                            }`}>
-                              {isDeposit ? '-' : isWithdraw || isClaim ? '+' : ''}{actualAmount.toFixed(6)} {actualToken}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              TX: <a 
-                                href={`https://explorer.aptoslabs.com/txn/${tx.hash}?network=mainnet`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
-                              >
-                                {tx.hash.substring(0, 8)}...{tx.hash.substring(tx.hash.length - 6)}
-                              </a>
-                            </div>
-                            {/* Плата за газ */}
-                            {tx._rawData?.gas_used && (
-                              <div className="text-xs text-orange-600">
-                                Газ: {parseInt(tx._rawData.gas_used) * (parseInt(tx._rawData.gas_unit_price || '100') / 100000000)} APT
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      });
+                  })()}
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Детали транзакций Hyperion */}
+          {/* Результаты расчета прибыли Hyperion */}
           {hyperionProfitResults.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Детали транзакций Hyperion</CardTitle>
+                <CardTitle>Результаты расчета прибыли Hyperion</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {hyperionProfitResults.map((result, index) => (
                     <div key={index} className="space-y-4">
                       <div className="text-lg font-semibold text-blue-600">
-                        Детали для {result.currency}
+                        Результаты для {result.currency}
                       </div>
                       
-                      {/* Детали транзакций */}
-                      <div className="space-y-3">
-                        {result.transactions.map((tx: any, txIndex: number) => {
-                          // Проверяем и используем правильное значение суммы
-                          const amount = tx.signedAmount !== null && tx.signedAmount !== undefined ? tx.signedAmount : tx.amount || 0;
-                          const isPositive = amount >= 0;
-                          
-                          return (
-                            <div key={txIndex} className="bg-gray-50 p-4 rounded-lg">
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <div className="text-sm font-medium text-gray-700">{tx.date}</div>
-                                  <div className="text-xs text-gray-500">Тип: {tx.type}</div>
-                                </div>
-                                <div className="text-right">
-                                  <div className={`font-bold text-lg ${
-                                    isPositive ? 'text-green-600' : 'text-red-600'
-                                  }`}>
-                                    {isPositive ? '+' : ''}{Math.abs(amount).toFixed(6)} {tx.currency}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    TX: <a 
-                                      href={`https://explorer.aptoslabs.com/txn/${tx.tx}?network=mainnet`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
-                                    >
-                                      {tx.tx.substring(0, 8)}...{tx.tx.substring(tx.tx.length - 6)}
-                                    </a>
-                                  </div>
-                                  {tx.gasFee > 0 && (
-                                    <div className="text-xs text-orange-600">
-                                      Газ: {tx.gasFee.toFixed(6)} APT
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                      {/* Основные показатели */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Остаток в пуле</div>
+                          <div className="text-lg font-bold text-yellow-600">
+                            {result.remainingPosition.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Награды</div>
+                          <div className="text-lg font-bold text-purple-600">
+                            {result.totalClaims.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Комиссии</div>
+                          <div className="text-lg font-bold text-red-600">
+                            {result.feesPaid.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-orange-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600">Плата за газ</div>
+                          <div className="text-lg font-bold text-orange-600">
+                            {result.totalGasFees.toFixed(6)} APT
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Дополнительные параметры */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий ввод</div>
+                          <div className="font-medium text-red-600">{result.totalSupply.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Общий вывод</div>
+                          <div className="font-medium text-green-600">{result.totalWithdraw.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Обмены</div>
+                          <div className="font-medium text-blue-600">{result.totalSwaps.toFixed(6)} {result.currency}</div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Net PnL</div>
+                          <div className={`font-medium ${result.netPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.netPnL >= 0 ? '+' : ''}{result.netPnL.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Total PnL</div>
+                          <div className={`font-medium ${result.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.totalPnL >= 0 ? '+' : ''}{result.totalPnL.toFixed(6)} {result.currency}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1074,6 +1141,7 @@ export default function TestHyperionProfitPage() {
               </CardContent>
             </Card>
           )}
+
         </>
       )}
     </div>
