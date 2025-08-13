@@ -904,7 +904,14 @@ export default function TestHyperionProfitPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {hyperionTransactions.map((tx, index) => {
+                  {hyperionTransactions
+                    .sort((a, b) => {
+                      // Сортировка по дате: ранние операции сначала
+                      const dateA = new Date(parseInt(a.timestamp) / 1000);
+                      const dateB = new Date(parseInt(b.timestamp) / 1000);
+                      return dateA.getTime() - dateB.getTime();
+                    })
+                    .map((tx, index) => {
                     // Извлекаем сумму и токен
                     const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx._rawData, tx.from);
                     const actualAmount = Math.abs(extractedAmount);
