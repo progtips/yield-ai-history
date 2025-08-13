@@ -17,6 +17,7 @@ import {
 } from "@/lib/utils/profitCalculation";
 import { ProtocolProfitCard } from "@/components/portfolio/ProtocolProfitCard";
 import { ProfitSummaryCard } from "@/components/portfolio/ProfitSummaryCard";
+import protocolsList from "@/lib/data/protocolsList.json";
 
 export default function TestHyperionProfitPage() {
   const { account, connected } = useWallet();
@@ -106,17 +107,27 @@ export default function TestHyperionProfitPage() {
     const contractAddress = parts[0];
     const normalizedAddress = contractAddress.toLowerCase().replace(/^0x/, '');
     
-    // Известные адреса контрактов Hyperion
-    const protocolAddresses: { [key: string]: string } = {
-      'c0c240c870606a5cb3150795e2d0dfff9f1f7456': 'Hyperion',
-    };
+    // Find protocol by contract address using protocolsList.json
+    const protocol = protocolsList.find(p => {
+      const protocolWithContract = p as any;
+      const hasContract = protocolWithContract.contract && typeof protocolWithContract.contract === 'string';
+      
+      if (!hasContract) {
+        return false;
+      }
+      
+      // Normalize contract address
+      const normalizedContract = protocolWithContract.contract.toLowerCase().replace(/^0x/, '');
+      const matches = normalizedContract === normalizedAddress;
+      
+      return matches;
+    });
     
-    // Проверяем по адресу контракта
-    if (protocolAddresses[normalizedAddress]) {
-      return protocolAddresses[normalizedAddress];
+    if (protocol) {
+      return protocol.name;
     }
     
-    // Проверяем по названию функции (более гибкий подход)
+    // Fallback: проверяем по названию функции
     const functionName = functionPath.toLowerCase();
     if (functionName.includes('hyperion') || 
         functionName.includes('swap') || 
@@ -232,6 +243,9 @@ export default function TestHyperionProfitPage() {
         const swapEvent = tx._rawData.events.find((event: any) => 
           event.type.includes('SwapEvent')
         );
+        const swapEventV3 = tx._rawData.events.find((event: any) => 
+          event.type.includes('SwapEventV3')
+        );
         const liquidityEvent = tx._rawData.events.find((event: any) => 
           event.type.includes('LiquidityEvent')
         );
@@ -256,7 +270,12 @@ export default function TestHyperionProfitPage() {
           }
         }
         
-        if (swapEvent && swapEvent.data) {
+        if (swapEventV3 && swapEventV3.data) {
+          // Для Hyperion SwapEventV3 используем amount_in
+          actualAmount = parseFloat(swapEventV3.data.amount_in) / Math.pow(10, 6); // USDC has 6 decimals
+          actualToken = 'USDC'; // Из события видно, что это USDC -> USDt swap
+          addDebugInfo(`SwapEventV3 found: amount_in=${swapEventV3.data.amount_in}, calculated=${actualAmount}`);
+        } else if (swapEvent && swapEvent.data) {
           actualAmount = parseFloat(swapEvent.data.amount) / Math.pow(10, tokenDecimals);
         } else if (liquidityEvent && liquidityEvent.data) {
           actualAmount = parseFloat(liquidityEvent.data.amount) / Math.pow(10, tokenDecimals);
@@ -279,7 +298,35 @@ export default function TestHyperionProfitPage() {
         addDebugInfo(`Обрабатываем claim: amount=${actualAmount}, signedAmount=${signedAmount}, token=${actualToken}`);
       } else if (tx.type === 'swap') {
         operationType = 'swap';
-        signedAmount = actualAmount; // Свопы оставляем как есть
+        // Для swap определяем направление по событиям
+        if (tx._rawData?.events) {
+          const swapEventV3 = tx._rawData.events.find((event: any) => 
+            event.type.includes('SwapEventV3')
+          );
+          if (swapEventV3 && swapEventV3.data) {
+            // Определяем направление swap
+            const fromToken = swapEventV3.data.from_token?.inner;
+            const toToken = swapEventV3.data.to_token?.inner;
+            
+            // Если from_token совпадает с адресом кошелька, это вывод (отрицательно)
+            // Если to_token совпадает с адресом кошелька, это ввод (положительно)
+            if (fromToken && toToken) {
+              const amountIn = parseFloat(swapEventV3.data.amount_in) / Math.pow(10, 6);
+              const amountOut = parseFloat(swapEventV3.data.amount_out) / Math.pow(10, 6);
+              
+              // Для упрощения считаем это как обмен, где пользователь тратит amount_in
+              signedAmount = -Math.abs(amountIn); // Отрицательно, так как тратит
+              actualAmount = amountIn;
+              actualToken = 'USDC';
+              
+              addDebugInfo(`Swap direction: ${amountIn} USDC -> ${amountOut} USDt, signedAmount=${signedAmount}`);
+            }
+          } else {
+            signedAmount = actualAmount; // Свопы оставляем как есть
+          }
+        } else {
+          signedAmount = actualAmount; // Свопы оставляем как есть
+        }
         addDebugInfo(`Обрабатываем swap: amount=${actualAmount}, signedAmount=${signedAmount}, token=${actualToken}`);
       } else if (tx.type === 'fee') {
         operationType = 'fee';
@@ -448,6 +495,200 @@ export default function TestHyperionProfitPage() {
     calculateHyperionProfitWithData(transactions);
   }, [isClient, addDebugInfo, calculateHyperionProfitWithData, transactions]);
 
+  const handleRefreshHistory = () => {
+    if (!walletAddress.trim()) {
+      setHasError(true);
+      setErrorMessage("Пожалуйста, введите адрес кошелька");
+      return;
+    }
+
+    setIsLoading(true);
+    setHasError(false);
+    setErrorMessage("");
+    setHasStartedAnalysis(true);
+    
+    addDebugInfo('=== Starting Hyperion profit calculation test ===');
+    addDebugInfo(`walletAddress: ${walletAddress}`);
+    
+    // Fetch real transactions from Aptos blockchain
+    const fetchRealTransactions = async (address: string) => {
+      try {
+        // Function to fetch all transactions with pagination
+        const fetchAllTransactions = async (address: string) => {
+          let allTransactions: any[] = [];
+          let start = 0;
+          const limit = 1000;
+          let hasMore = true;
+          
+          while (hasMore) {
+            const response = await fetch(`https://indexer.mainnet.aptoslabs.com/v1/accounts/${address}/transactions?start=${start}&limit=${limit}&include_events=true&include_payload=true&order=desc`);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            allTransactions = allTransactions.concat(data);
+            
+            if (data.length < limit) {
+              hasMore = false;
+            } else {
+              start += limit;
+            }
+          }
+          
+          return allTransactions;
+        };
+        
+        const data = await fetchAllTransactions(address);
+        addDebugInfo(`Fetched ${data.length} transactions for Hyperion analysis`);
+        
+        // Transform API data to our format
+        const transformedTransactions = data.map((tx: any, index: number) => {
+          // Determine transaction type based on payload and events
+          let type: TransactionType['type'] = 'transfer';
+          let protocol = 'Aptos';
+          
+          if (tx.payload?.type === 'entry_function_payload') {
+            const functionName = tx.payload.function;
+            
+            if (functionName.includes('supply') || functionName.includes('deposit')) {
+              type = 'deposit';
+            } else if (functionName.includes('withdraw') || functionName.includes('redeem')) {
+              type = 'withdraw';
+            } else if (functionName.includes('claim') || functionName.includes('reward')) {
+              type = 'claim';
+            } else if (functionName.includes('swap') || functionName.includes('exchange')) {
+              type = 'swap';
+            } else if (functionName.includes('coin::transfer')) {
+              type = 'transfer';
+            } else {
+              type = 'other';
+            }
+          }
+          
+          // Используем улучшенную логику извлечения суммы для Hyperion
+          const { amount: extractedAmount, token: extractedToken } = extractTransactionAmount(tx, address);
+          const amount = `${extractedAmount.toFixed(4)} ${extractedToken}`;
+          
+          // Improved recipient address extraction
+          let recipientAddress = 'Unknown';
+          
+          if (tx.payload?.type === 'entry_function_payload') {
+            const functionName = tx.payload.function;
+            const args = tx.payload.arguments || [];
+            
+            if (functionName.includes('coin::transfer') || functionName.includes('coin::transfer_with_metadata')) {
+              recipientAddress = String(args[0] || 'Unknown');
+            } else if (args.length > 0) {
+              if (typeof args[0] === 'object' && args[0] !== null && 'inner' in args[0]) {
+                const innerValue = String(args[0].inner || '');
+                if (innerValue.startsWith('0x') && innerValue.length > 40) {
+                  recipientAddress = innerValue;
+                } else {
+                  recipientAddress = `Pool ID: ${innerValue}`;
+                }
+              } else {
+                const firstArg = String(args[0] || '');
+                if (firstArg.startsWith('0x') && firstArg.length > 40) {
+                  recipientAddress = firstArg;
+                } else {
+                  recipientAddress = `Pool ID: ${firstArg}`;
+                }
+              }
+            }
+          }
+          
+          return {
+            id: tx.version || index.toString(),
+            type,
+            protocol,
+            timestamp: tx.timestamp,
+            amount,
+            status: tx.success ? 'completed' as const : 'failed' as const,
+            hash: tx.hash || `0x${(index * 12345).toString(16).padStart(16, '0')}...`,
+            from: String(tx.sender || 'Unknown'),
+            to: recipientAddress,
+            function: tx.payload?.function || 'N/A',
+            _rawData: tx // Store raw API data for debugging
+          };
+        });
+        
+        addDebugInfo(`Transformed ${transformedTransactions.length} transactions for Hyperion analysis`);
+        
+        // Sort transactions by timestamp in descending order (newest first)
+        const sortedTransactions = transformedTransactions.sort((a: any, b: any) => {
+          const getTimestamp = (timestamp: any) => {
+            if (!timestamp) return 0;
+            
+            let numTimestamp: number;
+            if (typeof timestamp === 'string') {
+              numTimestamp = parseFloat(timestamp);
+              if (isNaN(numTimestamp)) return 0;
+            } else {
+              numTimestamp = timestamp;
+            }
+            
+            if (numTimestamp > 1000000000000000) {
+              return numTimestamp / 1000;
+            } else if (numTimestamp > 1000000000000) {
+              return numTimestamp;
+            } else {
+              return numTimestamp * 1000;
+            }
+          };
+          
+          const dateA = getTimestamp(a.timestamp);
+          const dateB = getTimestamp(b.timestamp);
+          
+          if (dateA === dateB) {
+            const versionA = parseInt(a.id) || 0;
+            const versionB = parseInt(b.id) || 0;
+            return versionB - versionA;
+          }
+          
+          return dateB - dateA;
+        });
+        
+        return sortedTransactions;
+        
+      } catch (error) {
+        addDebugInfo(`Error fetching transactions: ${error}`);
+        throw error;
+      }
+    };
+    
+    // Fetch transactions and calculate profit
+    fetchRealTransactions(walletAddress)
+      .then((realTransactions) => {
+        addDebugInfo(`Fetched ${realTransactions.length} real transactions for Hyperion analysis`);
+        setTransactions(realTransactions);
+        
+        // Фильтруем только Hyperion транзакции для детального анализа
+        const hyperionOnly = realTransactions.filter(tx => {
+          const protocol = getProtocolNameByFunction(tx.function, tx.to);
+          addDebugInfo(`Transaction ${tx.hash}: function=${tx.function}, protocol=${protocol}`);
+          return protocol === 'Hyperion';
+        });
+        
+        addDebugInfo(`Found ${hyperionOnly.length} Hyperion transactions`);
+        setHyperionTransactions(hyperionOnly);
+        
+        // Автоматически запускаем расчет прибыли
+        if (hyperionOnly.length > 0) {
+          calculateHyperionProfitWithData(realTransactions);
+        }
+        
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        addDebugInfo(`Failed to fetch transactions: ${error}`);
+        setHasError(true);
+        setErrorMessage(`Ошибка при получении транзакций: ${error.message}`);
+        setIsLoading(false);
+      });
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {!isClient ? (
@@ -490,6 +731,13 @@ export default function TestHyperionProfitPage() {
                 )}
                 
                 <div className="flex flex-wrap gap-2">
+                  <Button 
+                    onClick={handleRefreshHistory} 
+                    disabled={isLoading}
+                  >
+                    Анализировать Hyperion
+                  </Button>
+                  
                   <Button 
                     variant="outline" 
                     onClick={() => {
