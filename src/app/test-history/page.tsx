@@ -938,8 +938,22 @@ export default function TestHistoryPage() {
           return dateB - dateA; // Descending order by timestamp
         });
         
+        // Filter transactions to include both outgoing (sender) and incoming (recipient) transactions
+        const walletAddressLower = address.toLowerCase();
+        const filteredTransactions = sortedTransactions.filter(tx => {
+          const isOutgoing = tx.from.toLowerCase() === walletAddressLower;
+          const isIncoming = tx.to.toLowerCase() === walletAddressLower;
+          
+          // Include transactions where wallet is either sender or recipient
+          return isOutgoing || isIncoming;
+        });
+        
+        console.log(`Filtered transactions: ${filteredTransactions.length} out of ${sortedTransactions.length} total`);
+        console.log(`Outgoing transactions: ${filteredTransactions.filter(tx => tx.from.toLowerCase() === walletAddressLower).length}`);
+        console.log(`Incoming transactions: ${filteredTransactions.filter(tx => tx.to.toLowerCase() === walletAddressLower).length}`);
+        
         console.log('Sorted transactions by date (newest first)');
-        return sortedTransactions;
+        return filteredTransactions;
         
       } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -1416,8 +1430,8 @@ export default function TestHistoryPage() {
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Version</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Type</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Timestamp</th>
-                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Sender</th>
+                          <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Send to</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Protocol</th>
                           <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Function</th>
 
@@ -1443,10 +1457,10 @@ export default function TestHistoryPage() {
                               {safeFormatTimestamp(tx.timestamp)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {tx.amount}
+                              {safeTruncateAddress(tx.from)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
-                              {safeTruncateAddress(tx.from)}
+                              {safeTruncateAddress(tx.to)}
                             </td>
                             <td className="border border-gray-200 px-4 py-2 text-sm font-mono">
                               {(() => {
