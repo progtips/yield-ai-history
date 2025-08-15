@@ -3,6 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NetworkSwitch } from "@/components/explorer/NetworkSwitch";
 import { GlobalSearch } from "@/components/explorer/GlobalSearch";
+import { SearchDebug } from "@/components/explorer/SearchDebug";
 import { useExplorerStore } from "@/stores/explorer";
 import { TransactionsTab } from "@/components/explorer/TransactionsTab";
 import { AccountsTab } from "@/components/explorer/AccountsTab";
@@ -23,6 +24,9 @@ export default function ExplorerPage() {
         <GlobalSearch />
         <NetworkSwitch />
       </div>
+
+      {/* Отладочная панель */}
+      <SearchDebug />
 
       {/* Основные табы */}
       <Tabs value={filters.selectedTab} onValueChange={handleTabChange} className="w-full">

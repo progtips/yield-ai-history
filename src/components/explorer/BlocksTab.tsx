@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useExplorerStore } from "@/stores/explorer";
-import { Cube, Layers, Hash } from "lucide-react";
+import { Box, Layers, Hash } from "lucide-react";
 
 export function BlocksTab() {
   const { network, filters } = useExplorerStore();
@@ -18,7 +18,7 @@ export function BlocksTab() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Cube className="h-5 w-5" />
+            <Box className="h-5 w-5" />
             Block Information
           </CardTitle>
         </CardHeader>

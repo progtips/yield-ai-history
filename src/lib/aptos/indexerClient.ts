@@ -4,8 +4,29 @@ import { GraphQLClient } from 'graphql-request';
  * Создает GraphQL клиент для Aptos Indexer
  * @returns GraphQLClient настроенный для работы с Aptos Indexer
  */
-export function getGraphQLClient(): GraphQLClient {
-  const indexerUrl = process.env.INDEXER_GQL_URL || 'https://indexer.mainnet.aptoslabs.com/v1/graphql';
+export function getGraphQLClient(network: string = 'mainnet'): GraphQLClient {
+  // Определяем URL в зависимости от сети
+  let indexerUrl: string;
+  
+  if (process.env.NEXT_PUBLIC_INDEXER_GQL_URL) {
+    indexerUrl = process.env.NEXT_PUBLIC_INDEXER_GQL_URL;
+  } else if (process.env.INDEXER_GQL_URL) {
+    indexerUrl = process.env.INDEXER_GQL_URL;
+  } else {
+    // URL по умолчанию в зависимости от сети
+    switch (network) {
+      case 'testnet':
+        indexerUrl = 'https://indexer.testnet.aptoslabs.com/v1/graphql';
+        break;
+      case 'devnet':
+        indexerUrl = 'https://indexer.devnet.aptoslabs.com/v1/graphql';
+        break;
+      case 'mainnet':
+      default:
+        indexerUrl = 'https://indexer.mainnet.aptoslabs.com/v1/graphql';
+        break;
+    }
+  }
   
   const client = new GraphQLClient(indexerUrl, {
     headers: {
@@ -31,9 +52,10 @@ export function getGraphQLClient(): GraphQLClient {
  */
 export async function executeQuery<T = any>(
   query: string, 
-  variables?: Record<string, any>
+  variables?: Record<string, any>,
+  network: string = 'mainnet'
 ): Promise<T> {
-  const client = getGraphQLClient();
+  const client = getGraphQLClient(network);
   
   try {
     const result = await client.request<T>(query, variables);
@@ -54,13 +76,14 @@ export async function executeQuery<T = any>(
 export async function executeQueryWithRetry<T = any>(
   query: string,
   variables?: Record<string, any>,
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  network: string = 'mainnet'
 ): Promise<T> {
   let lastError: Error;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await executeQuery<T>(query, variables);
+      return await executeQuery<T>(query, variables, network);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error');
       

@@ -32,6 +32,7 @@ export interface SearchResult {
   value: string;
   url: string;
   exists: boolean;
+  errorMessage?: string;
 }
 
 // Определение типа поиска на основе регулярных выражений
@@ -80,7 +81,7 @@ export function GlobalSearch() {
   const [error, setError] = useState<string | null>(null);
   
   const debouncedQuery = useDebounce(searchQuery, 500);
-  const { setFilters } = useExplorerStore();
+  const { setFilters, network } = useExplorerStore();
   const router = useRouter();
 
   // Получение иконки для типа поиска
@@ -131,21 +132,31 @@ export function GlobalSearch() {
     try {
       let exists = false;
       let url = '';
+      let errorMessage = '';
 
       // 1. Сначала пробуем найти транзакцию по хэшу
       if (searchType === 'transaction') {
-        const txQuery = `
-          query TransactionByHash($hash: String!) {
-            transactions(where: { hash: { _eq: $hash } }, limit: 1) {
-              hash
+        try {
+          const txQuery = `
+            query TransactionByHash($hash: String!) {
+              transactions(where: { hash: { _eq: $hash } }, limit: 1) {
+                hash
+                version
+                sender
+              }
             }
+          `;
+          
+          const result = await executeQueryWithRetry(txQuery, { hash: trimmedQuery }, 3, network);
+          if (result.transactions && result.transactions.length > 0) {
+            exists = true;
+            url = `/explorer/tx/${trimmedQuery}`;
+          } else {
+            errorMessage = 'Transaction not found in current network';
           }
-        `;
-        
-        const result = await executeQueryWithRetry(txQuery, { hash: trimmedQuery });
-        if (result.transactions && result.transactions.length > 0) {
-          exists = true;
-          url = `/explorer/tx/${trimmedQuery}`;
+        } catch (txError) {
+          console.error('Transaction search error:', txError);
+          errorMessage = 'Failed to search transaction';
         }
       }
       
@@ -155,18 +166,26 @@ export function GlobalSearch() {
         
         // Для больших чисел пробуем как версию
         if (searchType === 'version' || num > 1000000) {
-          const versionQuery = `
-            query TransactionByVersion($version: Int!) {
-              transactions(where: { version: { _eq: $version } }, limit: 1) {
-                version
+          try {
+            const versionQuery = `
+              query TransactionByVersion($version: Int!) {
+                transactions(where: { version: { _eq: $version } }, limit: 1) {
+                  version
+                  hash
+                }
               }
+            `;
+            
+            const result = await executeQueryWithRetry(versionQuery, { version: num }, 3, network);
+            if (result.transactions && result.transactions.length > 0) {
+              exists = true;
+              url = `/explorer/tx/version/${trimmedQuery}`;
+            } else {
+              errorMessage = 'Version not found in current network';
             }
-          `;
-          
-          const result = await executeQueryWithRetry(versionQuery, { version: num });
-          if (result.transactions && result.transactions.length > 0) {
-            exists = true;
-            url = `/explorer/tx/version/${trimmedQuery}`;
+          } catch (versionError) {
+            console.error('Version search error:', versionError);
+            errorMessage = 'Failed to search version';
           }
         }
         
@@ -180,21 +199,29 @@ export function GlobalSearch() {
       
       // 3. Иначе пробуем как адрес
       else if (searchType === 'address') {
-        const addressQuery = `
-          query AccountTransactions($address: String!, $limit: Int!) {
-            transactions(where: { sender: { _eq: $address } }, limit: 1) {
-              sender
+        try {
+          const addressQuery = `
+            query AccountTransactions($address: String!, $limit: Int!) {
+              transactions(where: { sender: { _eq: $address } }, limit: 1) {
+                sender
+                hash
+              }
             }
+          `;
+          
+          const result = await executeQueryWithRetry(addressQuery, { 
+            address: trimmedQuery, 
+            limit: 1 
+          }, 3, network);
+          if (result.transactions && result.transactions.length > 0) {
+            exists = true;
+            url = `/explorer/account/${trimmedQuery}`;
+          } else {
+            errorMessage = 'Account not found or has no transactions';
           }
-        `;
-        
-        const result = await executeQueryWithRetry(addressQuery, { 
-          address: trimmedQuery, 
-          limit: 1 
-        });
-        if (result.transactions && result.transactions.length > 0) {
-          exists = true;
-          url = `/explorer/account/${trimmedQuery}`;
+        } catch (addressError) {
+          console.error('Address search error:', addressError);
+          errorMessage = 'Failed to search account';
         }
       }
 
@@ -202,7 +229,8 @@ export function GlobalSearch() {
         type: searchType,
         value: trimmedQuery,
         url,
-        exists
+        exists,
+        errorMessage
       };
     } catch (error) {
       console.error('Search error:', error);
@@ -210,7 +238,8 @@ export function GlobalSearch() {
         type: searchType,
         value: trimmedQuery,
         url: '',
-        exists: false
+        exists: false,
+        errorMessage: 'Search failed due to network error'
       };
     }
   }, []);
@@ -338,9 +367,14 @@ export function GlobalSearch() {
             </div>
           </div>
           
-          {error && (
+          {(error || searchResult?.errorMessage) && (
             <div className="mt-1 text-xs text-red-600">
-              {error}
+              {error || searchResult?.errorMessage}
+              {searchResult?.errorMessage && (
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Current network: {network}
+                </div>
+              )}
             </div>
           )}
         </div>
