@@ -60,6 +60,13 @@ interface TransactionsState {
   pollingInterval: number | null;
   setPollingInterval: (interval: number | null) => void;
   
+  // Новые транзакции
+  newTransactionsCount: number;
+  setNewTransactionsCount: (count: number) => void;
+  resetNewTransactionsCount: () => void;
+  lastKnownVersion: string | null;
+  setLastKnownVersion: (version: string) => void;
+  
   // Кэш
   cache: Record<string, any>;
   setCache: (key: string, value: any) => void;
@@ -70,6 +77,7 @@ interface TransactionsState {
   addTransactions: (transactions: Transaction[]) => void;
   updateTransactions: (transactions: Transaction[]) => void;
   clearTransactions: () => void;
+  prependNewTransactions: (transactions: Transaction[]) => void;
 }
 
 const defaultFilters: TransactionFilters = {
@@ -110,6 +118,13 @@ export const useTransactionsStore = create<TransactionsState>()(
       pollingInterval: null,
       setPollingInterval: (interval) => set({ pollingInterval: interval }),
       
+      // Новые транзакции
+      newTransactionsCount: 0,
+      setNewTransactionsCount: (count) => set({ newTransactionsCount: count }),
+      resetNewTransactionsCount: () => set({ newTransactionsCount: 0 }),
+      lastKnownVersion: null,
+      setLastKnownVersion: (version) => set({ lastKnownVersion: version }),
+      
       // Кэш
       cache: {},
       setCache: (key, value) => 
@@ -141,8 +156,29 @@ export const useTransactionsStore = create<TransactionsState>()(
           totalCount: state.totalCount + newTransactions.length
         })),
       updateTransactions: (transactions) => 
-        set({ transactions, totalCount: transactions.length }),
+        set((state) => ({
+          transactions, 
+          totalCount: transactions.length,
+          lastKnownVersion: transactions.length > 0 ? transactions[0].version : state.lastKnownVersion
+        })),
       clearTransactions: () => set({ transactions: [], totalCount: 0 }),
+      prependNewTransactions: (newTransactions) => 
+        set((state) => {
+          // Фильтруем только действительно новые транзакции
+          const existingHashes = new Set(state.transactions.map(tx => tx.hash));
+          const trulyNewTransactions = newTransactions.filter(tx => !existingHashes.has(tx.hash));
+          
+          if (trulyNewTransactions.length === 0) {
+            return state;
+          }
+          
+          return {
+            transactions: [...trulyNewTransactions, ...state.transactions],
+            totalCount: state.totalCount + trulyNewTransactions.length,
+            newTransactionsCount: state.newTransactionsCount + trulyNewTransactions.length,
+            lastKnownVersion: trulyNewTransactions[0].version
+          };
+        }),
     }),
     {
       name: 'transactions-storage',

@@ -8,6 +8,7 @@ import { DragDropProvider } from "@/contexts/DragDropContext";
 import { Toaster } from "@/components/ui/toaster";
 import { AlphaBanner } from "@/components/ui/alpha-banner";
 import { Analytics } from "@vercel/analytics/next";
+import * as Sentry from "@sentry/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 

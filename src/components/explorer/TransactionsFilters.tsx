@@ -72,11 +72,17 @@ export function TransactionsFilters() {
               variant={isLive ? "default" : "outline"}
               size="sm"
               onClick={toggleLive}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${isLive ? 'animate-pulse' : ''}`}
             >
               {isLive ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
               {isLive ? 'Live' : 'Live'}
             </Button>
+            <Badge 
+              variant={isLive ? "default" : "secondary"} 
+              className="text-xs"
+            >
+              {isLive ? 'Polling every 4s' : 'Static'}
+            </Badge>
             <Button
               variant="outline"
               size="sm"

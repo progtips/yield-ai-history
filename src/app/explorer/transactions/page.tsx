@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { TransactionsTable } from '@/components/explorer/TransactionsTable';
 import { TransactionsFilters } from '@/components/explorer/TransactionsFilters';
+import { LiveTransactionsDemo } from '@/components/explorer/LiveTransactionsDemo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
@@ -74,6 +75,8 @@ export default async function TransactionsPage() {
       </div>
 
       <TransactionsFilters />
+      
+      <LiveTransactionsDemo />
 
       <Card>
         <CardHeader>

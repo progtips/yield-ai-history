@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTransactionsStore, type Transaction } from '@/stores/transactions';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
-import { Hash, User, Clock, Zap, CheckCircle, XCircle, Copy, ExternalLink } from 'lucide-react';
+import { Hash, User, Clock, Zap, CheckCircle, XCircle, Copy, ExternalLink, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { CompactProtocolBadge, CompactOperationBadge } from './ProtocolBadges';
+import { useToast } from '@/components/ui/use-toast';
 
 interface TransactionsTableProps {
   initialData: Transaction[];
@@ -24,9 +25,15 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
     setError,
     updateTransactions,
     addTransactions,
+    prependNewTransactions,
     isLive,
     setPollingInterval,
+    newTransactionsCount,
+    resetNewTransactionsCount,
+    lastKnownVersion,
   } = useTransactionsStore();
+  
+  const { toast } = useToast();
 
   // Инициализируем данные
   useEffect(() => {
@@ -82,10 +89,76 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
     }
   }, [filters, isLive, setIsLoading, setError, addTransactions, updateTransactions]);
 
+  // Функция для загрузки новых транзакций (для live режима)
+  const loadNewTransactions = useCallback(async () => {
+    try {
+      const query = `
+        query NewTransactions($limit: Int!) {
+          transactions(
+            limit: $limit
+            order_by: { timestamp: desc }
+          ) {
+            version
+            hash
+            sender
+            success
+            gas_used
+            timestamp
+            payload {
+              type
+              function
+              type_arguments
+              arguments
+            }
+          }
+        }
+      `;
+
+      const result = await executeQueryWithRetry(query, {
+        limit: 20, // Получаем последние 20 транзакций
+      });
+
+      const newTransactions = result.transactions || [];
+      
+      if (newTransactions.length > 0) {
+        // Проверяем, есть ли новые транзакции
+        const latestVersion = newTransactions[0].version;
+        
+        if (lastKnownVersion && parseInt(latestVersion) > parseInt(lastKnownVersion)) {
+          // Есть новые транзакции
+          prependNewTransactions(newTransactions);
+          
+          // Показываем тост с количеством новых транзакций
+          const newCount = newTransactions.filter((tx: Transaction) => 
+            parseInt(tx.version) > parseInt(lastKnownVersion)
+          ).length;
+          
+          if (newCount > 0) {
+            toast({
+              title: `+${newCount} new transactions`,
+              description: `Latest version: ${latestVersion}`,
+              action: (
+                <button 
+                  onClick={() => resetNewTransactionsCount()}
+                  className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded"
+                >
+                  Dismiss
+                </button>
+              ),
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load new transactions:', error);
+    }
+  }, [lastKnownVersion, prependNewTransactions, resetNewTransactionsCount, toast]);
+
   // Поллинг для live режима
   useEffect(() => {
     if (isLive) {
-      const interval = setInterval(loadTransactions, 4500);
+      // Загружаем новые транзакции каждые 4 секунды
+      const interval = setInterval(loadNewTransactions, 4000);
       setPollingInterval(interval as any);
       
       return () => {
@@ -93,7 +166,7 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
         setPollingInterval(null);
       };
     }
-  }, [isLive, loadTransactions, setPollingInterval]);
+  }, [isLive, loadNewTransactions, setPollingInterval]);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -145,7 +218,20 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Showing {transactions.length} transactions</span>
+        <div className="flex items-center gap-2">
+          <span>Showing {transactions.length} transactions</span>
+          {newTransactionsCount > 0 && (
+            <Badge 
+              variant="default" 
+              className="flex items-center gap-1 cursor-pointer hover:bg-primary/90"
+              onClick={resetNewTransactionsCount}
+              title="Click to dismiss"
+            >
+              <Bell className="h-3 w-3" />
+              +{newTransactionsCount} new
+            </Badge>
+          )}
+        </div>
         {isLive && (
           <Badge variant="destructive" className="animate-pulse">
             Live Mode
