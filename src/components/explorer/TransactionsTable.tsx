@@ -9,7 +9,7 @@ import { useTransactionsStore, type Transaction } from '@/stores/transactions';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
 import { Hash, User, Clock, Zap, CheckCircle, XCircle, Copy, ExternalLink, Bell } from 'lucide-react';
 import Link from 'next/link';
-import { CompactProtocolBadge, CompactOperationBadge } from './ProtocolBadges';
+
 import { useToast } from '@/components/ui/use-toast';
 
 interface TransactionsTableProps {
@@ -48,28 +48,19 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
       setIsLoading(true);
       setError(null);
 
-      const query = `
-        query LatestTransactions($limit: Int!, $offset: Int!) {
-          transactions(
-            limit: $limit
-            offset: $offset
-            order_by: { timestamp: desc }
-          ) {
-            version
-            hash
-            sender
-            success
-            gas_used
-            timestamp
-            payload {
-              type
-              function
-              type_arguments
-              arguments
-            }
-          }
-        }
-      `;
+             const query = `
+         query LatestTransactions($limit: Int!, $offset: Int!) {
+           user_transactions(
+             limit: $limit
+             offset: $offset
+             order_by: { version: desc }
+           ) {
+             version
+             sender
+             timestamp
+           }
+         }
+       `;
 
       const result = await executeQueryWithRetry(query, {
         limit: filters.limit,
@@ -77,9 +68,9 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
       });
 
       if (isLive) {
-        addTransactions(result.transactions || []);
-      } else {
-        updateTransactions(result.transactions || []);
+                 addTransactions(result.user_transactions || []);
+       } else {
+         updateTransactions(result.user_transactions || []);
       }
     } catch (error) {
       console.error('Failed to load transactions:', error);
@@ -92,33 +83,24 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
   // Функция для загрузки новых транзакций (для live режима)
   const loadNewTransactions = useCallback(async () => {
     try {
-      const query = `
-        query NewTransactions($limit: Int!) {
-          transactions(
-            limit: $limit
-            order_by: { timestamp: desc }
-          ) {
-            version
-            hash
-            sender
-            success
-            gas_used
-            timestamp
-            payload {
-              type
-              function
-              type_arguments
-              arguments
-            }
-          }
-        }
-      `;
+                    const query = `
+         query NewTransactions($limit: Int!) {
+           user_transactions(
+             limit: $limit
+             order_by: { version: desc }
+           ) {
+             version
+             sender
+             timestamp
+           }
+         }
+       `;
 
       const result = await executeQueryWithRetry(query, {
         limit: 20, // Получаем последние 20 транзакций
       });
 
-      const newTransactions = result.transactions || [];
+             const newTransactions = result.user_transactions || [];
       
       if (newTransactions.length > 0) {
         // Проверяем, есть ли новые транзакции
@@ -172,24 +154,16 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const formatHash = (hash: string) => {
-    return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
-  };
+     const formatVersion = (version: string) => {
+     return version.length > 10 ? `${version.slice(0, 8)}...${version.slice(-8)}` : version;
+   };
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
 
-  const formatGasUsed = (gasUsed: string) => {
-    const gas = parseInt(gasUsed);
-    if (gas > 1000000) {
-      return `${(gas / 1000000).toFixed(2)}M`;
-    } else if (gas > 1000) {
-      return `${(gas / 1000).toFixed(2)}K`;
-    }
-    return gas.toString();
-  };
+  
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -243,69 +217,40 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Version</TableHead>
-              <TableHead>Hash</TableHead>
-              <TableHead>Sender</TableHead>
-              <TableHead>Protocol</TableHead>
-              <TableHead>Operation</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Gas Used</TableHead>
-              <TableHead>Timestamp</TableHead>
-              <TableHead>Actions</TableHead>
+                             <TableHead>Version</TableHead>
+               <TableHead>Hash</TableHead>
+               <TableHead>Sender</TableHead>
+               <TableHead>Timestamp</TableHead>
+               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((tx) => (
-              <TableRow key={tx.hash} className="hover:bg-muted/50">
+                         {transactions.map((tx) => (
+               <TableRow key={tx.version} className="hover:bg-muted/50">
                 <TableCell className="font-mono text-sm">
                   {tx.version}
                 </TableCell>
-                <TableCell className="font-mono text-sm">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4 text-muted-foreground" />
-                    {formatHash(tx.hash)}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(tx.hash)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </TableCell>
+                                 <TableCell className="font-mono text-sm">
+                   <div className="flex items-center gap-2">
+                     <Hash className="h-4 w-4 text-muted-foreground" />
+                     {formatVersion(tx.version)}
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => copyToClipboard(tx.version)}
+                     >
+                       <Copy className="h-3 w-3" />
+                     </Button>
+                   </div>
+                 </TableCell>
                 <TableCell className="font-mono text-sm">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
                     {formatAddress(tx.sender)}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <CompactProtocolBadge 
-                    moduleId={tx.payload?.function} 
-                    address={tx.sender}
-                  />
-                </TableCell>
-                <TableCell>
-                  <CompactOperationBadge 
-                    payload={tx.payload}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Badge variant={tx.success ? "default" : "destructive"}>
-                    {tx.success ? (
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                    ) : (
-                      <XCircle className="h-3 w-3 mr-1" />
-                    )}
-                    {tx.success ? 'Success' : 'Failed'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-4 w-4 text-muted-foreground" />
-                    {formatGasUsed(tx.gas_used)}
-                  </div>
-                </TableCell>
+                
+                
                 <TableCell className="text-sm">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -313,16 +258,16 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                  >
-                    <Link href={`/explorer/tx/${tx.hash}`}>
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      View
-                    </Link>
-                  </Button>
+                                     <Button
+                     variant="outline"
+                     size="sm"
+                     asChild
+                   >
+                     <Link href={`/explorer/tx/version/${tx.version}`}>
+                       <ExternalLink className="h-3 w-3 mr-1" />
+                       View
+                     </Link>
+                   </Button>
                 </TableCell>
               </TableRow>
             ))}

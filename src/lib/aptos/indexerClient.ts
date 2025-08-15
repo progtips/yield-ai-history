@@ -5,7 +5,7 @@ import { GraphQLClient } from 'graphql-request';
  * @returns GraphQLClient настроенный для работы с Aptos Indexer
  */
 export function getGraphQLClient(network: string = 'mainnet'): GraphQLClient {
-  // Определяем URL в зависимости от сети
+  // Всегда используем mainnet для explorer
   let indexerUrl: string;
   
   if (process.env.NEXT_PUBLIC_INDEXER_GQL_URL) {
@@ -13,33 +13,25 @@ export function getGraphQLClient(network: string = 'mainnet'): GraphQLClient {
   } else if (process.env.INDEXER_GQL_URL) {
     indexerUrl = process.env.INDEXER_GQL_URL;
   } else {
-    // URL по умолчанию в зависимости от сети
-    switch (network) {
-      case 'testnet':
-        indexerUrl = 'https://indexer.testnet.aptoslabs.com/v1/graphql';
-        break;
-      case 'devnet':
-        indexerUrl = 'https://indexer.devnet.aptoslabs.com/v1/graphql';
-        break;
-      case 'mainnet':
-      default:
-        indexerUrl = 'https://indexer.mainnet.aptoslabs.com/v1/graphql';
-        break;
-    }
+    // URL по умолчанию - всегда mainnet
+    // Попробуем альтернативный URL
+    indexerUrl = 'https://indexer-v1.mainnet.aptoslabs.com/v1/graphql';
   }
+
   
-  const client = new GraphQLClient(indexerUrl, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      // Добавляем API ключ если есть
-      ...(process.env.INDEXER_API_KEY && {
-        'Authorization': `Bearer ${process.env.INDEXER_API_KEY}`
-      })
-    },
-    timeout: 30000, // 30 секунд таймаут
-    retries: 3, // Количество попыток
-  });
+  
+             const client = new GraphQLClient(indexerUrl, {
+             headers: {
+               'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               // Добавляем API ключ если есть
+               ...(process.env.NEXT_PUBLIC_INDEXER_API_KEY && {
+                 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_INDEXER_API_KEY}`
+               })
+             },
+             timeout: 60000, // 60 секунд таймаут
+             retries: 3, // Количество попыток
+           });
 
   return client;
 }
@@ -55,7 +47,7 @@ export async function executeQuery<T = any>(
   variables?: Record<string, any>,
   network: string = 'mainnet'
 ): Promise<T> {
-  const client = getGraphQLClient(network);
+  const client = getGraphQLClient('mainnet'); // Всегда используем mainnet
   
   try {
     const result = await client.request<T>(query, variables);
@@ -83,7 +75,7 @@ export async function executeQueryWithRetry<T = any>(
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await executeQuery<T>(query, variables, network);
+      return await executeQuery<T>(query, variables, 'mainnet'); // Всегда используем mainnet
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error');
       

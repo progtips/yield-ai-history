@@ -43,20 +43,20 @@ export function AccountActivityChart({ address }: AccountActivityChartProps) {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
 
-      const query = `
-        query AccountActivity($address: String!, $startDate: timestamptz!, $endDate: timestamptz!) {
-          transactions(
-            where: { 
-              sender: { _eq: $address },
-              timestamp: { _gte: $startDate, _lte: $endDate }
-            }
-            order_by: { timestamp: asc }
-          ) {
-            timestamp
-            success
-          }
-        }
-      `;
+             const query = `
+         query AccountActivity($address: String!, $startDate: timestamptz!, $endDate: timestamptz!) {
+           user_transactions(
+             where: { 
+               sender: { _eq: $address },
+               timestamp: { _gte: $startDate, _lte: $endDate }
+             }
+             order_by: { timestamp: asc }
+           ) {
+             timestamp
+             version
+           }
+         }
+       `;
 
       const result = await executeQueryWithRetry(query, {
         address,
@@ -75,18 +75,15 @@ export function AccountActivityChart({ address }: AccountActivityChartProps) {
         dailyData[dateKey] = { transactions: 0, successful: 0, failed: 0 };
       }
 
-      // Заполняем данные
-      result.transactions?.forEach((tx: any) => {
-        const dateKey = new Date(tx.timestamp).toISOString().split('T')[0];
-        if (dailyData[dateKey]) {
-          dailyData[dateKey].transactions++;
-          if (tx.success) {
-            dailyData[dateKey].successful++;
-          } else {
-            dailyData[dateKey].failed++;
-          }
-        }
-      });
+             // Заполняем данные
+       result.user_transactions?.forEach((tx: any) => {
+         const dateKey = new Date(tx.timestamp).toISOString().split('T')[0];
+         if (dailyData[dateKey]) {
+           dailyData[dateKey].transactions++;
+           // Поскольку у нас нет информации об успешности, считаем все успешными
+           dailyData[dateKey].successful++;
+         }
+       });
 
       // Преобразуем в массив
       const chartData = Object.entries(dailyData).map(([date, data]) => ({

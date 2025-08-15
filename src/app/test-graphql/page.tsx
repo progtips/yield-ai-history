@@ -18,18 +18,15 @@ export default function TestGraphQLPage() {
     setResult(null);
 
     try {
-      const query = `
-        query TransactionByHash($hash: String!) {
-          transactions(where: { hash: { _eq: $hash } }, limit: 1) {
-            hash
-            version
-            sender
-            success
-            gas_used
-            timestamp
-          }
-        }
-      `;
+             const query = `
+         query TransactionByHash($hash: String!) {
+           user_transactions(where: { hash: { _eq: $hash } }, limit: 1) {
+             version
+             sender
+             timestamp
+           }
+         }
+       `;
 
       const response = await executeQueryWithRetry(query, { hash: testHash });
       setResult(response);
@@ -46,20 +43,17 @@ export default function TestGraphQLPage() {
     setResult(null);
 
     try {
-      const query = `
-        query LatestTransactions($limit: Int!) {
-          transactions(limit: $limit, order_by: { timestamp: desc }) {
-            hash
-            version
-            sender
-            success
-            gas_used
-            timestamp
-          }
-        }
-      `;
+             const query = `
+         query LatestTransactions($limit: Int!) {
+           user_transactions(limit: $limit, order_by: { version: desc }) {
+             version
+             sender
+             timestamp
+           }
+         }
+       `;
 
-      const response = await executeQueryWithRetry(query, { limit: 5 });
+             const response = await executeQueryWithRetry(query, { limit: 1 });
       setResult(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

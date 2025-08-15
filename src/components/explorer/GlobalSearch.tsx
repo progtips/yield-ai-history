@@ -46,16 +46,16 @@ export const getSearchType = (query: string): SearchType => {
     return 'transaction';
   }
   
-  // Проверяем версию/высоту блока (только цифры)
-  if (PATTERNS.VERSION_OR_HEIGHT.test(trimmedQuery)) {
-    const num = parseInt(trimmedQuery);
-    // Если число большое, скорее всего это версия
-    if (num > 1000000) {
-      return 'version';
-    }
-    // Иначе это высота блока
-    return 'block';
-  }
+     // Проверяем версию/высоту блока (только цифры)
+   if (PATTERNS.VERSION_OR_HEIGHT.test(trimmedQuery)) {
+     const num = parseInt(trimmedQuery);
+     // Если число очень большое, скорее всего это версия
+     if (num > 1000000000) {
+       return 'version';
+     }
+     // Иначе это высота блока
+     return 'block';
+   }
   
   // Проверяем адрес
   if (PATTERNS.ADDRESS.test(trimmedQuery)) {
@@ -81,7 +81,7 @@ export function GlobalSearch() {
   const [error, setError] = useState<string | null>(null);
   
   const debouncedQuery = useDebounce(searchQuery, 500);
-  const { setFilters, network } = useExplorerStore();
+  const { setFilters } = useExplorerStore();
   const router = useRouter();
 
   // Получение иконки для типа поиска
@@ -137,18 +137,17 @@ export function GlobalSearch() {
       // 1. Сначала пробуем найти транзакцию по хэшу
       if (searchType === 'transaction') {
         try {
-          const txQuery = `
-            query TransactionByHash($hash: String!) {
-              transactions(where: { hash: { _eq: $hash } }, limit: 1) {
-                hash
-                version
-                sender
-              }
-            }
-          `;
+                     const txQuery = `
+             query TransactionByHash($hash: String!) {
+               user_transactions(where: { hash: { _eq: $hash } }, limit: 1) {
+                 version
+                 sender
+               }
+             }
+           `;
           
-          const result = await executeQueryWithRetry(txQuery, { hash: trimmedQuery }, 3, network);
-          if (result.transactions && result.transactions.length > 0) {
+                     const result = await executeQueryWithRetry(txQuery, { hash: trimmedQuery });
+           if (result.user_transactions && result.user_transactions.length > 0) {
             exists = true;
             url = `/explorer/tx/${trimmedQuery}`;
           } else {
@@ -164,30 +163,34 @@ export function GlobalSearch() {
       else if (searchType === 'version' || searchType === 'block') {
         const num = parseInt(trimmedQuery);
         
-        // Для больших чисел пробуем как версию
-        if (searchType === 'version' || num > 1000000) {
-          try {
-            const versionQuery = `
-              query TransactionByVersion($version: Int!) {
-                transactions(where: { version: { _eq: $version } }, limit: 1) {
-                  version
-                  hash
-                }
-              }
-            `;
-            
-            const result = await executeQueryWithRetry(versionQuery, { version: num }, 3, network);
-            if (result.transactions && result.transactions.length > 0) {
-              exists = true;
-              url = `/explorer/tx/version/${trimmedQuery}`;
-            } else {
-              errorMessage = 'Version not found in current network';
-            }
-          } catch (versionError) {
-            console.error('Version search error:', versionError);
-            errorMessage = 'Failed to search version';
-          }
-        }
+                 // Для больших чисел пробуем как версию
+         if (searchType === 'version' || num > 1000000000) {
+           try {
+             const versionQuery = `
+               query TransactionByVersion($version: bigint!, $versionRange: bigint!) {
+                 user_transactions(where: { version: { _gte: $version, _lte: $versionRange } }, order_by: { version: asc }, limit: 1) {
+                   version
+                   sender
+                   timestamp
+                 }
+               }
+             `;
+             
+             const result = await executeQueryWithRetry(versionQuery, { 
+               version: num,
+               versionRange: num + 1000 // Ищем в диапазоне +1000 версий
+             });
+             if (result.user_transactions && result.user_transactions.length > 0) {
+               exists = true;
+               url = `/explorer/tx/version/${trimmedQuery}`;
+             } else {
+               errorMessage = 'Version not found in current network';
+             }
+           } catch (versionError) {
+             console.error('Version search error:', versionError);
+             errorMessage = 'Failed to search version';
+           }
+         }
         
         // Для меньших чисел пробуем как блок
         if (!exists && (searchType === 'block' || num <= 1000000)) {
@@ -200,20 +203,20 @@ export function GlobalSearch() {
       // 3. Иначе пробуем как адрес
       else if (searchType === 'address') {
         try {
-          const addressQuery = `
-            query AccountTransactions($address: String!, $limit: Int!) {
-              transactions(where: { sender: { _eq: $address } }, limit: 1) {
-                sender
-                hash
-              }
-            }
-          `;
+                     const addressQuery = `
+             query AccountTransactions($address: String!, $limit: Int!) {
+               user_transactions(where: { sender: { _eq: $address } }, limit: 1) {
+                 sender
+                 version
+               }
+             }
+           `;
           
-          const result = await executeQueryWithRetry(addressQuery, { 
-            address: trimmedQuery, 
-            limit: 1 
-          }, 3, network);
-          if (result.transactions && result.transactions.length > 0) {
+                     const result = await executeQueryWithRetry(addressQuery, { 
+             address: trimmedQuery, 
+             limit: 1 
+           });
+           if (result.user_transactions && result.user_transactions.length > 0) {
             exists = true;
             url = `/explorer/account/${trimmedQuery}`;
           } else {
@@ -299,7 +302,7 @@ export function GlobalSearch() {
   const isValidInput = searchQuery.trim() && searchType !== 'unknown';
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
@@ -367,16 +370,18 @@ export function GlobalSearch() {
             </div>
           </div>
           
-          {(error || searchResult?.errorMessage) && (
-            <div className="mt-1 text-xs text-red-600">
-              {error || searchResult?.errorMessage}
-              {searchResult?.errorMessage && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  Current network: {network}
-                </div>
-              )}
-            </div>
-          )}
+                     {(error || searchResult?.errorMessage) && (
+             <div className="mt-1 text-xs text-red-600">
+               <div className="whitespace-pre-wrap break-words">
+                 {error || searchResult?.errorMessage}
+               </div>
+               {searchResult?.errorMessage && (
+                 <div className="mt-1 text-xs text-muted-foreground">
+                   Current network: mainnet
+                 </div>
+               )}
+             </div>
+           )}
         </div>
       )}
     </div>

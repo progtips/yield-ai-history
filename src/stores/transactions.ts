@@ -12,17 +12,8 @@ export interface TransactionFilters {
 
 export interface Transaction {
   version: string;
-  hash: string;
   sender: string;
-  success: boolean;
-  gas_used: string;
   timestamp: string;
-  payload?: {
-    type: string;
-    function?: string;
-    type_arguments?: string[];
-    arguments?: string[];
-  };
   events?: Array<{
     type: string;
     data: string;
@@ -162,23 +153,23 @@ export const useTransactionsStore = create<TransactionsState>()(
           lastKnownVersion: transactions.length > 0 ? transactions[0].version : state.lastKnownVersion
         })),
       clearTransactions: () => set({ transactions: [], totalCount: 0 }),
-      prependNewTransactions: (newTransactions) => 
-        set((state) => {
-          // Фильтруем только действительно новые транзакции
-          const existingHashes = new Set(state.transactions.map(tx => tx.hash));
-          const trulyNewTransactions = newTransactions.filter(tx => !existingHashes.has(tx.hash));
-          
-          if (trulyNewTransactions.length === 0) {
-            return state;
-          }
-          
-          return {
-            transactions: [...trulyNewTransactions, ...state.transactions],
-            totalCount: state.totalCount + trulyNewTransactions.length,
-            newTransactionsCount: state.newTransactionsCount + trulyNewTransactions.length,
-            lastKnownVersion: trulyNewTransactions[0].version
-          };
-        }),
+             prependNewTransactions: (newTransactions) => 
+         set((state) => {
+           // Фильтруем только действительно новые транзакции
+           const existingVersions = new Set(state.transactions.map(tx => tx.version));
+           const trulyNewTransactions = newTransactions.filter(tx => !existingVersions.has(tx.version));
+           
+           if (trulyNewTransactions.length === 0) {
+             return state;
+           }
+           
+           return {
+             transactions: [...trulyNewTransactions, ...state.transactions],
+             totalCount: state.totalCount + trulyNewTransactions.length,
+             newTransactionsCount: state.newTransactionsCount + trulyNewTransactions.length,
+             lastKnownVersion: trulyNewTransactions[0].version
+           };
+         }),
     }),
     {
       name: 'transactions-storage',

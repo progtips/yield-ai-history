@@ -9,35 +9,26 @@ import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
 // Серверный лоадер для начальных данных
 async function loadInitialTransactions() {
   try {
-    const query = `
-      query LatestTransactions($limit: Int!, $offset: Int!) {
-        transactions(
-          limit: $limit
-          offset: $offset
-          order_by: { timestamp: desc }
-        ) {
-          version
-          hash
-          sender
-          success
-          gas_used
-          timestamp
-          payload {
-            type
-            function
-            type_arguments
-            arguments
-          }
-        }
-      }
-    `;
+         const query = `
+       query LatestTransactions($limit: Int!, $offset: Int!) {
+         user_transactions(
+           limit: $limit
+           offset: $offset
+           order_by: { version: desc }
+         ) {
+           version
+           sender
+           timestamp
+         }
+       }
+     `;
 
     const result = await executeQueryWithRetry(query, {
       limit: 50,
       offset: 0
     });
 
-    return result.transactions || [];
+         return result.user_transactions || [];
   } catch (error) {
     console.error('Failed to load initial transactions:', error);
     return [];
