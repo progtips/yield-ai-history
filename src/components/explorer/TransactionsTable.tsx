@@ -9,6 +9,7 @@ import { useTransactionsStore, type Transaction } from '@/stores/transactions';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
 import { Hash, User, Clock, Zap, CheckCircle, XCircle, Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { CompactProtocolBadge, CompactOperationBadge } from './ProtocolBadges';
 
 interface TransactionsTableProps {
   initialData: Transaction[];
@@ -159,6 +160,8 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
               <TableHead>Version</TableHead>
               <TableHead>Hash</TableHead>
               <TableHead>Sender</TableHead>
+              <TableHead>Protocol</TableHead>
+              <TableHead>Operation</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Gas Used</TableHead>
               <TableHead>Timestamp</TableHead>
@@ -189,6 +192,17 @@ export function TransactionsTable({ initialData }: TransactionsTableProps) {
                     <User className="h-4 w-4 text-muted-foreground" />
                     {formatAddress(tx.sender)}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <CompactProtocolBadge 
+                    moduleId={tx.payload?.function} 
+                    address={tx.sender}
+                  />
+                </TableCell>
+                <TableCell>
+                  <CompactOperationBadge 
+                    payload={tx.payload}
+                  />
                 </TableCell>
                 <TableCell>
                   <Badge variant={tx.success ? "default" : "destructive"}>
