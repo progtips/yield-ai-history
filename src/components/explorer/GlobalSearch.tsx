@@ -303,8 +303,8 @@ export function GlobalSearch() {
 
   return (
     <div className="relative w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="relative">
-        <div className="relative">
+      <form onSubmit={handleSubmit} className="relative flex gap-2">
+        <div className="relative flex-1">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
             {isSearching ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -318,7 +318,7 @@ export function GlobalSearch() {
             placeholder={getPlaceholder(searchType)}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-10 pr-20 ${
+            className={`pl-10 ${
               searchResult?.exists 
                 ? 'border-green-500 focus:border-green-500' 
                 : searchResult && !searchResult.exists 
@@ -326,30 +326,30 @@ export function GlobalSearch() {
                 : ''
             }`}
           />
-          
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!isValidInput || isSearching}
-            onClick={handleSearchClick}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8"
-          >
-            {isSearching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Search'
-            )}
-          </Button>
         </div>
+        
+        <Button
+          type="submit"
+          size="default"
+          disabled={!isValidInput || isSearching}
+          onClick={handleSearchClick}
+          className="px-6"
+        >
+          {isSearching ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            'Search'
+          )}
+        </Button>
       </form>
 
-      {/* Индикатор статуса поиска */}
+      {/* Блок с информацией о поиске */}
       {searchResult && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-background border rounded-md shadow-lg z-50">
-          <div className="flex items-center justify-between">
+        <div className="mt-3 p-3 bg-muted/50 border rounded-md">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               {getSearchIcon(searchResult.type)}
-              <span className="text-sm">
+              <span className="text-sm font-medium">
                 {searchResult.type === 'transaction' && 'Transaction'}
                 {searchResult.type === 'address' && 'Account'}
                 {searchResult.type === 'version' && 'Version'}
@@ -363,25 +363,25 @@ export function GlobalSearch() {
             
             <div className="flex items-center gap-2">
               {searchResult.exists ? (
-                <span className="text-xs text-green-600">Found</span>
+                <span className="text-xs text-green-600 font-medium">Found</span>
               ) : (
-                <span className="text-xs text-red-600">Not found</span>
+                <span className="text-xs text-red-600 font-medium">Not found</span>
               )}
             </div>
           </div>
           
-                     {(error || searchResult?.errorMessage) && (
-             <div className="mt-1 text-xs text-red-600">
-               <div className="whitespace-pre-wrap break-words">
-                 {error || searchResult?.errorMessage}
-               </div>
-               {searchResult?.errorMessage && (
-                 <div className="mt-1 text-xs text-muted-foreground">
-                   Current network: mainnet
-                 </div>
-               )}
-             </div>
-           )}
+          {(error || searchResult?.errorMessage) && (
+            <div className="text-sm text-red-600">
+              <div className="whitespace-pre-wrap break-words">
+                {error || searchResult?.errorMessage}
+              </div>
+              {searchResult?.errorMessage && (
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Current network: mainnet
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
