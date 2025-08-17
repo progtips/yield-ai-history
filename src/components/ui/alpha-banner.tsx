@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 export function AlphaBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Проверяем, видел ли пользователь баннер ранее
-    const hasSeenBanner = localStorage.getItem("alpha-banner-dismissed");
+    const hasSeenBanner = localStorage.getItem('alpha-banner-dismissed');
     if (!hasSeenBanner) {
       setIsVisible(true);
     }
@@ -16,28 +16,28 @@ export function AlphaBanner() {
 
   const dismissBanner = () => {
     setIsVisible(false);
-    localStorage.setItem("alpha-banner-dismissed", "true");
+    localStorage.setItem('alpha-banner-dismissed', 'true');
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-blue-200/50">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-center gap-3 text-sm text-blue-800 relative">
-          <span className="animate-pulse">🧪</span>
-          <span className="font-medium">Early Access Beta version</span>
-          <span className="animate-pulse">🚀</span>
-          
+    <div className='bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-blue-200/50'>
+      <div className='container mx-auto px-4 py-3'>
+        <div className='flex items-center justify-center gap-3 text-sm text-blue-800 relative'>
+          <span className='animate-pulse'>🧪</span>
+          <span className='font-medium'>Early Access Beta version</span>
+          <span className='animate-pulse'>🚀</span>
+
           <button
             onClick={dismissBanner}
-            className="absolute right-0 p-1 hover:bg-blue-100 rounded-full transition-colors"
-            aria-label="Dismiss banner"
+            className='absolute right-0 p-1 hover:bg-blue-100 rounded-full transition-colors'
+            aria-label='Dismiss banner'
           >
-            <X className="h-4 w-4" />
+            <X className='h-4 w-4' />
           </button>
         </div>
       </div>
     </div>
   );
-} 
+}

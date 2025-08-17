@@ -8,36 +8,36 @@ export const useWalletData = (address?: string) => {
     positions,
     rewards,
     prices,
-    
+
     // Loading states
     balanceLoading,
     positionsLoading,
     rewardsLoading,
     pricesLoading,
-    
+
     // Error states
     balanceError,
     positionsError,
     rewardsError,
     pricesError,
-    
+
     // Actions
     setAddress,
     fetchBalance,
     fetchPositions,
     fetchRewards,
     fetchPrices,
-    
+
     // Getters
     getBalance,
     getPositions,
     getRewards,
     getTokenPrice,
     getTotalValue,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   } = useWalletStore();
 
   // Set address when it changes
@@ -70,7 +70,7 @@ export const useWalletData = (address?: string) => {
   useEffect(() => {
     if (Object.keys(positions).length > 0) {
       const tokenAddresses = new Set<string>();
-      
+
       // Collect all token addresses from positions
       Object.values(positions).forEach(protocolPositions => {
         protocolPositions.forEach((position: any) => {
@@ -90,7 +90,7 @@ export const useWalletData = (address?: string) => {
           // Add more token address fields as needed
         });
       });
-      
+
       if (tokenAddresses.size > 0) {
         fetchPrices(Array.from(tokenAddresses));
       }
@@ -99,7 +99,9 @@ export const useWalletData = (address?: string) => {
 
   // Computed values
   const isLoading = useMemo(() => {
-    return balanceLoading || positionsLoading || rewardsLoading || pricesLoading;
+    return (
+      balanceLoading || positionsLoading || rewardsLoading || pricesLoading
+    );
   }, [balanceLoading, positionsLoading, rewardsLoading, pricesLoading]);
 
   const hasError = useMemo(() => {
@@ -129,25 +131,30 @@ export const useWalletData = (address?: string) => {
     }
   }, [address, fetchRewards]);
 
-  const refreshPrices = useCallback((tokenAddresses?: string[]) => {
-    if (tokenAddresses) {
-      fetchPrices(tokenAddresses, true);
-    } else {
-      // Get all token addresses from current positions
-      const allTokenAddresses = new Set<string>();
-      Object.values(positions).forEach(protocolPositions => {
-        protocolPositions.forEach((position: any) => {
-          if (position.coin) allTokenAddresses.add(position.coin);
-          if (position.token) allTokenAddresses.add(position.token);
-          if (position.collateralTokenAddress) allTokenAddresses.add(position.collateralTokenAddress);
-          if (position.debtTokenInfo?.faAddress) allTokenAddresses.add(position.debtTokenInfo.faAddress);
+  const refreshPrices = useCallback(
+    (tokenAddresses?: string[]) => {
+      if (tokenAddresses) {
+        fetchPrices(tokenAddresses, true);
+      } else {
+        // Get all token addresses from current positions
+        const allTokenAddresses = new Set<string>();
+        Object.values(positions).forEach(protocolPositions => {
+          protocolPositions.forEach((position: any) => {
+            if (position.coin) allTokenAddresses.add(position.coin);
+            if (position.token) allTokenAddresses.add(position.token);
+            if (position.collateralTokenAddress)
+              allTokenAddresses.add(position.collateralTokenAddress);
+            if (position.debtTokenInfo?.faAddress)
+              allTokenAddresses.add(position.debtTokenInfo.faAddress);
+          });
         });
-      });
-      if (allTokenAddresses.size > 0) {
-        fetchPrices(Array.from(allTokenAddresses), true);
+        if (allTokenAddresses.size > 0) {
+          fetchPrices(Array.from(allTokenAddresses), true);
+        }
       }
-    }
-  }, [positions, fetchPrices]);
+    },
+    [positions, fetchPrices]
+  );
 
   const refreshAll = useCallback(() => {
     if (address) {
@@ -164,24 +171,24 @@ export const useWalletData = (address?: string) => {
     positions,
     rewards,
     prices,
-    
+
     // Loading states
     isLoading,
     balanceLoading,
     positionsLoading,
     rewardsLoading,
     pricesLoading,
-    
+
     // Error states
     hasError,
     balanceError,
     positionsError,
     rewardsError,
     pricesError,
-    
+
     // Computed values
     totalValue,
-    
+
     // Actions
     refreshAll,
     refreshBalance,
@@ -192,16 +199,16 @@ export const useWalletData = (address?: string) => {
     fetchPositions,
     fetchRewards,
     fetchPrices,
-    
+
     // Getters
     getBalance,
     getPositions,
     getRewards,
     getTokenPrice,
     getTotalValue,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   };
-}; 
+};

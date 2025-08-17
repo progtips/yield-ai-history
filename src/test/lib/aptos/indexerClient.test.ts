@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeQuery, executeQueryWithRetry, getGraphQLClient } from '@/lib/aptos/indexerClient';
+import {
+  executeQuery,
+  executeQueryWithRetry,
+  getGraphQLClient,
+} from '@/lib/aptos/indexerClient';
 
 // Mock graphql-request
 vi.mock('graphql-request', () => ({
@@ -90,7 +94,8 @@ describe('IndexerClient', () => {
     it('should retry on failure and eventually succeed', async () => {
       const mockResponse = { data: 'success' };
       const mockClient = {
-        request: vi.fn()
+        request: vi
+          .fn()
           .mockRejectedValueOnce(new Error('Network Error'))
           .mockRejectedValueOnce(new Error('Network Error'))
           .mockResolvedValue(mockResponse),
@@ -115,7 +120,9 @@ describe('IndexerClient', () => {
 
       const query = 'query { test }';
 
-      await expect(executeQueryWithRetry(query)).rejects.toThrow('Persistent Network Error');
+      await expect(executeQueryWithRetry(query)).rejects.toThrow(
+        'Persistent Network Error'
+      );
       expect(mockClient.request).toHaveBeenCalledTimes(3); // Default max retries
     });
 
@@ -124,7 +131,8 @@ describe('IndexerClient', () => {
 
       const mockResponse = { data: 'success' };
       const mockClient = {
-        request: vi.fn()
+        request: vi
+          .fn()
           .mockRejectedValueOnce(new Error('Network Error'))
           .mockResolvedValue(mockResponse),
       };
@@ -186,7 +194,9 @@ describe('IndexerClient', () => {
 
       const query = 'invalid query';
 
-      await expect(executeQueryWithRetry(query)).rejects.toThrow('syntax error');
+      await expect(executeQueryWithRetry(query)).rejects.toThrow(
+        'syntax error'
+      );
     });
   });
 });

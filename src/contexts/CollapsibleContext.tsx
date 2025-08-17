@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
@@ -10,14 +10,28 @@ interface CollapsibleContextType {
   isExpanded: (sectionId: string) => boolean;
 }
 
-const CollapsibleContext = createContext<CollapsibleContextType | undefined>(undefined);
+const CollapsibleContext = createContext<CollapsibleContextType | undefined>(
+  undefined
+);
 
 interface CollapsibleProviderProps {
   children: ReactNode;
 }
 
 export function CollapsibleProvider({ children }: CollapsibleProviderProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['wallet', 'hyperion', 'echelon', 'aries', 'joule', 'tapp', 'meso', 'auro', 'amnis']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set([
+      'wallet',
+      'hyperion',
+      'echelon',
+      'aries',
+      'joule',
+      'tapp',
+      'meso',
+      'auro',
+      'amnis',
+    ])
+  );
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -32,7 +46,19 @@ export function CollapsibleProvider({ children }: CollapsibleProviderProps) {
   };
 
   const expandAll = () => {
-    setExpandedSections(new Set(['wallet', 'hyperion', 'echelon', 'aries', 'joule', 'tapp', 'meso', 'auro', 'amnis']));
+    setExpandedSections(
+      new Set([
+        'wallet',
+        'hyperion',
+        'echelon',
+        'aries',
+        'joule',
+        'tapp',
+        'meso',
+        'auro',
+        'amnis',
+      ])
+    );
   };
 
   const collapseAll = () => {
@@ -44,13 +70,15 @@ export function CollapsibleProvider({ children }: CollapsibleProviderProps) {
   };
 
   return (
-    <CollapsibleContext.Provider value={{
-      expandedSections,
-      toggleSection,
-      expandAll,
-      collapseAll,
-      isExpanded
-    }}>
+    <CollapsibleContext.Provider
+      value={{
+        expandedSections,
+        toggleSection,
+        expandAll,
+        collapseAll,
+        isExpanded,
+      }}
+    >
       {children}
     </CollapsibleContext.Provider>
   );
@@ -62,4 +90,4 @@ export function useCollapsible() {
     throw new Error('useCollapsible must be used within a CollapsibleProvider');
   }
   return context;
-} 
+}

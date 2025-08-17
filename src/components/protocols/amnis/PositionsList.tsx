@@ -5,11 +5,15 @@ import { AmnisPositionCard } from './PositionCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Plus, ChevronDown, ChevronRight } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { useCollapsible } from "@/contexts/CollapsibleContext";
-import { getProtocolByName } from "@/lib/protocols/getProtocolsList";
-import { cn } from "@/lib/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useCollapsible } from '@/contexts/CollapsibleContext';
+import { getProtocolByName } from '@/lib/protocols/getProtocolsList';
+import { cn } from '@/lib/utils';
 
 interface AmnisPosition {
   id: string;
@@ -48,35 +52,39 @@ export const AmnisPositionsList: React.FC<AmnisPositionsListProps> = ({
   onClaim,
   onStake,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
 }) => {
   if (positions.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <img 
-              src="/amnis-logo.png" 
-              alt="Amnis Finance" 
-              className="w-6 h-6 rounded"
+          <CardTitle className='flex items-center gap-2'>
+            <img
+              src='/amnis-logo.png'
+              alt='Amnis Finance'
+              className='w-6 h-6 rounded'
             />
             Amnis Finance
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-muted-foreground mb-4">
+        <CardContent className='text-center py-8'>
+          <p className='text-muted-foreground mb-4'>
             No staking positions found
           </p>
-          <div className="flex gap-2 justify-center">
+          <div className='flex gap-2 justify-center'>
             {onStake && (
-              <Button onClick={onStake} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
+              <Button onClick={onStake} className='flex items-center gap-2'>
+                <Plus className='w-4 h-4' />
                 Start Staking
               </Button>
             )}
-            <Button variant="outline" asChild>
-              <a href="https://stake.amnis.finance/" target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 h-4 mr-2" />
+            <Button variant='outline' asChild>
+              <a
+                href='https://stake.amnis.finance/'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <ExternalLink className='w-4 h-4 mr-2' />
                 Visit Amnis
               </a>
             </Button>
@@ -89,23 +97,25 @@ export const AmnisPositionsList: React.FC<AmnisPositionsListProps> = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <img 
-              src="/amnis-logo.png" 
-              alt="Amnis Finance" 
-              className="w-6 h-6 rounded"
+        <div className='flex items-center justify-between'>
+          <CardTitle className='flex items-center gap-2'>
+            <img
+              src='/amnis-logo.png'
+              alt='Amnis Finance'
+              className='w-6 h-6 rounded'
             />
             Amnis Finance
           </CardTitle>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total Value</p>
-            <p className="text-lg font-semibold">${(totalValue || 0).toFixed(2)}</p>
+          <div className='text-right'>
+            <p className='text-sm text-muted-foreground'>Total Value</p>
+            <p className='text-lg font-semibold'>
+              ${(totalValue || 0).toFixed(2)}
+            </p>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-4">
+      <CardContent className='space-y-4'>
+        <div className='grid gap-4'>
           {positions.map((position, index) => (
             <div key={position.id || index}>
               <AmnisPositionCard
@@ -113,26 +123,41 @@ export const AmnisPositionsList: React.FC<AmnisPositionsListProps> = ({
                 onWithdraw={onWithdraw}
                 onClaim={onClaim}
               />
-              
+
               {/* Show pool details for AMI staking positions */}
               {position.pools && position.pools.length > 0 && (
                 <Collapsible>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-full justify-between mt-2">
-                      <span className="text-xs text-muted-foreground">Pool Details</span>
-                      <ChevronDown className="w-4 h-4" />
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      className='w-full justify-between mt-2'
+                    >
+                      <span className='text-xs text-muted-foreground'>
+                        Pool Details
+                      </span>
+                      <ChevronDown className='w-4 h-4' />
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="mt-2 space-y-2 pl-4">
+                    <div className='mt-2 space-y-2 pl-4'>
                       {position.pools.map((pool, poolIndex) => (
-                        <div key={poolIndex} className="text-xs bg-muted p-2 rounded">
-                          <div className="flex justify-between">
-                            <span>Pool: {pool.address.substring(0, 8)}...{pool.address.substring(pool.address.length - 8)}</span>
-                            <span className="text-green-600">{(pool.rate * 100).toFixed(2)}% APY</span>
+                        <div
+                          key={poolIndex}
+                          className='text-xs bg-muted p-2 rounded'
+                        >
+                          <div className='flex justify-between'>
+                            <span>
+                              Pool: {pool.address.substring(0, 8)}...
+                              {pool.address.substring(pool.address.length - 8)}
+                            </span>
+                            <span className='text-green-600'>
+                              {(pool.rate * 100).toFixed(2)}% APY
+                            </span>
                           </div>
-                          <div className="text-muted-foreground">
-                            Staked: {(pool.stakedAmount / 100000000).toFixed(2)} AMI
+                          <div className='text-muted-foreground'>
+                            Staked: {(pool.stakedAmount / 100000000).toFixed(2)}{' '}
+                            AMI
                           </div>
                         </div>
                       ))}
@@ -143,11 +168,15 @@ export const AmnisPositionsList: React.FC<AmnisPositionsListProps> = ({
             </div>
           ))}
         </div>
-        
-        <div className="flex justify-center pt-4">
-          <Button variant="outline" asChild>
-            <a href="https://stake.amnis.finance/" target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4 mr-2" />
+
+        <div className='flex justify-center pt-4'>
+          <Button variant='outline' asChild>
+            <a
+              href='https://stake.amnis.finance/'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <ExternalLink className='w-4 h-4 mr-2' />
               Manage on Amnis
             </a>
           </Button>
@@ -163,9 +192,9 @@ interface SidebarPositionsListProps {
   onPositionsValueChange?: (value: number) => void;
 }
 
-export const PositionsList: React.FC<SidebarPositionsListProps> = ({ 
-  address, 
-  onPositionsValueChange 
+export const PositionsList: React.FC<SidebarPositionsListProps> = ({
+  address,
+  onPositionsValueChange,
 }) => {
   const { account } = useWallet();
   const { isExpanded, toggleSection } = useCollapsible();
@@ -176,16 +205,18 @@ export const PositionsList: React.FC<SidebarPositionsListProps> = ({
   // Fetch real data from API
   const fetchPositions = useCallback(async () => {
     if (!address) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`/api/protocols/amnis/userPositions?address=${address}`);
+      const response = await fetch(
+        `/api/protocols/amnis/userPositions?address=${address}`
+      );
       if (!response.ok) {
         throw new Error(`Failed to fetch positions: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data.success && data.positions) {
         setPositions(data.positions);
@@ -194,7 +225,9 @@ export const PositionsList: React.FC<SidebarPositionsListProps> = ({
       }
     } catch (err) {
       console.error('Error fetching Amnis positions:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch positions');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch positions'
+      );
       setPositions([]);
     } finally {
       setLoading(false);
@@ -224,62 +257,76 @@ export const PositionsList: React.FC<SidebarPositionsListProps> = ({
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader 
-        className="py-2 cursor-pointer hover:bg-accent/50 transition-colors"
+    <Card className='w-full'>
+      <CardHeader
+        className='py-2 cursor-pointer hover:bg-accent/50 transition-colors'
         onClick={() => toggleSection('amnis')}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 relative">
-              <img 
-                src="/amnis-logo.png" 
-                alt="Amnis Finance"
-                className="w-5 h-5 object-contain"
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <div className='w-5 h-5 relative'>
+              <img
+                src='/amnis-logo.png'
+                alt='Amnis Finance'
+                className='w-5 h-5 object-contain'
               />
             </div>
-            <CardTitle className="text-lg">Amnis Finance</CardTitle>
+            <CardTitle className='text-lg'>Amnis Finance</CardTitle>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-lg">${totalValue.toFixed(2)}</div>
-            <ChevronDown className={cn(
-              "h-5 w-5 transition-transform",
-              isExpanded('amnis') ? "transform rotate-0" : "transform -rotate-90"
-            )} />
+          <div className='flex items-center gap-2'>
+            <div className='text-lg'>${totalValue.toFixed(2)}</div>
+            <ChevronDown
+              className={cn(
+                'h-5 w-5 transition-transform',
+                isExpanded('amnis')
+                  ? 'transform rotate-0'
+                  : 'transform -rotate-90'
+              )}
+            />
           </div>
         </div>
       </CardHeader>
       {isExpanded('amnis') && (
-        <CardContent className="flex-1 overflow-y-auto px-3 pt-0">
+        <CardContent className='flex-1 overflow-y-auto px-3 pt-0'>
           {loading ? (
-            <div className="text-center py-4 text-muted-foreground">Loading...</div>
+            <div className='text-center py-4 text-muted-foreground'>
+              Loading...
+            </div>
           ) : error ? (
-            <div className="text-center py-4 text-red-500 text-sm">{error}</div>
+            <div className='text-center py-4 text-red-500 text-sm'>{error}</div>
           ) : (
-            <div className="space-y-2">
-              {positions.map((position) => (
-                <div key={position.id} className="mb-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 relative">
-                        <img 
-                          src="/amnis-logo.png" 
-                          alt={position.tokenSymbol || "AMI"}
-                          className="w-6 h-6 object-contain"
+            <div className='space-y-2'>
+              {positions.map(position => (
+                <div key={position.id} className='mb-2'>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex items-center gap-2'>
+                      <div className='w-6 h-6 relative'>
+                        <img
+                          src='/amnis-logo.png'
+                          alt={position.tokenSymbol || 'AMI'}
+                          className='w-6 h-6 object-contain'
                         />
                       </div>
-                                              <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{position.tokenSymbol || "AMI"}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            ${(position.usdValue / parseFloat(position.stakedAmount)).toFixed(3)}
-                          </div>
+                      <div>
+                        <div className='flex items-center gap-2'>
+                          <span className='text-sm font-medium'>
+                            {position.tokenSymbol || 'AMI'}
+                          </span>
                         </div>
+                        <div className='text-xs text-muted-foreground'>
+                          $
+                          {(
+                            position.usdValue /
+                            parseFloat(position.stakedAmount)
+                          ).toFixed(3)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium">${(position.usdValue || 0).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">
+                    <div className='text-right'>
+                      <div className='text-sm font-medium'>
+                        ${(position.usdValue || 0).toFixed(2)}
+                      </div>
+                      <div className='text-xs text-muted-foreground'>
                         {parseFloat(position.stakedAmount).toFixed(2)}
                       </div>
                     </div>
@@ -292,4 +339,4 @@ export const PositionsList: React.FC<SidebarPositionsListProps> = ({
       )}
     </Card>
   );
-}; 
+};

@@ -1,12 +1,12 @@
-import { Card, CardHeader } from "@/components/ui/card";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import tokenList from "@/lib/data/tokenList.json";
-import { useEffect, useState } from "react";
-import { PanoraPricesService } from "@/lib/services/panora/prices";
-import { TokenPrice } from "@/lib/types/panora";
+import { Card, CardHeader } from '@/components/ui/card';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import tokenList from '@/lib/data/tokenList.json';
+import { useEffect, useState } from 'react';
+import { PanoraPricesService } from '@/lib/services/panora/prices';
+import { TokenPrice } from '@/lib/types/panora';
 
 interface Token {
   chainId: number;
@@ -33,14 +33,14 @@ interface PositionProps {
           borrow_amount: string;
           coin_name: string;
           interest_accumulated: string;
-        }
-      }>
+        };
+      }>;
     };
     lend_positions: {
       data: Array<{
         key: string;
         value: string;
-      }>
+      }>;
     };
   };
   onPositionValueChange?: (value: number) => void;
@@ -55,37 +55,53 @@ interface Position {
   tokenInfo?: Token;
 }
 
-export function PositionCard({ position, onPositionValueChange }: PositionProps) {
+export function PositionCard({
+  position,
+  onPositionValueChange,
+}: PositionProps) {
   const [tokenPrices, setTokenPrices] = useState<Record<string, string>>({});
   const [currentTotal, setCurrentTotal] = useState(0);
   const pricesService = PanoraPricesService.getInstance();
 
   const getTokenInfo = (coinName: string): Token | undefined => {
     // Убираем префикс @ если он есть
-    const cleanAddress = coinName.startsWith('@') ? coinName.slice(1) : coinName;
+    const cleanAddress = coinName.startsWith('@')
+      ? coinName.slice(1)
+      : coinName;
     // Добавляем префикс 0x если его нет
-    const fullAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
-    
-    return (tokenList.data.data as Token[]).find(token => 
-      token.tokenAddress === fullAddress || token.faAddress === fullAddress
+    const fullAddress = cleanAddress.startsWith('0x')
+      ? cleanAddress
+      : `0x${cleanAddress}`;
+
+    return (tokenList.data.data as Token[]).find(
+      token =>
+        token.tokenAddress === fullAddress || token.faAddress === fullAddress
     );
   };
 
-  const isLoopPosition = position.position_name === "Loop-Position";
+  const isLoopPosition = position.position_name === 'Loop-Position';
 
   // Получаем все уникальные адреса токенов
   const getAllTokenAddresses = () => {
     const addresses = new Set<string>();
-    
+
     position.borrow_positions.data.forEach(borrow => {
-      const cleanAddress = borrow.value.coin_name.startsWith('@') ? borrow.value.coin_name.slice(1) : borrow.value.coin_name;
-      const fullAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+      const cleanAddress = borrow.value.coin_name.startsWith('@')
+        ? borrow.value.coin_name.slice(1)
+        : borrow.value.coin_name;
+      const fullAddress = cleanAddress.startsWith('0x')
+        ? cleanAddress
+        : `0x${cleanAddress}`;
       addresses.add(fullAddress);
     });
-    
+
     position.lend_positions.data.forEach(lend => {
-      const cleanAddress = lend.key.startsWith('@') ? lend.key.slice(1) : lend.key;
-      const fullAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+      const cleanAddress = lend.key.startsWith('@')
+        ? lend.key.slice(1)
+        : lend.key;
+      const fullAddress = cleanAddress.startsWith('0x')
+        ? cleanAddress
+        : `0x${cleanAddress}`;
       addresses.add(fullAddress);
     });
     const arr = Array.from(addresses);
@@ -96,7 +112,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
   // Получаем цену токена с учетом префиксов
   const getTokenPrice = (address: string): string => {
     const cleanAddress = address.startsWith('@') ? address.slice(1) : address;
-    const fullAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+    const fullAddress = cleanAddress.startsWith('0x')
+      ? cleanAddress
+      : `0x${cleanAddress}`;
     const price = tokenPrices[fullAddress] || '0';
     if (fullAddress.toLowerCase().includes('stapt')) {
       console.log('[Joule] getTokenPrice for stAPT:', fullAddress, '=>', price);
@@ -152,7 +170,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
     // Суммируем значения lend позиций
     position.lend_positions.data.forEach(lend => {
       const tokenInfo = getTokenInfo(lend.key);
-      const amount = parseFloat(lend.value) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(lend.value) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(lend.key);
       totalValue += amount * parseFloat(price);
     });
@@ -160,7 +180,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
     // Вычитаем значения borrow позиций
     position.borrow_positions.data.forEach(borrow => {
       const tokenInfo = getTokenInfo(borrow.value.coin_name);
-      const amount = parseFloat(borrow.value.borrow_amount) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(borrow.value.borrow_amount) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(borrow.value.coin_name);
       totalValue -= amount * parseFloat(price);
     });
@@ -175,7 +197,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
     // Суммируем значения lend позиций
     position.lend_positions.data.forEach(lend => {
       const tokenInfo = getTokenInfo(lend.key);
-      const amount = parseFloat(lend.value) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(lend.value) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(lend.key);
       totalValue += amount * parseFloat(price);
     });
@@ -183,7 +207,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
     // Вычитаем значения borrow позиций
     position.borrow_positions.data.forEach(borrow => {
       const tokenInfo = getTokenInfo(borrow.value.coin_name);
-      const amount = parseFloat(borrow.value.borrow_amount) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(borrow.value.borrow_amount) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(borrow.value.coin_name);
       totalValue -= amount * parseFloat(price);
     });
@@ -198,7 +224,9 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
     // Добавляем lend позиции
     position.lend_positions.data.forEach(lend => {
       const tokenInfo = getTokenInfo(lend.key);
-      const amount = parseFloat(lend.value) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(lend.value) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(lend.key);
       const value = amount * parseFloat(price);
       positions.push({
@@ -207,14 +235,16 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
         amount,
         price,
         value,
-        tokenInfo
+        tokenInfo,
       });
     });
 
     // Добавляем borrow позиции
     position.borrow_positions.data.forEach(borrow => {
       const tokenInfo = getTokenInfo(borrow.value.coin_name);
-      const amount = parseFloat(borrow.value.borrow_amount) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+      const amount =
+        parseFloat(borrow.value.borrow_amount) /
+        (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
       const price = getTokenPrice(borrow.value.coin_name);
       const value = amount * parseFloat(price);
       positions.push({
@@ -223,7 +253,7 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
         amount,
         price,
         value,
-        tokenInfo
+        tokenInfo,
       });
     });
 
@@ -232,56 +262,88 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
   };
 
   return (
-    <Card className="w-full mb-3">
-      <CardHeader className="py-2">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-medium">
-                {position.position_name === "Loop-Position" ? "Loop-Position" : "Positions"}
+    <Card className='w-full mb-3'>
+      <CardHeader className='py-2'>
+        <div className='flex flex-col gap-2'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <div className='text-sm font-medium'>
+                {position.position_name === 'Loop-Position'
+                  ? 'Loop-Position'
+                  : 'Positions'}
               </div>
             </div>
-            {position.position_name === "Loop-Position" && (
-              <div className="text-sm text-muted-foreground">
+            {position.position_name === 'Loop-Position' && (
+              <div className='text-sm text-muted-foreground'>
                 ${calculateTotalValue().toFixed(2)}
               </div>
             )}
           </div>
-          
+
           {isLoopPosition ? (
             // Для Loop-Position показываем оба актива с пометкой Borrow
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {getSortedPositions().map((pos, index) => (
-                <div key={`${pos.type}-${index}`} className="flex items-center justify-between p-2 rounded-lg">
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
+                <div
+                  key={`${pos.type}-${index}`}
+                  className='flex items-center justify-between p-2 rounded-lg'
+                >
+                  <div className='flex flex-col'>
+                    <div className='flex items-center gap-2'>
                       {pos.tokenInfo?.logoUrl && (
                         <Image
                           src={pos.tokenInfo.logoUrl}
                           alt={pos.tokenInfo.symbol}
                           width={16}
                           height={16}
-                          className="rounded-full"
+                          className='rounded-full'
                         />
                       )}
-                      <div className={cn("text-sm", pos.type === 'borrow' && "text-red-600")}>
+                      <div
+                        className={cn(
+                          'text-sm',
+                          pos.type === 'borrow' && 'text-red-600'
+                        )}
+                      >
                         {pos.tokenInfo?.symbol || pos.key.split('::').pop()}
                       </div>
                       {pos.type === 'borrow' && (
-                        <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                        <Badge
+                          variant='outline'
+                          className='bg-red-500/10 text-red-600 border-red-500/20'
+                        >
                           Borrow
                         </Badge>
                       )}
                     </div>
-                    <div className={cn("text-xs", pos.type === 'borrow' ? "text-red-600/70" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        'text-xs',
+                        pos.type === 'borrow'
+                          ? 'text-red-600/70'
+                          : 'text-muted-foreground'
+                      )}
+                    >
                       ${parseFloat(pos.price).toFixed(2)}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <div className={cn("text-sm", pos.type === 'borrow' && "text-red-600")}>
+                  <div className='flex flex-col items-end'>
+                    <div
+                      className={cn(
+                        'text-sm',
+                        pos.type === 'borrow' && 'text-red-600'
+                      )}
+                    >
                       ${pos.value.toFixed(2)}
                     </div>
-                    <div className={cn("text-xs", pos.type === 'borrow' ? "text-red-600/70" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        'text-xs',
+                        pos.type === 'borrow'
+                          ? 'text-red-600/70'
+                          : 'text-muted-foreground'
+                      )}
+                    >
                       {pos.amount.toFixed(2)}
                     </div>
                   </div>
@@ -290,38 +352,68 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
             </div>
           ) : (
             // Для обычных позиций просто список активов
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {getSortedPositions().map((pos, index) => (
-                <div key={`${pos.type}-${index}`} className="flex items-center justify-between p-2 rounded-lg">
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
+                <div
+                  key={`${pos.type}-${index}`}
+                  className='flex items-center justify-between p-2 rounded-lg'
+                >
+                  <div className='flex flex-col'>
+                    <div className='flex items-center gap-2'>
                       {pos.tokenInfo?.logoUrl && (
                         <Image
                           src={pos.tokenInfo.logoUrl}
                           alt={pos.tokenInfo.symbol}
                           width={16}
                           height={16}
-                          className="rounded-full"
+                          className='rounded-full'
                         />
                       )}
-                      <div className={cn("text-sm", pos.type === 'borrow' && "text-red-600")}>
+                      <div
+                        className={cn(
+                          'text-sm',
+                          pos.type === 'borrow' && 'text-red-600'
+                        )}
+                      >
                         {pos.tokenInfo?.symbol || pos.key.split('::').pop()}
                       </div>
                       {pos.type === 'borrow' && (
-                        <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                        <Badge
+                          variant='outline'
+                          className='bg-red-500/10 text-red-600 border-red-500/20'
+                        >
                           Borrow
                         </Badge>
                       )}
                     </div>
-                    <div className={cn("text-xs", pos.type === 'borrow' ? "text-red-600/70" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        'text-xs',
+                        pos.type === 'borrow'
+                          ? 'text-red-600/70'
+                          : 'text-muted-foreground'
+                      )}
+                    >
                       ${parseFloat(pos.price).toFixed(2)}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <div className={cn("text-sm", pos.type === 'borrow' && "text-red-600")}>
+                  <div className='flex flex-col items-end'>
+                    <div
+                      className={cn(
+                        'text-sm',
+                        pos.type === 'borrow' && 'text-red-600'
+                      )}
+                    >
                       ${pos.value.toFixed(2)}
                     </div>
-                    <div className={cn("text-xs", pos.type === 'borrow' ? "text-red-600/70" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        'text-xs',
+                        pos.type === 'borrow'
+                          ? 'text-red-600/70'
+                          : 'text-muted-foreground'
+                      )}
+                    >
                       {pos.amount.toFixed(2)}
                     </div>
                   </div>
@@ -333,4 +425,4 @@ export function PositionCard({ position, onPositionValueChange }: PositionProps)
       </CardHeader>
     </Card>
   );
-} 
+}

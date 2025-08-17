@@ -7,7 +7,10 @@ export async function GET(request: NextRequest) {
   try {
     // Get chainId from query params, default to Aptos (1)
     const searchParams = request.nextUrl.searchParams;
-    const chainId = parseInt(searchParams.get('chainId') || String(DEFAULT_CHAIN_ID), 10);
+    const chainId = parseInt(
+      searchParams.get('chainId') || String(DEFAULT_CHAIN_ID),
+      10
+    );
 
     // Validate chainId
     if (isNaN(chainId)) {
@@ -24,27 +27,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(createSuccessResponse(response));
   } catch (error) {
     console.error('Error in tokenList route:', error);
-    
+
     if (error instanceof Error) {
       // Handle specific error cases
       if (error.message.includes('Unsupported chainId')) {
         return NextResponse.json(
-          createErrorResponse(new Error(`Unsupported chainId. Supported chains: ${Object.values(SUPPORTED_CHAIN_IDS).join(', ')}`)),
+          createErrorResponse(
+            new Error(
+              `Unsupported chainId. Supported chains: ${Object.values(SUPPORTED_CHAIN_IDS).join(', ')}`
+            )
+          ),
           { status: 400 }
         );
       }
-      
+
       if (error.message.includes('404')) {
         return NextResponse.json(
           createErrorResponse(new Error('Chain not supported')),
           { status: 404 }
         );
       }
-      
-      return NextResponse.json(
-        createErrorResponse(error),
-        { status: 500 }
-      );
+
+      return NextResponse.json(createErrorResponse(error), { status: 500 });
     }
 
     return NextResponse.json(
@@ -52,4 +56,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

@@ -8,10 +8,14 @@ interface ProtocolContextType {
   setSelectedProtocol: (protocol: Protocol | null) => void;
 }
 
-const ProtocolContext = createContext<ProtocolContextType | undefined>(undefined);
+const ProtocolContext = createContext<ProtocolContextType | undefined>(
+  undefined
+);
 
 export function ProtocolProvider({ children }: { children: ReactNode }) {
-  const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
+  const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(
+    null
+  );
 
   return (
     <ProtocolContext.Provider value={{ selectedProtocol, setSelectedProtocol }}>
@@ -26,4 +30,4 @@ export function useProtocol() {
     throw new Error('useProtocol must be used within a ProtocolProvider');
   }
   return context;
-} 
+}

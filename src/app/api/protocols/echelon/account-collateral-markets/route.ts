@@ -15,21 +15,21 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getAccountCollateralMarkets(address);
-    
+
     if (!result.success) {
       return NextResponse.json(result, { status: 500 });
     }
-    
-    return NextResponse.json(result);
 
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error in GET handler:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       },
       { status: 500 }
     );
   }
-} 
+}

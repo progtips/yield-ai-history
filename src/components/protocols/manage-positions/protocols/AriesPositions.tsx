@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import tokenList from "@/lib/data/tokenList.json";
+import { useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import tokenList from '@/lib/data/tokenList.json';
 
 interface TokenInfo {
   address: string;
@@ -44,14 +44,16 @@ export function AriesPositions() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`/api/protocols/aries/userPositions?address=${account.address}`);
-        
+        const response = await fetch(
+          `/api/protocols/aries/userPositions?address=${account.address}`
+        );
+
         if (!response.ok) {
           throw new Error(`API returned status ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success && Array.isArray(data.data)) {
           setPositions(data.data);
         } else {
@@ -70,14 +72,16 @@ export function AriesPositions() {
   }, [account?.address]);
 
   const getTokenInfo = (assetName: string): TokenInfo | undefined => {
-    const token = (tokenList as any).data.data.find((token: any) => token.tokenAddress === assetName);
+    const token = (tokenList as any).data.data.find(
+      (token: any) => token.tokenAddress === assetName
+    );
     if (!token) return undefined;
-    
+
     return {
       address: token.tokenAddress,
       symbol: token.symbol,
       logoUrl: token.logoUrl,
-      decimals: token.decimals
+      decimals: token.decimals,
     };
   };
 
@@ -86,7 +90,7 @@ export function AriesPositions() {
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className='text-red-500'>{error}</div>;
   }
 
   if (positions.length === 0) {
@@ -94,56 +98,70 @@ export function AriesPositions() {
   }
 
   return (
-    <Card className="w-full">
-      <ScrollArea className="h-[400px]">
+    <Card className='w-full'>
+      <ScrollArea className='h-[400px]'>
         {positions.map((position, index) => {
           const tokenInfo = getTokenInfo(position.assetName);
-          const amount = parseFloat(position.balance) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+          const amount =
+            parseFloat(position.balance) /
+            (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
           const value = parseFloat(position.value);
           const isBorrow = position.type === 'borrow';
-          
+
           return (
-            <div 
-              key={`${position.assetName}-${index}`} 
+            <div
+              key={`${position.assetName}-${index}`}
               className={cn(
-                "p-4 border-b last:border-b-0",
-                isBorrow && "bg-red-50"
+                'p-4 border-b last:border-b-0',
+                isBorrow && 'bg-red-50'
               )}
             >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
+              <div className='flex justify-between items-center'>
+                <div className='flex items-center gap-2'>
                   {tokenInfo?.logoUrl && (
-                    <div className="w-6 h-6 relative">
-                      <Image 
-                        src={tokenInfo.logoUrl} 
+                    <div className='w-6 h-6 relative'>
+                      <Image
+                        src={tokenInfo.logoUrl}
                         alt={tokenInfo.symbol}
                         width={24}
                         height={24}
-                        className="object-contain"
+                        className='object-contain'
                       />
                     </div>
                   )}
                   <div>
-                    <div className={cn(
-                      "text-sm font-medium",
-                      isBorrow && "text-red-500"
-                    )}>{position.assetName}</div>
+                    <div
+                      className={cn(
+                        'text-sm font-medium',
+                        isBorrow && 'text-red-500'
+                      )}
+                    >
+                      {position.assetName}
+                    </div>
                     {isBorrow && (
-                      <div className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">
+                      <div className='text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20'>
                         Borrow
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className={cn(
-                    "text-sm font-medium",
-                    isBorrow && "text-red-500"
-                  )}>${value.toFixed(2)}</div>
-                  <div className={cn(
-                    "text-xs",
-                    isBorrow ? "text-red-400" : "text-muted-foreground"
-                  )}>{amount.toFixed(4)}</div>
+                <div className='text-right'>
+                  <div
+                    className={cn(
+                      'text-sm font-medium',
+                      isBorrow && 'text-red-500'
+                    )}
+                  >
+                    ${value.toFixed(2)}
+                  </div>
+                  <div
+                    className={cn(
+                      'text-xs',
+                      isBorrow ? 'text-red-400' : 'text-muted-foreground'
+                    )}
+                  >
+                    {amount.toFixed(4)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -152,4 +170,4 @@ export function AriesPositions() {
       </ScrollArea>
     </Card>
   );
-} 
+}

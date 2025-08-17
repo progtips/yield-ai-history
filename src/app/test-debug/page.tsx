@@ -30,7 +30,7 @@ export default function TestDebugPage() {
       { url: '/api/protocols/hyperion/pools', name: 'Hyperion' },
       { url: '/api/protocols/auro/pools', name: 'Auro' },
       { url: '/api/protocols/tapp/pools', name: 'Tapp' },
-      { url: '/api/protocols/amnis/pools', name: 'Amnis' }
+      { url: '/api/protocols/amnis/pools', name: 'Amnis' },
     ];
 
     const results = await Promise.allSettled(
@@ -38,7 +38,10 @@ export default function TestDebugPage() {
     );
 
     const successfulResults = results
-      .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === 'fulfilled'
+      )
       .map(result => result.value);
 
     setData(successfulResults);
@@ -46,33 +49,31 @@ export default function TestDebugPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Debug API Test</h1>
-      
-      <button 
+    <div className='container mx-auto p-4'>
+      <h1 className='text-2xl font-bold mb-4'>Debug API Test</h1>
+
+      <button
         onClick={testAllAPIs}
         disabled={loading}
-        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        className='px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50'
       >
         {loading ? 'Testing...' : 'Test All APIs'}
       </button>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
-          {error}
-        </div>
+        <div className='mt-4 p-4 bg-red-100 text-red-700 rounded'>{error}</div>
       )}
 
       {data && (
-        <div className="mt-4 space-y-4">
-          <h2 className="text-xl font-semibold">Results:</h2>
+        <div className='mt-4 space-y-4'>
+          <h2 className='text-xl font-semibold'>Results:</h2>
           {data.map((result: any, index: number) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle>{result.name}</CardTitle>
               </CardHeader>
               <CardContent>
-                <pre className="text-xs overflow-auto">
+                <pre className='text-xs overflow-auto'>
                   {JSON.stringify(result, null, 2)}
                 </pre>
               </CardContent>
@@ -82,4 +83,4 @@ export default function TestDebugPage() {
       )}
     </div>
   );
-} 
+}

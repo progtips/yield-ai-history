@@ -24,10 +24,7 @@ export async function POST(request: NextRequest) {
     const response = await swapService.executeSwap(quoteData, walletAddress);
 
     if (!response.success) {
-      return NextResponse.json(
-        { error: response.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: response.error }, { status: 400 });
     }
 
     return NextResponse.json(response.data);
@@ -38,4 +35,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

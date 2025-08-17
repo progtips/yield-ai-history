@@ -1,7 +1,13 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { useWallet as useAptosWallet } from "@aptos-labs/wallet-adapter-react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
+import { useWallet as useAptosWallet } from '@aptos-labs/wallet-adapter-react';
 import { AptosPortfolioService } from '@/lib/services/aptos/portfolio';
 
 interface PortfolioToken {
@@ -19,7 +25,9 @@ interface WalletContextType {
   tokens: PortfolioToken[];
 }
 
-const WalletDataContext = createContext<WalletContextType | undefined>(undefined);
+const WalletDataContext = createContext<WalletContextType | undefined>(
+  undefined
+);
 
 export function WalletDataProvider({ children }: { children: ReactNode }) {
   const { account, connected } = useAptosWallet();
@@ -33,17 +41,19 @@ export function WalletDataProvider({ children }: { children: ReactNode }) {
       const fetchWalletData = async () => {
         try {
           const portfolioService = new AptosPortfolioService();
-          const { tokens } = await portfolioService.getPortfolio(account.address.toString());
+          const { tokens } = await portfolioService.getPortfolio(
+            account.address.toString()
+          );
 
           setWalletData({
             address: account.address.toString(),
-            tokens
+            tokens,
           });
         } catch (error) {
           console.error('Error fetching wallet data:', error);
           setWalletData({
             address: account.address.toString(),
-            tokens: []
+            tokens: [],
           });
         }
       };
@@ -52,7 +62,7 @@ export function WalletDataProvider({ children }: { children: ReactNode }) {
     } else {
       setWalletData({
         address: undefined,
-        tokens: []
+        tokens: [],
       });
     }
   }, [connected, account]);
@@ -70,4 +80,4 @@ export function useWalletData() {
     throw new Error('useWalletData must be used within a WalletDataProvider');
   }
   return context;
-} 
+}

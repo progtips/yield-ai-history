@@ -7,21 +7,18 @@ export async function POST(request: NextRequest) {
     const { url, transform } = body;
 
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
     // Test the API source
     const result = await PoolValidator.testApiSource(url, transform);
-    
+
     // Log results for debugging
     PoolValidator.logValidationResult(result, url);
 
     return NextResponse.json({
       success: true,
-      result
+      result,
     });
   } catch (error) {
     console.error('Error testing pool source:', error);
@@ -30,4 +27,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

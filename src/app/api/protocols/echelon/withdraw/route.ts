@@ -52,30 +52,31 @@ export async function POST(request: Request) {
 
     if (!marketAddress || !amount || !token) {
       return NextResponse.json(
-        { error: "Market address, amount and token are required" },
+        { error: 'Market address, amount and token are required' },
         { status: 400 }
       );
     }
 
     const protocol = new EchelonProtocol();
-    const payload = await protocol.buildWithdraw(marketAddress, BigInt(amount), token);
+    const payload = await protocol.buildWithdraw(
+      marketAddress,
+      BigInt(amount),
+      token
+    );
 
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Error generating withdraw payload:", error);
-    
+    console.error('Error generating withdraw payload:', error);
+
     if (error instanceof Error) {
-      if (error.message.includes("Market not found")) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        );
+      if (error.message.includes('Market not found')) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
       }
     }
 
     return NextResponse.json(
-      { error: "Failed to generate withdraw payload" },
+      { error: 'Failed to generate withdraw payload' },
       { status: 500 }
     );
   }
-} 
+}

@@ -19,24 +19,27 @@ export class PoolsService {
 
       try {
         // Handle relative URLs for internal APIs
-        const fullUrl = source.url.startsWith('http') 
-          ? source.url 
+        const fullUrl = source.url.startsWith('http')
+          ? source.url
           : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}${source.url}`;
 
         const response = await fetch(fullUrl, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json'
-          }
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            Accept: 'application/json',
+          },
         });
 
         if (!response.ok) {
-          console.warn(`Failed to fetch from ${source.name}: ${response.status}`);
+          console.warn(
+            `Failed to fetch from ${source.name}: ${response.status}`
+          );
           continue;
         }
 
         const data = await response.json();
-        
+
         if (source.transform) {
           // Use custom transform function
           const transformedPools = source.transform(data);
@@ -47,7 +50,9 @@ export class PoolsService {
           allPools.push(...pools);
         }
 
-        console.log(`Successfully fetched ${source.name}: ${allPools.length} pools`);
+        console.log(
+          `Successfully fetched ${source.name}: ${allPools.length} pools`
+        );
       } catch (error) {
         console.error(`Error fetching from ${source.name}:`, error);
       }
@@ -63,9 +68,7 @@ export class PoolsService {
 
   async getTopPools(limit: number = 10): Promise<InvestmentData[]> {
     const allPools = await this.getAllPools();
-    return allPools
-      .sort((a, b) => b.totalAPY - a.totalAPY)
-      .slice(0, limit);
+    return allPools.sort((a, b) => b.totalAPY - a.totalAPY).slice(0, limit);
   }
 
   // Method to add new source dynamically
@@ -82,4 +85,4 @@ export class PoolsService {
   }
 }
 
-export const poolsService = new PoolsService(); 
+export const poolsService = new PoolsService();

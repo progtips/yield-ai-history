@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sdk } from "@/lib/hyperion";
+import { sdk } from '@/lib/hyperion';
 
 /**
  * @swagger
@@ -44,27 +44,31 @@ export async function GET() {
   try {
     // Получаем все пулы через локальный SDK
     const pools = await sdk.Pool.fetchAllPools();
-    
+
     // Возвращаем данные с настройками кэширования
-    return NextResponse.json({
-      success: true,
-      data: pools
-    }, {
-      headers: {
-        'Cache-Control': 'public, max-age=2, s-maxage=2, stale-while-revalidate=4',
-        'Cdn-Cache-Control': 'max-age=2',
-        'Surrogate-Control': 'max-age=2'
+    return NextResponse.json(
+      {
+        success: true,
+        data: pools,
+      },
+      {
+        headers: {
+          'Cache-Control':
+            'public, max-age=2, s-maxage=2, stale-while-revalidate=4',
+          'Cdn-Cache-Control': 'max-age=2',
+          'Surrogate-Control': 'max-age=2',
+        },
       }
-    });
+    );
   } catch (error) {
-    console.error("❌ Hyperion pools error:", error);
+    console.error('❌ Hyperion pools error:', error);
     // Возвращаем пустой массив при ошибках
     return NextResponse.json(
       {
         success: true,
-        data: []
+        data: [],
       },
       { status: 200 }
     );
   }
-} 
+}

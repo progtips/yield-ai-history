@@ -16,10 +16,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APT.svg",
         "websiteUrl": "https://aptosfoundation.org",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 1,
         "coinGeckoId": "aptos",
         "coinMarketCapId": 21794,
@@ -40,10 +37,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/USDT.svg",
         "websiteUrl": "https://tether.to",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 3,
         "coinGeckoId": "tether",
         "coinMarketCapId": 825,
@@ -64,10 +58,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/USDC.svg",
         "websiteUrl": "https://circle.com/usdc",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 4,
         "coinGeckoId": "usd-coin",
         "coinMarketCapId": 3408,
@@ -88,10 +79,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/WBTC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 7,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -112,10 +100,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/xBTC.png",
         "websiteUrl": "https://www.okx.com/xbtc",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 8,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -136,10 +121,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RION.svg",
         "websiteUrl": "https://hyperion.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 10,
         "coinGeckoId": "hyperion",
         "coinMarketCapId": 37344,
@@ -160,10 +142,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ECHO.svg",
         "websiteUrl": "https://www.echo-protocol.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 13,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -184,10 +163,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MKL.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 15,
         "coinGeckoId": "merkle-trade",
         "coinMarketCapId": 32997,
@@ -208,10 +184,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/AMI.png",
         "websiteUrl": "https://amnis.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 17,
         "coinGeckoId": "ami",
         "coinMarketCapId": 36126,
@@ -232,10 +205,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/LSD.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 20,
         "coinGeckoId": "pontem-liquidswap",
         "coinMarketCapId": 22262,
@@ -256,10 +226,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/THL.svg",
         "websiteUrl": "https://www.thala.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 40,
         "coinGeckoId": "thala",
         "coinMarketCapId": 24268,
@@ -280,10 +247,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CELL.png",
         "websiteUrl": "https://cellana.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 45,
         "coinGeckoId": "cellena-finance",
         "coinMarketCapId": null,
@@ -304,10 +268,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/VIBE.png",
         "websiteUrl": "https://vibrantx.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 47,
         "coinGeckoId": null,
         "coinMarketCapId": 35266,
@@ -328,10 +289,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/GUI.png",
         "websiteUrl": "https://www.guiinu.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 50,
         "coinGeckoId": "gui-inu",
         "coinMarketCapId": 28851,
@@ -352,10 +310,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/AURO.png",
         "websiteUrl": "https://auro.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 51,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -376,10 +331,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MESO.png",
         "websiteUrl": "https://meso.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 52,
         "coinGeckoId": "meso-finance",
         "coinMarketCapId": null,
@@ -400,10 +352,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CATTOS.png",
         "websiteUrl": "https://cattos.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 53,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -424,10 +373,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/TOMA.png",
         "websiteUrl": "https://tomarket.ai",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 54,
         "coinGeckoId": "tomarket",
         "coinMarketCapId": null,
@@ -448,10 +394,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/AMA.png",
         "websiteUrl": "https://amaterasu.gg",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 55,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -472,10 +415,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DOODOO.png",
         "websiteUrl": "https://doodoo.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 60,
         "coinGeckoId": "doodoo",
         "coinMarketCapId": 28881,
@@ -496,10 +436,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/LOON.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 65,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -520,10 +457,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/USDe.png",
         "websiteUrl": "https://ethena.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 67,
         "coinGeckoId": "ethena-usde",
         "coinMarketCapId": 29470,
@@ -544,10 +478,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/amAPT.png",
         "websiteUrl": "https://amnis.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 70,
         "coinGeckoId": "amnis-aptos",
         "coinMarketCapId": 29034,
@@ -568,10 +499,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/stAptAmnis.svg",
         "websiteUrl": "https://stake.amnis.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 75,
         "coinGeckoId": "amnis-staked-aptos-coin",
         "coinMarketCapId": null,
@@ -592,10 +520,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/THAPT.png",
         "websiteUrl": "https://thala.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 80,
         "coinGeckoId": "thala-apt",
         "coinMarketCapId": null,
@@ -616,10 +541,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/STHAPT.png",
         "websiteUrl": "https://thala.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 85,
         "coinGeckoId": "staked-thala-apt",
         "coinMarketCapId": null,
@@ -640,10 +562,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/kAPT.png",
         "websiteUrl": "https://app.kofi.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 87,
         "coinGeckoId": "kofi-aptos",
         "coinMarketCapId": null,
@@ -664,10 +583,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/stkAPT.png",
         "websiteUrl": "https://app.kofi.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 88,
         "coinGeckoId": "staked-kofi-aptos",
         "coinMarketCapId": null,
@@ -688,10 +604,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/mUSD.svg",
         "websiteUrl": "https://mirage.money",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 89,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -712,10 +625,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOD.svg",
         "websiteUrl": "https://thala.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 90,
         "coinGeckoId": "move-dollar",
         "coinMarketCapId": null,
@@ -736,10 +646,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/AURO_USDA.png",
         "websiteUrl": "https://auro.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 91,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -760,10 +667,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzUSDC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 92,
         "coinGeckoId": "layerzero-bridged-usdc-aptos",
         "coinMarketCapId": null,
@@ -784,10 +688,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzUSDT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 93,
         "coinGeckoId": "layerzero-bridged-usdt-aptos",
         "coinMarketCapId": null,
@@ -808,10 +709,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzWETH.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 94,
         "coinGeckoId": "layerzero-bridged-weth-aptos",
         "coinMarketCapId": null,
@@ -832,10 +730,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/whUSDC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 95,
         "coinGeckoId": "bridged-usd-coin-wormhole-ethereum",
         "coinMarketCapId": null,
@@ -856,10 +751,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/eAPT.svg",
         "websiteUrl": "https://www.echo-protocol.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 96,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -880,10 +772,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/aBTC.svg",
         "websiteUrl": "https://www.echo-protocol.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 97,
         "coinGeckoId": "abtc",
         "coinMarketCapId": null,
@@ -904,10 +793,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/TEVI.svg",
         "websiteUrl": "https://web3.tevi.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 98,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -928,10 +814,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/UPTOS.svg",
         "websiteUrl": "https://uptos.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 100,
         "coinGeckoId": "uptos",
         "coinMarketCapId": 30366,
@@ -952,10 +835,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CHEWY.png",
         "websiteUrl": "https://chewytoken.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 105,
         "coinGeckoId": "chewy-token",
         "coinMarketCapId": 30840,
@@ -976,10 +856,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOOMOO.png",
         "websiteUrl": "https://www.moo.meme",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 107,
         "coinGeckoId": "moo-moo",
         "coinMarketCapId": 34379,
@@ -1000,10 +877,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/EDOG.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 108,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1024,10 +898,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MGPT.png",
         "websiteUrl": "https://movegpt.io/",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 115,
         "coinGeckoId": "movegpt",
         "coinMarketCapId": null,
@@ -1048,10 +919,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DONK.png",
         "websiteUrl": "https://donkmove.com/",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 120,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1072,10 +940,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/HAIR.png",
         "websiteUrl": "https://hairclub.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 122,
         "coinGeckoId": "hair",
         "coinMarketCapId": null,
@@ -1096,10 +961,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ZIPO.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 125,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1120,10 +982,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/Pancake.png",
         "websiteUrl": "https://pancakeswap.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 130,
         "coinGeckoId": "pancakeswap-token",
         "coinMarketCapId": 7186,
@@ -1144,10 +1003,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/TruAPT.png",
         "websiteUrl": "https://www.trufin.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 135,
         "coinGeckoId": "trufin-staked-apt",
         "coinMarketCapId": null,
@@ -1168,10 +1024,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BAPTMAN.png",
         "websiteUrl": "https://baptmantoken.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 140,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1192,10 +1045,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzWBTC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 145,
         "coinGeckoId": "layerzero-bridged-wbtc-aptos",
         "coinMarketCapId": null,
@@ -1216,10 +1066,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOVE.svg",
         "websiteUrl": "https://bluemove.net",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 150,
         "coinGeckoId": "bluemove",
         "coinMarketCapId": 23359,
@@ -1240,10 +1087,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOVEPUMP.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 155,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1264,10 +1108,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/whUSDT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 160,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1288,10 +1129,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APE.png",
         "websiteUrl": "https://apetos.xyz/",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 165,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1312,10 +1150,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BUBBLES.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 170,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1336,10 +1171,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/whWBTC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 175,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1360,10 +1192,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ZAAP.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 180,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1384,10 +1213,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APTO.png",
         "websiteUrl": "https://aptothemascot.com/",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 185,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1408,10 +1234,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CASH.png",
         "websiteUrl": "https://www.cash.markets/",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 190,
         "coinGeckoId": "cash-2",
         "coinMarketCapId": null,
@@ -1432,10 +1255,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/sUSDe.png",
         "websiteUrl": "https://ethena.fi",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 194,
         "coinGeckoId": "ethena-staked-usde",
         "coinMarketCapId": 29471,
@@ -1456,10 +1276,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/whWETH.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 195,
         "coinGeckoId": "ethereum-wormhole",
         "coinMarketCapId": null,
@@ -1480,10 +1297,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzSTONE.png",
         "websiteUrl": "https://stakestone.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 200,
         "coinGeckoId": "stakestone-ether",
         "coinMarketCapId": 32194,
@@ -1504,10 +1318,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzSBTC.png",
         "websiteUrl": "https://stakestone.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 201,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1528,10 +1339,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/NIGHT.png",
         "websiteUrl": "https://midnight.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 210,
         "coinGeckoId": null,
         "coinMarketCapId": 34135,
@@ -1552,10 +1360,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MODENG.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 299,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1576,10 +1381,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/SIDELINED.png",
         "websiteUrl": "https://x.com/SidelinedAPT",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 300,
         "coinGeckoId": null,
         "coinMarketCapId": 35898,
@@ -1600,10 +1402,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/lzWUSDM.png",
         "websiteUrl": "https://mountainprotocol.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 301,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1624,10 +1423,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CAPTOS.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 302,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1648,10 +1444,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MEOW.png",
         "websiteUrl": "https://meowtos.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 303,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1672,10 +1465,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ceUSDT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 329,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1696,10 +1486,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ceUSDC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 350,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1720,10 +1507,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ceWETH.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 352,
         "coinGeckoId": "wrapped-ether-celer",
         "coinMarketCapId": null,
@@ -1744,10 +1528,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ceWBNB.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 354,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1768,10 +1549,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/whGARI.png",
         "websiteUrl": "https://gari.network",
         "panoraUI": true,
-        "panoraTags": [
-          "Bridged",
-          "Verified"
-        ],
+        "panoraTags": ["Bridged", "Verified"],
         "panoraIndex": 357,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1792,9 +1570,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1815,9 +1591,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1838,9 +1612,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1861,9 +1633,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1884,9 +1654,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1907,9 +1675,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1930,9 +1696,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1953,9 +1717,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1976,9 +1738,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -1999,9 +1759,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2022,9 +1780,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2045,9 +1801,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2068,9 +1822,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2091,9 +1843,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2114,9 +1864,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2137,9 +1885,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2160,9 +1906,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2183,9 +1927,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2206,9 +1948,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2229,9 +1969,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2252,9 +1990,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2275,9 +2011,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2298,9 +2032,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2321,9 +2053,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2344,9 +2074,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2367,9 +2095,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2390,9 +2116,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2413,9 +2137,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2436,9 +2158,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2459,9 +2179,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2482,9 +2200,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2505,9 +2221,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2528,9 +2242,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2551,9 +2263,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2574,9 +2284,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2597,9 +2305,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2620,9 +2326,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2643,9 +2347,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2666,9 +2368,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2689,9 +2389,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2712,9 +2410,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2735,9 +2431,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2758,9 +2452,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2781,9 +2473,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2804,9 +2494,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2827,9 +2515,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2850,9 +2536,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2873,9 +2557,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2896,9 +2578,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2919,9 +2599,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2942,9 +2620,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2965,9 +2641,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -2988,9 +2662,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3011,9 +2683,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3034,9 +2704,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3057,9 +2725,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3080,9 +2746,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3103,9 +2767,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3126,9 +2788,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3149,9 +2809,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3172,9 +2830,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3195,9 +2851,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3218,9 +2872,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3241,9 +2893,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3264,9 +2914,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3287,9 +2935,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3310,9 +2956,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3333,9 +2977,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3356,9 +2998,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3379,9 +3019,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3402,9 +3040,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3425,9 +3061,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3448,9 +3082,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3471,9 +3103,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3494,9 +3124,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3517,9 +3145,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3540,9 +3166,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3563,9 +3187,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3586,9 +3208,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3609,9 +3229,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3632,9 +3250,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3655,9 +3271,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3678,9 +3292,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3701,9 +3313,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3724,9 +3334,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3747,9 +3355,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3770,9 +3376,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3793,9 +3397,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3816,9 +3418,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3839,9 +3439,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3862,9 +3460,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3885,9 +3481,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3908,9 +3502,7 @@
         "logoUrl": null,
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Emojicoin"
-        ],
+        "panoraTags": ["Emojicoin"],
         "panoraIndex": 10000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3931,10 +3523,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/FOMO.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3955,10 +3544,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RWD.png",
         "websiteUrl": "https://www.rewardywallet.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -3979,10 +3565,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/PROPS.png",
         "websiteUrl": "https://www.propbase.app",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "propbase",
         "coinMarketCapId": 28385,
@@ -4003,10 +3586,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/FAPTOS.png",
         "websiteUrl": "https://faptosaptos.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4027,10 +3607,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/TOAST.png",
         "websiteUrl": "https://aptoast.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4051,10 +3628,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/HEART.png",
         "websiteUrl": "https://tapos.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4075,10 +3649,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APTOGE.png",
         "websiteUrl": "https://aptoge.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": 22383,
@@ -4099,10 +3670,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/SNZ.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4123,10 +3691,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ACAT.png",
         "websiteUrl": "https://www.aptocat.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4147,10 +3712,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/LUFFY.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4171,10 +3733,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MEE.svg",
         "websiteUrl": "https://meeiro.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": 22705,
@@ -4195,10 +3754,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BEDOG.svg",
         "websiteUrl": "https://edog.baby",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4219,10 +3775,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ABEL.svg",
         "websiteUrl": "https://abelfinance.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "abel-finance",
         "coinMarketCapId": 22959,
@@ -4243,10 +3796,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BURRITOS.png",
         "websiteUrl": "https://burritos-aptos.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4267,10 +3817,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APARTMENT.png",
         "websiteUrl": "https://aptosapartments.rent",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4291,10 +3838,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DUMDUM.png",
         "websiteUrl": "https://dumdum.cc/",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4315,10 +3859,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/NRUH.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4339,10 +3880,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RICE.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4363,10 +3901,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APD.png",
         "websiteUrl": "https://aptopad.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "aptopad",
         "coinMarketCapId": 24733,
@@ -4387,10 +3922,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BEARD.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4411,10 +3943,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APTS.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4435,10 +3964,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOJO.svg",
         "websiteUrl": "https://dex.mojito.markets",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "mojito",
         "coinMarketCapId": 22399,
@@ -4459,10 +3985,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOVER.svg",
         "websiteUrl": "https://mov3r.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "mover-xyz",
         "coinMarketCapId": 23767,
@@ -4483,10 +4006,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/WOOF.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4507,10 +4027,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/STOS.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4531,10 +4048,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/PUPTOS.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4555,10 +4069,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/PEPE.png",
         "websiteUrl": "https://pepe.as",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4579,10 +4090,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ZAP.png",
         "websiteUrl": "https://zapdos.dev",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4603,10 +4111,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/LME.svg",
         "websiteUrl": "https://legendaryme.me",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "legendary-meme",
         "coinMarketCapId": null,
@@ -4627,10 +4132,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RAPT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4651,10 +4153,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/SHRIMP.png",
         "websiteUrl": "https://shrimp.app",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": 29921,
@@ -4675,10 +4174,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DLC.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "doglaikacoin",
         "coinMarketCapId": 23200,
@@ -4699,10 +4195,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/POLES.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4723,10 +4216,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/POK.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4747,10 +4237,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/USDY.svg",
         "websiteUrl": "https://ondo.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "ondo-us-dollar-yield",
         "coinMarketCapId": 29256,
@@ -4771,10 +4258,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DDOS.png",
         "websiteUrl": "https://ddosapt.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4795,10 +4279,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APTS.png",
         "websiteUrl": "https://bluemove.net/collection/apts",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4819,10 +4300,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BUBU.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4843,10 +4321,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/TIN.png",
         "websiteUrl": "https://ongame.dev",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "token-in",
         "coinMarketCapId": 27939,
@@ -4867,10 +4342,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RETURD.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4891,10 +4363,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ALT.png",
         "websiteUrl": "https://aptoslaunch.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "aptos-launch-token",
         "coinMarketCapId": 22065,
@@ -4915,10 +4384,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/o-xyz.svg",
         "websiteUrl": "https://www.o.xyz/",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "o-xyz",
         "coinMarketCapId": null,
@@ -4939,10 +4405,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CTD.svg",
         "websiteUrl": "https://citadeli.crypto",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -4963,10 +4426,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/WAR.png",
         "websiteUrl": "https://werewolfandwitch.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "war-coin",
         "coinMarketCapId": null,
@@ -4987,10 +4447,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/tAptTortuga.png",
         "websiteUrl": "https://tortuga.finance",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "tortuga-staked-aptos",
         "coinMarketCapId": 22412,
@@ -5011,10 +4468,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BLT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "blocto-token",
         "coinMarketCapId": null,
@@ -5035,10 +4489,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MOTOS.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5059,10 +4510,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/FOG.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5083,10 +4531,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CMT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5107,10 +4552,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/MBX.svg",
         "websiteUrl": "https://marblex.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "marblex",
         "coinMarketCapId": 18895,
@@ -5131,10 +4573,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/UPDOG.png",
         "websiteUrl": "https://updogapt.xyz",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5155,10 +4594,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/CHAD.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5179,10 +4615,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/AMAGA.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5203,10 +4636,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/GHO.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5227,10 +4657,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BLADEE.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5251,10 +4678,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/OBOT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "obot",
         "coinMarketCapId": 33986,
@@ -5275,10 +4699,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APOP.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5299,10 +4720,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/BREW.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5323,10 +4741,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/RENA.png",
         "websiteUrl": "https://www.renegades.build",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5347,10 +4762,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ANI.png",
         "websiteUrl": "https://animeswap.org",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": "animeswap",
         "coinMarketCapId": 22650,
@@ -5371,10 +4783,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APTSHIBA.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5395,10 +4804,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ROO.png",
         "websiteUrl": "https://aptosroo.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5419,10 +4825,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/EVA.png",
         "websiteUrl": "https://apt-20.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5443,10 +4846,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/DOOT.png",
         "websiteUrl": "https://skeltal.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Recognized"
-        ],
+        "panoraTags": ["Meme", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5467,10 +4867,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/NETZY.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5491,10 +4888,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/PP.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,
@@ -5515,10 +4909,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/APC.svg",
         "websiteUrl": "https://aptpp.com",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Recognized"
-        ],
+        "panoraTags": ["Native", "Recognized"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": 23226,
@@ -5539,10 +4930,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/stAptDitto.png",
         "websiteUrl": "https://www.dittofinance.io",
         "panoraUI": true,
-        "panoraTags": [
-          "Native",
-          "Verified"
-        ],
+        "panoraTags": ["Native", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": "ditto-staked-aptos",
         "coinMarketCapId": 22290,
@@ -5563,10 +4951,7 @@
         "logoUrl": "https://assets.panora.exchange/tokens/aptos/ZAPT.png",
         "websiteUrl": null,
         "panoraUI": true,
-        "panoraTags": [
-          "Meme",
-          "Verified"
-        ],
+        "panoraTags": ["Meme", "Verified"],
         "panoraIndex": 200000,
         "coinGeckoId": null,
         "coinMarketCapId": null,

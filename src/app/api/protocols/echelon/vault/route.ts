@@ -47,11 +47,11 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const address = searchParams.get("address");
+    const address = searchParams.get('address');
 
     if (!address) {
       return NextResponse.json(
-        { error: "Address is required" },
+        { error: 'Address is required' },
         { status: 400 }
       );
     }
@@ -59,10 +59,10 @@ export async function GET(request: Request) {
     // Получаем данные Vault из Aptos blockchain
     const vaultUrl = `https://mainnet.aptoslabs.com/v1/accounts/${address}/resource/0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::Vault`;
     console.log('Fetching vault data from:', vaultUrl);
-    
+
     const response = await fetch(vaultUrl);
     console.log('Vault API response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Vault API error response:', errorText);
@@ -71,9 +71,9 @@ export async function GET(request: Request) {
           success: true,
           data: {
             collaterals: {
-              data: []
-            }
-          }
+              data: [],
+            },
+          },
         },
         { status: 200 }
       );
@@ -84,20 +84,20 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      data: vaultData
+      data: vaultData,
     });
   } catch (error) {
-    console.error("Error fetching Echelon vault data:", error);
+    console.error('Error fetching Echelon vault data:', error);
     return NextResponse.json(
       {
         success: true,
         data: {
           collaterals: {
-            data: []
-          }
-        }
+            data: [],
+          },
+        },
       },
       { status: 200 }
     );
   }
-} 
+}

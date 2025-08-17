@@ -11,4 +11,4 @@ export interface UserPosition {
 export interface ProtocolService {
   getPools(): Promise<Pool[]>;
   getUserPositions(userAddress: string): Promise<UserPosition[]>;
-} 
+}

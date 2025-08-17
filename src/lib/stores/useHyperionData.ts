@@ -7,32 +7,32 @@ export const useHyperionData = (address?: string) => {
     positions,
     pools,
     prices,
-    
+
     // Loading states
     positionsLoading,
     poolsLoading,
     pricesLoading,
-    
+
     // Error states
     positionsError,
     poolsError,
     pricesError,
-    
+
     // Actions
     fetchPositions,
     fetchPools,
     fetchPrices,
-    
+
     // Getters
     getPosition,
     getPool,
     getTokenPrice,
     getTotalValue,
     getTotalRewards,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   } = useHyperionStore();
 
   // Auto-fetch positions when address changes
@@ -51,7 +51,7 @@ export const useHyperionData = (address?: string) => {
   useEffect(() => {
     if (positions.length > 0) {
       const tokenAddresses = new Set<string>();
-      
+
       positions.forEach(position => {
         // Add token addresses from pool
         if (position.position?.pool?.token1) {
@@ -60,23 +60,26 @@ export const useHyperionData = (address?: string) => {
         if (position.position?.pool?.token2) {
           tokenAddresses.add(position.position.pool.token2);
         }
-        
+
         // Add token addresses from rewards
         position.farm.unclaimed.forEach(reward => {
           if (reward.token) {
             tokenAddresses.add(reward.token);
           }
         });
-        
+
         position.fees.unclaimed.forEach(fee => {
           if (fee.token) {
             tokenAddresses.add(fee.token);
           }
         });
       });
-      
+
       if (tokenAddresses.size > 0) {
-        console.log('[useHyperionData] Fetching prices for tokens:', Array.from(tokenAddresses));
+        console.log(
+          '[useHyperionData] Fetching prices for tokens:',
+          Array.from(tokenAddresses)
+        );
         fetchPrices(Array.from(tokenAddresses), true); // Force refresh
       }
     }
@@ -85,21 +88,19 @@ export const useHyperionData = (address?: string) => {
   // Manual refresh function
   const refreshData = useCallback(async () => {
     if (!address) return;
-    
+
     console.log('[useHyperionData] Manual refresh triggered');
-    
+
     // First fetch positions to get token addresses
     await fetchPositions(address);
-    
+
     // Then fetch other data in parallel
-    await Promise.all([
-      fetchPools()
-    ]);
-    
+    await Promise.all([fetchPools()]);
+
     // Fetch prices after positions are loaded
     if (positions.length > 0) {
       const tokenAddresses = new Set<string>();
-      
+
       positions.forEach(position => {
         if (position.position?.pool?.token1) {
           tokenAddresses.add(position.position.pool.token1);
@@ -107,22 +108,25 @@ export const useHyperionData = (address?: string) => {
         if (position.position?.pool?.token2) {
           tokenAddresses.add(position.position.pool.token2);
         }
-        
+
         position.farm.unclaimed.forEach(reward => {
           if (reward.token) {
             tokenAddresses.add(reward.token);
           }
         });
-        
+
         position.fees.unclaimed.forEach(fee => {
           if (fee.token) {
             tokenAddresses.add(fee.token);
           }
         });
       });
-      
+
       if (tokenAddresses.size > 0) {
-        console.log('[useHyperionData] Fetching prices for tokens:', Array.from(tokenAddresses));
+        console.log(
+          '[useHyperionData] Fetching prices for tokens:',
+          Array.from(tokenAddresses)
+        );
         await fetchPrices(Array.from(tokenAddresses), true); // Force refresh
       }
     }
@@ -139,36 +143,36 @@ export const useHyperionData = (address?: string) => {
     positions,
     pools,
     prices,
-    
+
     // Loading states
     isLoading,
     positionsLoading,
     poolsLoading,
     pricesLoading,
-    
+
     // Error states
     hasError,
     positionsError,
     poolsError,
     pricesError,
-    
+
     // Computed values
     totalValue,
     totalRewards,
-    
+
     // Actions
     refreshData,
     fetchPositions,
     fetchPools,
     fetchPrices,
-    
+
     // Getters
     getPosition,
     getPool,
     getTokenPrice,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   };
-}; 
+};

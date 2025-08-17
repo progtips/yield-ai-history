@@ -31,8 +31,10 @@ export async function getAccountCollateralMarkets(address: string) {
     const resources = await response.json();
 
     // Find the lending::Vault resource
-    const vaultResource = resources.find((resource: any) => 
-      resource.type === "0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::Vault"
+    const vaultResource = resources.find(
+      (resource: any) =>
+        resource.type ===
+        '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::Vault'
     );
 
     if (!vaultResource) {
@@ -40,20 +42,20 @@ export async function getAccountCollateralMarkets(address: string) {
         success: true,
         data: {
           hasVault: false,
-          message: "No lending vault found for this address"
-        }
+          message: 'No lending vault found for this address',
+        },
       };
     }
 
     // Extract market addresses from vault data
     const marketAddresses = new Set<string>();
-    
+
     if (vaultResource.data.collaterals?.data) {
       vaultResource.data.collaterals.data.forEach((item: any) => {
         marketAddresses.add(item.key.inner);
       });
     }
-    
+
     if (vaultResource.data.liabilities?.data) {
       vaultResource.data.liabilities.data.forEach((item: any) => {
         marketAddresses.add(item.key.inner);
@@ -69,16 +71,19 @@ export async function getAccountCollateralMarkets(address: string) {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_liability_markets',
+            function:
+              '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_liability_markets',
             type_arguments: [],
-            arguments: [address]
-          })
+            arguments: [address],
+          }),
         }
       );
 
       if (liabilityMarketsResponse.ok) {
         const liabilityResult = await liabilityMarketsResponse.json();
-        liabilityMarketsData = Array.isArray(liabilityResult) ? liabilityResult[0] : liabilityResult;
+        liabilityMarketsData = Array.isArray(liabilityResult)
+          ? liabilityResult[0]
+          : liabilityResult;
       }
     } catch (error) {
       console.warn(`Error fetching liability markets data:`, error);
@@ -104,10 +109,11 @@ export async function getAccountCollateralMarkets(address: string) {
             method: 'POST',
             headers,
             body: JSON.stringify({
-              function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_is_fa',
+              function:
+                '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_is_fa',
               type_arguments: [],
-              arguments: [marketAddress]
-            })
+              arguments: [marketAddress],
+            }),
           }
         );
 
@@ -120,7 +126,7 @@ export async function getAccountCollateralMarkets(address: string) {
         if (isFaResponse.ok) {
           const isFaResult = await isFaResponse.json();
           isFa = Array.isArray(isFaResult) ? isFaResult[0] : isFaResult;
-          
+
           if (isFa) {
             // Step 2: If it's FA, get asset metadata
             const assetMetadataResponse = await fetch(
@@ -129,16 +135,19 @@ export async function getAccountCollateralMarkets(address: string) {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
-                  function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_asset_metadata',
+                  function:
+                    '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_asset_metadata',
                   type_arguments: [],
-                  arguments: [marketAddress]
-                })
+                  arguments: [marketAddress],
+                }),
               }
             );
 
             if (assetMetadataResponse.ok) {
               const metadataResult = await assetMetadataResponse.json();
-              assetMetadata = Array.isArray(metadataResult) ? metadataResult[0] : metadataResult;
+              assetMetadata = Array.isArray(metadataResult)
+                ? metadataResult[0]
+                : metadataResult;
               // Extract coin address from asset metadata
               if (assetMetadata && assetMetadata.inner) {
                 coinAddress = assetMetadata.inner;
@@ -152,17 +161,20 @@ export async function getAccountCollateralMarkets(address: string) {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
-                  function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_is_coin',
+                  function:
+                    '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_is_coin',
                   type_arguments: [],
-                  arguments: [marketAddress]
-                })
+                  arguments: [marketAddress],
+                }),
               }
             );
 
             if (isCoinResponse.ok) {
               const isCoinResult = await isCoinResponse.json();
-              isCoin = Array.isArray(isCoinResult) ? isCoinResult[0] : isCoinResult;
-              
+              isCoin = Array.isArray(isCoinResult)
+                ? isCoinResult[0]
+                : isCoinResult;
+
               if (isCoin) {
                 // Step 4: If it's a coin, use market_coin function
                 const marketCoinResponse = await fetch(
@@ -171,16 +183,19 @@ export async function getAccountCollateralMarkets(address: string) {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({
-                      function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_coin',
+                      function:
+                        '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::market_coin',
                       type_arguments: [],
-                      arguments: [marketAddress]
-                    })
+                      arguments: [marketAddress],
+                    }),
                   }
                 );
 
                 if (marketCoinResponse.ok) {
                   const coinResult = await marketCoinResponse.json();
-                  coinAddress = Array.isArray(coinResult) ? coinResult[0] : coinResult;
+                  coinAddress = Array.isArray(coinResult)
+                    ? coinResult[0]
+                    : coinResult;
                 }
               } else {
                 // Step 5: If it's neither FA nor coin, mark as unknown type
@@ -197,16 +212,19 @@ export async function getAccountCollateralMarkets(address: string) {
             method: 'POST',
             headers,
             body: JSON.stringify({
-              function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_coins',
+              function:
+                '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_coins',
               type_arguments: [],
-              arguments: [address, marketAddress]
-            })
+              arguments: [address, marketAddress],
+            }),
           }
         );
 
         if (accountCoinsResponse.ok) {
           const coinsResult = await accountCoinsResponse.json();
-          accountCoins = Array.isArray(coinsResult) ? coinsResult[0] : coinsResult;
+          accountCoins = Array.isArray(coinsResult)
+            ? coinsResult[0]
+            : coinsResult;
         }
 
         // Step 7: Get account liability for this market
@@ -218,19 +236,25 @@ export async function getAccountCollateralMarkets(address: string) {
               method: 'POST',
               headers,
               body: JSON.stringify({
-                function: '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_liability',
+                function:
+                  '0xc6bc659f1649553c1a3fa05d9727433dc03843baac29473c817d06d39e7621ba::lending::account_liability',
                 type_arguments: [],
-                arguments: [address, marketAddress]
-              })
+                arguments: [address, marketAddress],
+              }),
             }
           );
 
           if (accountLiabilityResponse.ok) {
             const liabilityResult = await accountLiabilityResponse.json();
-            accountLiability = Array.isArray(liabilityResult) ? liabilityResult[0] : liabilityResult;
+            accountLiability = Array.isArray(liabilityResult)
+              ? liabilityResult[0]
+              : liabilityResult;
           }
         } catch (error) {
-          console.warn(`Error fetching liability for market ${marketAddress}:`, error);
+          console.warn(
+            `Error fetching liability for market ${marketAddress}:`,
+            error
+          );
         }
 
         marketCoinData.push({
@@ -240,9 +264,8 @@ export async function getAccountCollateralMarkets(address: string) {
           coinAddress,
           assetMetadata: isFa ? assetMetadata : null,
           accountCoins,
-          accountLiability
+          accountLiability,
         });
-
       } catch (error) {
         console.warn(`Error fetching data for market ${marketAddress}:`, error);
         marketCoinData.push({
@@ -252,7 +275,7 @@ export async function getAccountCollateralMarkets(address: string) {
           coinAddress: 'Error',
           assetMetadata: null,
           accountCoins: null,
-          accountLiability: null
+          accountLiability: null,
         });
       }
     }
@@ -261,21 +284,26 @@ export async function getAccountCollateralMarkets(address: string) {
     const userPositions = marketCoinData
       .map(item => {
         const supply = Number(item.accountCoins) || 0;
-        const borrow = item.accountLiability && item.accountLiability !== '0' ? Number(item.accountLiability) || 0 : 0;
-        
+        const borrow =
+          item.accountLiability && item.accountLiability !== '0'
+            ? Number(item.accountLiability) || 0
+            : 0;
+
         const position: any = {
           market: item.marketAddress,
-          coin: item.isFa ? (item.assetMetadata?.inner || item.coinAddress) : item.coinAddress
+          coin: item.isFa
+            ? item.assetMetadata?.inner || item.coinAddress
+            : item.coinAddress,
         };
-        
+
         if (supply > 0) {
           position.supply = supply;
         }
-        
+
         if (borrow > 0) {
           position.borrow = borrow;
         }
-        
+
         return position;
       })
       .filter(item => item.supply > 0 || item.borrow > 0);
@@ -288,15 +316,14 @@ export async function getAccountCollateralMarkets(address: string) {
         marketAddresses: Array.from(marketAddresses),
         marketCoinMapping: marketCoinData,
         userPositions,
-        liabilityMarkets: liabilityMarketsData
-      }
+        liabilityMarkets: liabilityMarketsData,
+      },
     };
-
   } catch (error) {
     console.error('Error fetching account collateral markets:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
-} 
+}

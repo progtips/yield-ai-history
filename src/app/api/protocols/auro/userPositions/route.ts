@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Auro Finance contract addresses (mainnet)
-const AURO_ADDRESS = "0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c";
-const AURO_ROUTER_ADDRESS = '0xd039ef33e378c10544491855a2ef99cd77bf1a610fd52cc43117cd96e1c73465';
+const AURO_ADDRESS =
+  '0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c';
+const AURO_ROUTER_ADDRESS =
+  '0xd039ef33e378c10544491855a2ef99cd77bf1a610fd52cc43117cd96e1c73465';
 
 // Helper function to normalize collection id
 function normalizeCollectionId(id: string): string {
-  if (id.startsWith("0x") && id.length === 66) return id;
-  if (id.startsWith("0x") && id.length === 65) {
-    return "0x0" + id.slice(2);
+  if (id.startsWith('0x') && id.length === 66) return id;
+  if (id.startsWith('0x') && id.length === 65) {
+    return '0x0' + id.slice(2);
   }
   return id; // fallback
 }
@@ -16,9 +18,9 @@ function normalizeCollectionId(id: string): string {
 // Helper function to get token info from tokenList.json
 function getTokenInfo(tokenAddress: string) {
   const tokenList = require('@/lib/data/tokenList.json');
-  return tokenList.data.data.find((token: any) => 
-    token.tokenAddress === tokenAddress || 
-    token.faAddress === tokenAddress
+  return tokenList.data.data.find(
+    (token: any) =>
+      token.tokenAddress === tokenAddress || token.faAddress === tokenAddress
   );
 }
 
@@ -28,23 +30,26 @@ async function getCollateralToken(poolAddress: string): Promise<string | null> {
     const viewPayload = {
       function: `${AURO_ADDRESS}::auro_pool::collateral_token`,
       type_arguments: [],
-      arguments: [poolAddress]
+      arguments: [poolAddress],
     };
 
     console.log('Getting collateral token for pool:', poolAddress);
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     if (process.env.APTOS_API_KEY) {
       headers['Authorization'] = `Bearer ${process.env.APTOS_API_KEY}`;
     }
-    
-    const response = await fetch('https://fullnode.mainnet.aptoslabs.com/v1/view', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(viewPayload)
-    });
+
+    const response = await fetch(
+      'https://fullnode.mainnet.aptoslabs.com/v1/view',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(viewPayload),
+      }
+    );
 
     if (!response.ok) {
       console.error('Failed to get collateral token for pool:', poolAddress);
@@ -56,7 +61,11 @@ async function getCollateralToken(poolAddress: string): Promise<string | null> {
     console.log('Collateral token for pool', poolAddress, ':', tokenAddress);
     return tokenAddress;
   } catch (error) {
-    console.error('Error getting collateral token for pool:', poolAddress, error);
+    console.error(
+      'Error getting collateral token for pool:',
+      poolAddress,
+      error
+    );
     return null;
   }
 }
@@ -64,7 +73,7 @@ async function getCollateralToken(poolAddress: string): Promise<string | null> {
 export async function GET(request: NextRequest) {
   try {
     console.log('=== Auro API Route Started ===');
-    
+
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
 
@@ -73,7 +82,10 @@ export async function GET(request: NextRequest) {
 
     if (!address) {
       console.log('No address provided, returning 400');
-      return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Address parameter is required' },
+        { status: 400 }
+      );
     }
 
     console.log('Getting collection address for Auro Finance...');
@@ -82,7 +94,7 @@ export async function GET(request: NextRequest) {
     const viewPayload = {
       function: `${AURO_ADDRESS}::auro_pool::position_nft_collection`,
       type_arguments: [],
-      arguments: []
+      arguments: [],
     };
 
     console.log('Calling view function with payload:', viewPayload);
@@ -94,11 +106,14 @@ export async function GET(request: NextRequest) {
       viewHeaders['Authorization'] = `Bearer ${process.env.APTOS_API_KEY}`;
     }
 
-    const response = await fetch('https://fullnode.mainnet.aptoslabs.com/v1/view', {
-      method: 'POST',
-      headers: viewHeaders,
-      body: JSON.stringify(viewPayload)
-    });
+    const response = await fetch(
+      'https://fullnode.mainnet.aptoslabs.com/v1/view',
+      {
+        method: 'POST',
+        headers: viewHeaders,
+        body: JSON.stringify(viewPayload),
+      }
+    );
 
     console.log('View function response status:', response.status);
 
@@ -113,7 +128,7 @@ export async function GET(request: NextRequest) {
 
     const collectionAddress = data[0];
     console.log('Collection address:', collectionAddress);
-    
+
     // Стандартизируем адрес коллекции
     const standardizedAddress = normalizeCollectionId(collectionAddress);
     console.log('Standardized address:', standardizedAddress);
@@ -158,15 +173,20 @@ export async function GET(request: NextRequest) {
       headers['Authorization'] = `Bearer ${process.env.APTOS_API_KEY}`;
     }
 
-    const indexerResponse = await fetch("https://indexer.mainnet.aptoslabs.com/v1/graphql", {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ query, variables })
-    });
+    const indexerResponse = await fetch(
+      'https://indexer.mainnet.aptoslabs.com/v1/graphql',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ query, variables }),
+      }
+    );
 
     if (!indexerResponse.ok) {
       const errorText = await indexerResponse.text();
-      throw new Error(`Indexer API error: ${indexerResponse.status} - ${errorText}`);
+      throw new Error(
+        `Indexer API error: ${indexerResponse.status} - ${errorText}`
+      );
     }
 
     const indexerData = await indexerResponse.json();
@@ -174,7 +194,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`GraphQL errors: ${JSON.stringify(indexerData.errors)}`);
     }
 
-    const positions = (indexerData.data?.current_token_ownerships_v2 || []);
+    const positions = indexerData.data?.current_token_ownerships_v2 || [];
 
     // Получаем подробную информацию о позициях через view-функцию
     let rawPositionInfo = null;
@@ -185,7 +205,7 @@ export async function GET(request: NextRequest) {
       type PositionInfo = {
         collateral_pool: {
           inner: string;
-        };  // pool address
+        }; // pool address
         asset_amount: string;
         debt_amount: string;
         liquidate_price: string;
@@ -196,22 +216,31 @@ export async function GET(request: NextRequest) {
         const payloadPositionInfo = {
           function: `${AURO_ROUTER_ADDRESS}::auro_view::multiple_position_info`,
           type_arguments: [],
-          arguments: [positionAddresses.map((addr: string) => ({ inner: addr }))]
+          arguments: [
+            positionAddresses.map((addr: string) => ({ inner: addr })),
+          ],
         };
 
-        console.log("Calling view function:", payloadPositionInfo.function);
-        
-        const viewResponse = await fetch('https://fullnode.mainnet.aptoslabs.com/v1/view', {
-          method: 'POST',
-          headers: viewHeaders,
-          body: JSON.stringify(payloadPositionInfo)
-        });
-        
+        console.log('Calling view function:', payloadPositionInfo.function);
+
+        const viewResponse = await fetch(
+          'https://fullnode.mainnet.aptoslabs.com/v1/view',
+          {
+            method: 'POST',
+            headers: viewHeaders,
+            body: JSON.stringify(payloadPositionInfo),
+          }
+        );
+
         if (viewResponse.ok) {
           const positionInfoResult = await viewResponse.json();
-          console.log("View function response:", positionInfoResult);
-          
-          if (positionInfoResult && Array.isArray(positionInfoResult) && positionInfoResult.length > 0) {
+          console.log('View function response:', positionInfoResult);
+
+          if (
+            positionInfoResult &&
+            Array.isArray(positionInfoResult) &&
+            positionInfoResult.length > 0
+          ) {
             const positionsData = positionInfoResult[0] as PositionInfo[];
             if (Array.isArray(positionsData)) {
               // Получаем информацию о токенах для каждой позиции
@@ -220,48 +249,63 @@ export async function GET(request: NextRequest) {
                   const poolAddress = x.collateral_pool?.inner;
                   let collateralTokenAddress = null;
                   let collateralTokenInfo = null;
-                  
+
                   if (poolAddress) {
-                    collateralTokenAddress = await getCollateralToken(poolAddress);
+                    collateralTokenAddress =
+                      await getCollateralToken(poolAddress);
                     if (collateralTokenAddress) {
-                      collateralTokenInfo = getTokenInfo(collateralTokenAddress);
+                      collateralTokenInfo = getTokenInfo(
+                        collateralTokenAddress
+                      );
                     }
                   }
-                  
+
                   // Получаем информацию о токене долга (USDA)
-                  const debtTokenInfo = getTokenInfo("0x534e4c3dc0f038dab1a8259e89301c4da58779a5d482fb354a41c08147e6b9ec");
-                  
+                  const debtTokenInfo = getTokenInfo(
+                    '0x534e4c3dc0f038dab1a8259e89301c4da58779a5d482fb354a41c08147e6b9ec'
+                  );
+
                   // Используем правильные decimals для каждого токена
                   const collateralDecimals = collateralTokenInfo?.decimals || 8;
                   const debtDecimals = debtTokenInfo?.decimals || 8;
-                  
+
                   return {
                     address: positionAddresses[index],
                     poolAddress: poolAddress,
                     collateralTokenAddress: collateralTokenAddress,
                     collateralTokenInfo: collateralTokenInfo,
                     debtTokenInfo: debtTokenInfo,
-                    collateralAmount: (Number(x.asset_amount) / Math.pow(10, collateralDecimals)).toFixed(4),
-                    debtAmount: (Number(x.debt_amount) / Math.pow(10, debtDecimals)).toFixed(4),
-                    liquidatePrice: (Number(x.liquidate_price) / Math.pow(10, 8)).toFixed(2), // Price обычно в 8 decimals
+                    collateralAmount: (
+                      Number(x.asset_amount) / Math.pow(10, collateralDecimals)
+                    ).toFixed(4),
+                    debtAmount: (
+                      Number(x.debt_amount) / Math.pow(10, debtDecimals)
+                    ).toFixed(4),
+                    liquidatePrice: (
+                      Number(x.liquidate_price) / Math.pow(10, 8)
+                    ).toFixed(2), // Price обычно в 8 decimals
                     collateralSymbol: collateralTokenInfo?.symbol || 'Unknown',
                     debtSymbol: debtTokenInfo?.symbol || 'USDA',
                   };
                 })
               );
-              
+
               positionInfo = positionInfoWithTokens;
             }
           }
           rawPositionInfo = positionInfoResult;
         } else {
           const errorText = await viewResponse.text();
-          console.error("View function error:", viewResponse.status, errorText);
-          rawPositionInfo = { error: `View function error: ${viewResponse.status} - ${errorText}` };
+          console.error('View function error:', viewResponse.status, errorText);
+          rawPositionInfo = {
+            error: `View function error: ${viewResponse.status} - ${errorText}`,
+          };
         }
       } catch (error) {
-        console.error("Error calling view function:", error);
-        rawPositionInfo = { error: error instanceof Error ? error.message : "Unknown error" };
+        console.error('Error calling view function:', error);
+        rawPositionInfo = {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
     }
 
@@ -272,24 +316,26 @@ export async function GET(request: NextRequest) {
       positions,
       positionInfo,
       rawPositionInfo,
-      message: "Collection address and user positions retrieved successfully"
+      message: 'Collection address and user positions retrieved successfully',
     };
 
     console.log('Returning result:', JSON.stringify(result, null, 2));
     console.log('=== Auro API Route Completed ===');
 
     return NextResponse.json(result);
-
   } catch (error) {
     console.error('=== Auro API Route Error ===');
     console.error('Error getting collection address:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error(
+      'Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace'
+    );
     return NextResponse.json(
-      { 
-        error: 'Failed to get collection address', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        error: 'Failed to get collection address',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
   }
-} 
+}

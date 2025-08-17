@@ -18,19 +18,19 @@ export interface MesoUserPosition {
 function formatTokenAmount(amount: string, decimals: number): string {
   const bigIntAmount = BigInt(amount);
   const divisor = BigInt(10 ** decimals);
-  
+
   const wholePart = bigIntAmount / divisor;
   const fractionalPart = bigIntAmount % divisor;
-  
+
   if (fractionalPart === BigInt(0)) {
     return wholePart.toString();
   }
-  
+
   // Format fractional part with leading zeros
   const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
   // Remove trailing zeros
   const trimmedFractional = fractionalStr.replace(/0+$/, '');
-  
+
   return `${wholePart}.${trimmedFractional}`;
 }
 
@@ -52,7 +52,7 @@ export function parseMesoPosition(resourceData: any): MesoUserPosition | null {
             tokenName: token?.name || 'Unknown Token',
             shares: item.value,
             inner: inner,
-            decimals: token?.decimals || 8
+            decimals: token?.decimals || 8,
           });
         }
       });
@@ -71,7 +71,7 @@ export function parseMesoPosition(resourceData: any): MesoUserPosition | null {
             tokenName: token?.name || 'Unknown Token',
             shares: item.value,
             inner: inner,
-            decimals: token?.decimals || 8
+            decimals: token?.decimals || 8,
           });
         }
       });
@@ -79,7 +79,7 @@ export function parseMesoPosition(resourceData: any): MesoUserPosition | null {
 
     return {
       deposits,
-      debts
+      debts,
     };
   } catch (error) {
     console.error('Error parsing Meso position:', error);
@@ -89,20 +89,20 @@ export function parseMesoPosition(resourceData: any): MesoUserPosition | null {
 
 export function formatMesoPosition(position: MesoUserPosition): string {
   const parts: string[] = [];
-  
+
   if (position.deposits.length > 0) {
-    const deposits = position.deposits.map(d => 
-      `${formatTokenAmount(d.shares, d.decimals)} ${d.tokenSymbol}`
-    ).join(', ');
+    const deposits = position.deposits
+      .map(d => `${formatTokenAmount(d.shares, d.decimals)} ${d.tokenSymbol}`)
+      .join(', ');
     parts.push(`Deposits: ${deposits}`);
   }
-  
+
   if (position.debts.length > 0) {
-    const debts = position.debts.map(d => 
-      `${formatTokenAmount(d.shares, d.decimals)} ${d.tokenSymbol}`
-    ).join(', ');
+    const debts = position.debts
+      .map(d => `${formatTokenAmount(d.shares, d.decimals)} ${d.tokenSymbol}`)
+      .join(', ');
     parts.push(`Debts: ${debts}`);
   }
-  
+
   return parts.join(' | ');
-} 
+}

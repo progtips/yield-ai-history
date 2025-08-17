@@ -15,22 +15,26 @@ import {
 describe('Protocol Detection', () => {
   describe('detectProtocolByModule', () => {
     it('should detect Amnis protocol', () => {
-      const moduleId = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
+      const moduleId =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
       expect(detectProtocolByModule(moduleId)).toBe('amnis');
     });
 
     it('should detect Auro protocol', () => {
-      const moduleId = '0x222ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::auro::staking';
+      const moduleId =
+        '0x222ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::auro::staking';
       expect(detectProtocolByModule(moduleId)).toBe('auro');
     });
 
     it('should detect Echelon protocol', () => {
-      const moduleId = '0x333ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::echelon::lending';
+      const moduleId =
+        '0x333ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::echelon::lending';
       expect(detectProtocolByModule(moduleId)).toBe('echelon');
     });
 
     it('should detect Hyperion protocol', () => {
-      const moduleId = '0x444ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::hyperion::swap';
+      const moduleId =
+        '0x444ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::hyperion::swap';
       expect(detectProtocolByModule(moduleId)).toBe('hyperion');
     });
 
@@ -40,29 +44,34 @@ describe('Protocol Detection', () => {
     });
 
     it('should be case insensitive', () => {
-      const moduleId = '0x111AE3E5BC36A301611D2B0109D4E6B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B::AMNIS::STAKE';
+      const moduleId =
+        '0x111AE3E5BC36A301611D2B0109D4E6B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B::AMNIS::STAKE';
       expect(detectProtocolByModule(moduleId)).toBe('amnis');
     });
   });
 
   describe('detectProtocolByAddress', () => {
     it('should detect Amnis address', () => {
-      const address = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
+      const address =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
       expect(detectProtocolByAddress(address)).toBe('amnis');
     });
 
     it('should detect Auro address', () => {
-      const address = '0x222ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
+      const address =
+        '0x222ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
       expect(detectProtocolByAddress(address)).toBe('auro');
     });
 
     it('should return unknown for unrecognized addresses', () => {
-      const address = '0x9999999999999999999999999999999999999999999999999999999999999999';
+      const address =
+        '0x9999999999999999999999999999999999999999999999999999999999999999';
       expect(detectProtocolByAddress(address)).toBe('unknown');
     });
 
     it('should be case insensitive', () => {
-      const address = '0x111AE3E5BC36A301611D2B0109D4E6B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B';
+      const address =
+        '0x111AE3E5BC36A301611D2B0109D4E6B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B4B';
       expect(detectProtocolByAddress(address)).toBe('amnis');
     });
   });
@@ -132,14 +141,16 @@ describe('Protocol Detection', () => {
 
   describe('Utility Functions', () => {
     it('should get protocol by module', () => {
-      const moduleId = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
+      const moduleId =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
       const protocol = getProtocolByModule(moduleId);
       expect(protocol.type).toBe('amnis');
       expect(protocol.displayName).toBe('Amnis');
     });
 
     it('should get protocol by address', () => {
-      const address = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
+      const address =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
       const protocol = getProtocolByAddress(address);
       expect(protocol.type).toBe('amnis');
       expect(protocol.displayName).toBe('Amnis');
@@ -153,17 +164,20 @@ describe('Protocol Detection', () => {
     });
 
     it('should check if address is protocol', () => {
-      const amnisAddress = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
-      const unknownAddress = '0x9999999999999999999999999999999999999999999999999999999999999999';
-      
+      const amnisAddress =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b';
+      const unknownAddress =
+        '0x9999999999999999999999999999999999999999999999999999999999999999';
+
       expect(isProtocolAddress(amnisAddress)).toBe(true);
       expect(isProtocolAddress(unknownAddress)).toBe(false);
     });
 
     it('should check if module is protocol', () => {
-      const amnisModule = '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
+      const amnisModule =
+        '0x111ae3e5bc36a301611d2b0109d4e6b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b::amnis::stake';
       const unknownModule = '0x999::unknown::function';
-      
+
       expect(isProtocolModule(amnisModule)).toBe(true);
       expect(isProtocolModule(unknownModule)).toBe(false);
     });

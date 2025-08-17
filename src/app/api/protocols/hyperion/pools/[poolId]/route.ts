@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sdk } from "@/lib/hyperion";
+import { sdk } from '@/lib/hyperion';
 
 /**
  * @swagger
@@ -56,7 +56,7 @@ export async function GET(
 
     if (!poolId) {
       return NextResponse.json(
-        { error: "Pool ID is required" },
+        { error: 'Pool ID is required' },
         { status: 400 }
       );
     }
@@ -64,26 +64,22 @@ export async function GET(
     // Используем SDK метод для получения пула по ID
     // Согласно документации: sdk.Pool.fetchPoolById({ poolId: '0xf108...876b5' })
     const pool = await sdk.Pool.fetchPoolById({
-      poolId: poolId
+      poolId: poolId,
     });
 
     if (!pool) {
-      return NextResponse.json(
-        { error: "Pool not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Pool not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      data: pool
+      data: pool,
     });
-
   } catch (error) {
-    console.error("Error fetching Hyperion pool by ID:", error);
+    console.error('Error fetching Hyperion pool by ID:', error);
     return NextResponse.json(
-      { error: "Failed to fetch pool" },
+      { error: 'Failed to fetch pool' },
       { status: 500 }
     );
   }
-} 
+}

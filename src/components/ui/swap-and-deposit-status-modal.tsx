@@ -1,9 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { HyperionSwapService } from '@/lib/services/protocols/hyperion/swap';
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import tokenList from '@/lib/data/tokenList.json';
 import { useDeposit } from '@/lib/hooks/useDeposit';
 import { ProtocolKey } from '@/lib/transactions/types';
@@ -36,7 +42,15 @@ interface SwapAndDepositStatusModalProps {
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
-export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, toToken, protocol, userAddress }: SwapAndDepositStatusModalProps) {
+export function SwapAndDepositStatusModal({
+  isOpen,
+  onClose,
+  amount,
+  fromToken,
+  toToken,
+  protocol,
+  userAddress,
+}: SwapAndDepositStatusModalProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +62,9 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
   const [receivedHuman, setReceivedHuman] = useState<string | null>(null);
   const wallet = useWallet();
   const { deposit } = useDeposit();
-  const [depositStatus, setDepositStatus] = useState<'idle' | 'loading' | 'success' | 'error' | null>(null);
+  const [depositStatus, setDepositStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error' | null
+  >(null);
   const [depositResult, setDepositResult] = useState<any>(null);
   const [depositError, setDepositError] = useState<string | null>(null);
   const [isCheckingTransaction, setIsCheckingTransaction] = useState(false);
@@ -82,16 +98,27 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
         // Проверка формата адресов
         const isFA = (addr: string) => /^0x[a-fA-F0-9]{1,64}$/.test(addr);
         const isAptosAddr = (addr: string) => /^0x[a-fA-F0-9]{64}$/.test(addr);
-        if (!isFA(fromToken.address)) throw new Error(`Invalid fromToken address: ${fromToken.address}`);
-        if (!isFA(toToken.address)) throw new Error(`Invalid toToken address: ${toToken.address}`);
-        if (!isAptosAddr(userAddress)) throw new Error(`Invalid user address: ${userAddress}`);
-        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) throw new Error('Invalid amount');
+        if (!isFA(fromToken.address))
+          throw new Error(`Invalid fromToken address: ${fromToken.address}`);
+        if (!isFA(toToken.address))
+          throw new Error(`Invalid toToken address: ${toToken.address}`);
+        if (!isAptosAddr(userAddress))
+          throw new Error(`Invalid user address: ${userAddress}`);
+        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0)
+          throw new Error('Invalid amount');
         const swapService = HyperionSwapService.getInstance();
 
         // Преобразуем amount в минимальные единицы
         const decimalsA = fromToken.decimals || 8;
-        console.log('fromToken.decimals:', fromToken.decimals, 'amount:', amount);
-        const amountInMinimalUnits = Math.floor(parseFloat(amount) * Math.pow(10, decimalsA));
+        console.log(
+          'fromToken.decimals:',
+          fromToken.decimals,
+          'amount:',
+          amount
+        );
+        const amountInMinimalUnits = Math.floor(
+          parseFloat(amount) * Math.pow(10, decimalsA)
+        );
         console.log('amountInMinimalUnits:', amountInMinimalUnits);
 
         // Предварительная оценка через estFromAmount и estToAmount
@@ -117,7 +144,9 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
         }
 
         // Проверяем минимальное выходное количество
-        const minAmountOut = Math.floor(parseFloat(estToAmount.amountOut) * 0.99); // 1% slippage
+        const minAmountOut = Math.floor(
+          parseFloat(estToAmount.amountOut) * 0.99
+        ); // 1% slippage
         if (minAmountOut <= 0) {
           throw new Error('Output amount too small for swap');
         }
@@ -132,11 +161,15 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
         // Преобразуем amount и amountOut в минимальные единицы (BigInt)
         const decimalsB = toToken.decimals || 8;
         const amountOutRaw = parseFloat(quote.amountOut);
-        if (isNaN(amountOutRaw) || amountOutRaw <= 0) throw new Error('No liquidity or amount too small for swap (amountOut=0)');
-        
+        if (isNaN(amountOutRaw) || amountOutRaw <= 0)
+          throw new Error(
+            'No liquidity or amount too small for swap (amountOut=0)'
+          );
+
         // Используем значение из estToAmount без дополнительной конвертации
         const amountOut = estToAmount.amountOut;
-        if (!amountOut || amountOut === '0') throw new Error('Amount out is zero');
+        if (!amountOut || amountOut === '0')
+          throw new Error('Amount out is zero');
 
         // Используем path из estToAmount, так как он короче и эффективнее
         const path = estToAmount.path;
@@ -181,12 +214,13 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
         // Добавляем type_arguments к payload
         const modifiedPayload = {
           ...payload,
-          type_arguments: ['0x1::aptos_coin::AptosCoin']
+          type_arguments: ['0x1::aptos_coin::AptosCoin'],
         };
 
         // 3. Отправить payload через wallet-адаптер
         // В некоторых версиях wallet-adapter нужно передавать просто payload, а не { data: payload }
-        if (!wallet.signAndSubmitTransaction) throw new Error('Wallet not connected');
+        if (!wallet.signAndSubmitTransaction)
+          throw new Error('Wallet not connected');
         let txResult;
         try {
           txResult = await wallet.signAndSubmitTransaction({
@@ -195,7 +229,10 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
           });
         } catch (e: any) {
           // Попробовать без обертки, если ошибка формата
-          if (e?.message?.includes('Invalid transaction format') || e?.message?.includes('data')) {
+          if (
+            e?.message?.includes('Invalid transaction format') ||
+            e?.message?.includes('data')
+          ) {
             txResult = await wallet.signAndSubmitTransaction(modifiedPayload);
           } else {
             throw e;
@@ -209,57 +246,78 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, amount, fromToken.address, toToken.address, userAddress, wallet, retryCount, hasRun]);
+  }, [
+    isOpen,
+    amount,
+    fromToken.address,
+    toToken.address,
+    userAddress,
+    wallet,
+    retryCount,
+    hasRun,
+  ]);
 
   useEffect(() => {
     if (!isOpen) setHasRun(false);
   }, [isOpen]);
 
   useEffect(() => {
-    console.log('Transaction status effect triggered:', { 
-      status, 
-      hasHash: !!result?.hash, 
+    console.log('Transaction status effect triggered:', {
+      status,
+      hasHash: !!result?.hash,
       hasProcessedTransaction,
-      hash: result?.hash 
+      hash: result?.hash,
     });
-    
+
     if (status === 'success' && result?.hash && !hasProcessedTransaction) {
       // Add retry logic for transaction status check
       const checkTransactionStatus = async () => {
         const maxAttempts = 10;
         const delay = 2000;
-        
+
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           try {
-            console.log(`Checking transaction status attempt ${attempt}/${maxAttempts} for hash: ${result.hash}`);
-            
-            const response = await fetch(`https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${result.hash}`);
-            
+            console.log(
+              `Checking transaction status attempt ${attempt}/${maxAttempts} for hash: ${result.hash}`
+            );
+
+            const response = await fetch(
+              `https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${result.hash}`
+            );
+
             if (!response.ok) {
               if (response.status === 404) {
-                console.log(`Transaction not found yet (attempt ${attempt}), waiting ${delay}ms...`);
+                console.log(
+                  `Transaction not found yet (attempt ${attempt}), waiting ${delay}ms...`
+                );
                 if (attempt < maxAttempts) {
                   await new Promise(resolve => setTimeout(resolve, delay));
                   continue;
                 } else {
-                  throw new Error('Transaction not found after maximum attempts');
+                  throw new Error(
+                    'Transaction not found after maximum attempts'
+                  );
                 }
               } else {
-                throw new Error(`API error: ${response.status} ${response.statusText}`);
+                throw new Error(
+                  `API error: ${response.status} ${response.statusText}`
+                );
               }
             }
-            
+
             const data = await response.json();
             console.log('Transaction data received:', data);
-            
+
             // Check if transaction was successful
-            if (data.vm_status && data.vm_status !== "Executed successfully") {
+            if (data.vm_status && data.vm_status !== 'Executed successfully') {
               throw new Error(`Transaction failed: ${data.vm_status}`);
             }
-            
+
             const events = data.events || [];
             // 1. Ищем SwapEventV3
-            const swapEvent = events.find((e: any) => e.type && e.type.includes('SwapEventV3'));
+            const swapEvent = events.find(
+              (e: any) => e.type && e.type.includes('SwapEventV3')
+            );
             let amount = null;
             let tokenAddress: string | null = null;
             if (swapEvent && swapEvent.data) {
@@ -268,24 +326,46 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
             }
             // 2. Если нет SwapEventV3, ищем Deposit с amount > 0
             if (!amount) {
-              const depositEvent = events.find((e: any) => e.type && e.type.includes('Deposit') && e.data && e.data.amount && Number(e.data.amount) > 0);
+              const depositEvent = events.find(
+                (e: any) =>
+                  e.type &&
+                  e.type.includes('Deposit') &&
+                  e.data &&
+                  e.data.amount &&
+                  Number(e.data.amount) > 0
+              );
               if (depositEvent) {
                 amount = depositEvent.data.amount;
                 tokenAddress = depositEvent.data.store;
               }
             }
             if (amount && tokenAddress && !hasProcessedTransaction) {
-              console.log('Starting deposit process:', { amount, tokenAddress, protocol: protocol.key });
+              console.log('Starting deposit process:', {
+                amount,
+                tokenAddress,
+                protocol: protocol.key,
+              });
               // 3. Ищем метаданные токена
               let symbol = null;
               let decimals = 8;
-              const tokensArr = Array.isArray((tokenList as any).data?.data) ? (tokenList as any).data.data : (tokenList as any);
-              const tokenMeta = tokensArr.find((t: any) => t.faAddress === tokenAddress || t.address === tokenAddress);
+              const tokensArr = Array.isArray((tokenList as any).data?.data)
+                ? (tokenList as any).data.data
+                : (tokenList as any);
+              const tokenMeta = tokensArr.find(
+                (t: any) =>
+                  t.faAddress === tokenAddress || t.address === tokenAddress
+              );
               if (tokenMeta) {
                 symbol = tokenMeta.symbol;
                 decimals = tokenMeta.decimals;
               } else {
-                const metaChange = (data.changes || []).find((c: any) => c.address === tokenAddress && c.data && c.data.type && c.data.type.includes('Metadata'));
+                const metaChange = (data.changes || []).find(
+                  (c: any) =>
+                    c.address === tokenAddress &&
+                    c.data &&
+                    c.data.type &&
+                    c.data.type.includes('Metadata')
+                );
                 if (metaChange && metaChange.data && metaChange.data.data) {
                   symbol = metaChange.data.data.symbol;
                   decimals = metaChange.data.data.decimals;
@@ -294,7 +374,9 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
               setReceivedAmount(amount);
               setReceivedSymbol(symbol);
               setReceivedDecimals(decimals);
-              const human = (Number(amount) / Math.pow(10, decimals)).toFixed(decimals);
+              const human = (Number(amount) / Math.pow(10, decimals)).toFixed(
+                decimals
+              );
               setReceivedHuman(human);
 
               // 5. Автоматически запускаем депозит
@@ -319,22 +401,23 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
                 setHasProcessedTransaction(true);
               }
             }
-            
+
             // Success - break out of retry loop
             break;
-            
           } catch (error) {
             console.error(`Attempt ${attempt} failed:`, error);
             if (attempt === maxAttempts) {
               console.error('All attempts failed to check transaction status');
               // Show error to user
-              setDepositError('Failed to verify transaction status. Please check the transaction manually.');
+              setDepositError(
+                'Failed to verify transaction status. Please check the transaction manually.'
+              );
               setDepositStatus('error');
             }
           }
         }
       };
-      
+
       // Start checking transaction status
       setIsCheckingTransaction(true);
       setHasProcessedTransaction(true); // Mark as processing to prevent re-execution
@@ -345,86 +428,133 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
   }, [status, result, tokenList, hasProcessedTransaction]);
 
   const handleRetry = () => {
-    setRetryCount((c) => c + 1);
+    setRetryCount(c => c + 1);
     setHasRun(false);
   };
 
   // Получение логотипа токена по адресу
   const getTokenLogo = (address: string): string => {
-    const tokensArr = Array.isArray((tokenList as any).data?.data) ? (tokenList as any).data.data : (tokenList as any);
-    const tokenMeta = tokensArr.find((t: any) => t.faAddress === address || t.address === address);
-    return tokenMeta?.logoUrl && tokenMeta.logoUrl !== '' ? tokenMeta.logoUrl : '/file.svg';
+    const tokensArr = Array.isArray((tokenList as any).data?.data)
+      ? (tokenList as any).data.data
+      : (tokenList as any);
+    const tokenMeta = tokensArr.find(
+      (t: any) => t.faAddress === address || t.address === address
+    );
+    return tokenMeta?.logoUrl && tokenMeta.logoUrl !== ''
+      ? tokenMeta.logoUrl
+      : '/file.svg';
   };
 
   // Получение логотипа протокола
-  const getProtocolLogo = (logo?: string) => logo && logo !== '' ? logo : '/file.svg';
+  const getProtocolLogo = (logo?: string) =>
+    logo && logo !== '' ? logo : '/file.svg';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px] p-6 rounded-2xl flex flex-col items-center">
+      <DialogContent className='sm:max-w-[400px] p-6 rounded-2xl flex flex-col items-center'>
         <DialogHeader>
           <DialogTitle>Swap and Deposit</DialogTitle>
           <DialogDescription>
-            Processing your swap and deposit transaction. Please wait...<br/>
-            You will need to sign 2 transactions: 1 for swap, 2 for deposit of received tokens
+            Processing your swap and deposit transaction. Please wait...
+            <br />
+            You will need to sign 2 transactions: 1 for swap, 2 for deposit of
+            received tokens
           </DialogDescription>
-          <div className="flex items-center justify-center gap-2 mt-2 text-base font-medium">
+          <div className='flex items-center justify-center gap-2 mt-2 text-base font-medium'>
             <span>Deposit on</span>
-            <Image src={getProtocolLogo(protocol.logo)} alt={protocol.name} width={20} height={20} className="rounded-full bg-white border" />
+            <Image
+              src={getProtocolLogo(protocol.logo)}
+              alt={protocol.name}
+              width={20}
+              height={20}
+              className='rounded-full bg-white border'
+            />
             <span>{protocol.name}</span>
           </div>
         </DialogHeader>
-        <div className="flex flex-col items-center gap-4 mt-4 w-full">
+        <div className='flex flex-col items-center gap-4 mt-4 w-full'>
           {/* Блок обмена */}
-          <div className="w-full flex flex-col items-center gap-2 mb-2">
-            <div className="flex items-center gap-2">
-              <Image src={getTokenLogo(fromToken.address)} alt={fromToken.symbol} width={28} height={28} className="rounded-full bg-white border" />
-              <span className="font-semibold text-base">{amount} {fromToken.symbol}</span>
-              <span className="text-xl">→</span>
+          <div className='w-full flex flex-col items-center gap-2 mb-2'>
+            <div className='flex items-center gap-2'>
+              <Image
+                src={getTokenLogo(fromToken.address)}
+                alt={fromToken.symbol}
+                width={28}
+                height={28}
+                className='rounded-full bg-white border'
+              />
+              <span className='font-semibold text-base'>
+                {amount} {fromToken.symbol}
+              </span>
+              <span className='text-xl'>→</span>
               {receivedAmount && receivedSymbol && (
                 <>
-                  <Image src={getTokenLogo(toToken.address)} alt={receivedSymbol || ''} width={28} height={28} className="rounded-full bg-white border" />
-                  <span className="font-semibold text-base">{receivedHuman} {receivedSymbol}</span>
+                  <Image
+                    src={getTokenLogo(toToken.address)}
+                    alt={receivedSymbol || ''}
+                    width={28}
+                    height={28}
+                    className='rounded-full bg-white border'
+                  />
+                  <span className='font-semibold text-base'>
+                    {receivedHuman} {receivedSymbol}
+                  </span>
                 </>
               )}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className='text-xs text-muted-foreground'>
               Swap: {fromToken.symbol} → {receivedSymbol || toToken.symbol}
             </div>
           </div>
 
           {/* Статус свапа */}
-          {status === 'loading' && <Loader2 className="h-10 w-10 animate-spin text-primary" />}
-          {status === 'loading' && <div className="text-lg font-medium">Processing swap and deposit...</div>}
           {status === 'loading' && (
-            <div className="text-sm text-muted-foreground mt-2">Waiting for wallet confirmation and network response...</div>
+            <Loader2 className='h-10 w-10 animate-spin text-primary' />
+          )}
+          {status === 'loading' && (
+            <div className='text-lg font-medium'>
+              Processing swap and deposit...
+            </div>
+          )}
+          {status === 'loading' && (
+            <div className='text-sm text-muted-foreground mt-2'>
+              Waiting for wallet confirmation and network response...
+            </div>
           )}
           {status === 'success' && (
-            <div className="text-green-600 text-center w-full">
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <span className="font-mono text-sm bg-muted px-2 py-1 rounded">
+            <div className='text-green-600 text-center w-full'>
+              <div className='flex items-center justify-center gap-2 mt-2'>
+                <span className='font-mono text-sm bg-muted px-2 py-1 rounded'>
                   {result.hash.slice(0, 6)}...{result.hash.slice(-4)}
                 </span>
                 <a
                   href={`https://explorer.aptoslabs.com/txn/${result.hash}?network=mainnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="View in Explorer"
-                  className="text-blue-600 hover:underline"
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  title='View in Explorer'
+                  className='text-blue-600 hover:underline'
                 >
-                  <ExternalLink className="inline w-4 h-4 align-text-bottom" />
+                  <ExternalLink className='inline w-4 h-4 align-text-bottom' />
                 </a>
               </div>
               {isCheckingTransaction && (
-                <div className="mt-2 text-sm text-blue-600 flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                <div className='mt-2 text-sm text-blue-600 flex items-center justify-center gap-2'>
+                  <Loader2 className='h-4 w-4 animate-spin' />
                   <span>Verifying transaction...</span>
                 </div>
               )}
               {receivedAmount && receivedSymbol && receivedHuman && (
-                <div className="mt-2 text-sm text-green-700 flex items-center justify-center gap-2">
-                  <Image src={getTokenLogo(toToken.address)} alt={receivedSymbol || ''} width={20} height={20} className="rounded-full bg-white border" />
-                  <span>Received: <b>{receivedHuman}</b> {receivedSymbol}</span>
+                <div className='mt-2 text-sm text-green-700 flex items-center justify-center gap-2'>
+                  <Image
+                    src={getTokenLogo(toToken.address)}
+                    alt={receivedSymbol || ''}
+                    width={20}
+                    height={20}
+                    className='rounded-full bg-white border'
+                  />
+                  <span>
+                    Received: <b>{receivedHuman}</b> {receivedSymbol}
+                  </span>
                 </div>
               )}
             </div>
@@ -432,57 +562,85 @@ export function SwapAndDepositStatusModal({ isOpen, onClose, amount, fromToken, 
 
           {/* Статус депозита */}
           {depositStatus === 'loading' && (
-            <div className="text-blue-600 text-center mt-2">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Image src={getProtocolLogo(protocol.logo)} alt={protocol.name} width={24} height={24} className="rounded-full bg-white border" />
-                <span className="font-semibold">Depositing to {protocol.name}...</span>
+            <div className='text-blue-600 text-center mt-2'>
+              <div className='flex items-center justify-center gap-2 mb-1'>
+                <Image
+                  src={getProtocolLogo(protocol.logo)}
+                  alt={protocol.name}
+                  width={24}
+                  height={24}
+                  className='rounded-full bg-white border'
+                />
+                <span className='font-semibold'>
+                  Depositing to {protocol.name}...
+                </span>
               </div>
-              <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
+              <Loader2 className='h-6 w-6 animate-spin text-primary mx-auto' />
             </div>
           )}
           {depositStatus === 'success' && depositResult?.hash && (
-            <div className="text-green-600 text-center mt-2">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Image src={getProtocolLogo(protocol.logo)} alt={protocol.name} width={24} height={24} className="rounded-full bg-white border" />
-                <span className="font-semibold">Deposited to {protocol.name}:</span>
-                <Image src={getTokenLogo(toToken.address)} alt={receivedSymbol || ''} width={20} height={20} className="rounded-full bg-white border" />
-                <span><b>{receivedHuman}</b> {receivedSymbol}</span>
+            <div className='text-green-600 text-center mt-2'>
+              <div className='flex items-center justify-center gap-2 mb-1'>
+                <Image
+                  src={getProtocolLogo(protocol.logo)}
+                  alt={protocol.name}
+                  width={24}
+                  height={24}
+                  className='rounded-full bg-white border'
+                />
+                <span className='font-semibold'>
+                  Deposited to {protocol.name}:
+                </span>
+                <Image
+                  src={getTokenLogo(toToken.address)}
+                  alt={receivedSymbol || ''}
+                  width={20}
+                  height={20}
+                  className='rounded-full bg-white border'
+                />
+                <span>
+                  <b>{receivedHuman}</b> {receivedSymbol}
+                </span>
               </div>
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <span className="font-mono text-sm bg-muted px-2 py-1 rounded">
-                  {depositResult.hash.slice(0, 6)}...{depositResult.hash.slice(-4)}
+              <div className='flex items-center justify-center gap-2 mt-2'>
+                <span className='font-mono text-sm bg-muted px-2 py-1 rounded'>
+                  {depositResult.hash.slice(0, 6)}...
+                  {depositResult.hash.slice(-4)}
                 </span>
                 <a
                   href={`https://explorer.aptoslabs.com/txn/${depositResult.hash}?network=mainnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="View in Explorer"
-                  className="text-blue-600 hover:underline"
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  title='View in Explorer'
+                  className='text-blue-600 hover:underline'
                 >
-                  <ExternalLink className="inline w-4 h-4 align-text-bottom" />
+                  <ExternalLink className='inline w-4 h-4 align-text-bottom' />
                 </a>
               </div>
               {/* APY и финальный месседж */}
               {protocol.apy !== undefined && protocol.apy !== null && (
-                <div className="mt-1 text-base text-green-700 font-medium">
+                <div className='mt-1 text-base text-green-700 font-medium'>
                   Now you are earning {protocol.apy.toFixed(2)}% APY!
                 </div>
               )}
             </div>
           )}
           {depositStatus === 'error' && (
-            <div className="text-red-600 text-center mt-2">
-              Deposit failed:<br />
-              <pre className="text-xs mt-2 bg-muted p-2 rounded max-w-xs overflow-x-auto">{depositError}</pre>
+            <div className='text-red-600 text-center mt-2'>
+              Deposit failed:
+              <br />
+              <pre className='text-xs mt-2 bg-muted p-2 rounded max-w-xs overflow-x-auto'>
+                {depositError}
+              </pre>
             </div>
           )}
         </div>
-        <div className="flex justify-end w-full mt-6">
-          <Button variant="outline" onClick={onClose}>
+        <div className='flex justify-end w-full mt-6'>
+          <Button variant='outline' onClick={onClose}>
             {depositStatus === 'success' ? 'Close' : 'Cancel'}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
-} 
+}

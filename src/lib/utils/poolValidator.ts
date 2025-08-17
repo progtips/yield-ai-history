@@ -50,7 +50,9 @@ export class PoolValidator {
         poolWarnings.push(`Pool ${index}: Negative totalAPY detected`);
       }
       if (pool.totalAPY > 1000) {
-        poolWarnings.push(`Pool ${index}: Unusually high APY detected (>1000%)`);
+        poolWarnings.push(
+          `Pool ${index}: Unusually high APY detected (>1000%)`
+        );
       }
 
       if (poolErrors.length === 0) {
@@ -66,17 +68,21 @@ export class PoolValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      data: validPools
+      data: validPools,
     };
   }
 
-  static async testApiSource(url: string, transform?: (data: any) => InvestmentData[]): Promise<ValidationResult> {
+  static async testApiSource(
+    url: string,
+    transform?: (data: any) => InvestmentData[]
+  ): Promise<ValidationResult> {
     try {
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'application/json'
-        }
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          Accept: 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -84,12 +90,12 @@ export class PoolValidator {
           isValid: false,
           errors: [`API request failed with status ${response.status}`],
           warnings: [],
-          data: []
+          data: [],
         };
       }
 
       const data = await response.json();
-      
+
       let pools: InvestmentData[];
       if (transform) {
         pools = transform(data);
@@ -103,14 +109,14 @@ export class PoolValidator {
         isValid: false,
         errors: [`API request failed: ${error}`],
         warnings: [],
-        data: []
+        data: [],
       };
     }
   }
 
   static logValidationResult(result: ValidationResult, sourceName: string) {
     console.log(`\n=== Validation Results for ${sourceName} ===`);
-    
+
     if (result.isValid) {
       console.log('✅ Data is valid');
     } else {
@@ -124,10 +130,10 @@ export class PoolValidator {
     }
 
     console.log(`📊 Valid pools: ${result.data.length}`);
-    
+
     if (result.data.length > 0) {
       console.log('📋 Sample pool:');
       console.log(JSON.stringify(result.data[0], null, 2));
     }
   }
-} 
+}

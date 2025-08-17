@@ -1,7 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useRef } from 'react';
-import { DragData, DragDropState, DropValidationResult } from '@/types/dragDrop';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useRef,
+} from 'react';
+import {
+  DragData,
+  DragDropState,
+  DropValidationResult,
+} from '@/types/dragDrop';
 import { InvestmentData } from '@/types/investments';
 import { DepositModal } from '@/components/ui/deposit-modal';
 import { SwapAndDepositModal } from '@/components/ui/swap-and-deposit-modal';
@@ -15,8 +25,14 @@ interface DragDropContextType {
   state: DragDropState;
   startDrag: (data: DragData) => void;
   endDrag: () => void;
-  validateDrop: (dragData: DragData, dropTarget: InvestmentData | 'wallet') => DropValidationResult;
-  handleDrop: (dragData: DragData, dropTarget: InvestmentData | 'wallet') => void;
+  validateDrop: (
+    dragData: DragData,
+    dropTarget: InvestmentData | 'wallet'
+  ) => DropValidationResult;
+  handleDrop: (
+    dragData: DragData,
+    dropTarget: InvestmentData | 'wallet'
+  ) => void;
   // Модальные окна
   isDepositModalOpen: boolean;
   isSwapModalOpen: boolean;
@@ -42,7 +58,9 @@ interface DragDropContextType {
   setPositionConfirmHandler: (handler: (() => Promise<void>) | null) => void;
 }
 
-const DragDropContext = createContext<DragDropContextType | undefined>(undefined);
+const DragDropContext = createContext<DragDropContextType | undefined>(
+  undefined
+);
 
 export function DragDropProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DragDropState>({
@@ -55,13 +73,15 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [depositModalData, setDepositModalData] = useState<any>(null);
-  
+
   // Состояние модалок позиций
   const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
   const [positionModalData, setPositionModalData] = useState<any>(null);
   // Обработчик подтверждения транзакции для позиций
-  const [positionConfirmHandler, setPositionConfirmHandler] = useState<(() => Promise<void>) | null>(null);
-  
+  const [positionConfirmHandler, setPositionConfirmHandler] = useState<
+    (() => Promise<void>) | null
+  >(null);
+
   // Глобальный флаг для предотвращения повторного срабатывания событий
   const globalEventTriggerRef = useRef(false);
   // Отслеживание открытых модалок по positionId
@@ -86,7 +106,10 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const validateDrop = (dragData: DragData, dropTarget: InvestmentData | 'wallet'): DropValidationResult => {
+  const validateDrop = (
+    dragData: DragData,
+    dropTarget: InvestmentData | 'wallet'
+  ): DropValidationResult => {
     // Если перетаскиваем токен
     if (dragData.type === 'token') {
       // Если dropTarget это wallet, то токены нельзя перетаскивать в wallet
@@ -96,11 +119,12 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
           reason: 'Cannot drop tokens into wallet',
         };
       }
-      
+
       // Проверяем совместимость токена с пулом
-      const isCompatible = dropTarget.token === dragData.address || 
-                          dropTarget.asset.toLowerCase() === dragData.symbol.toLowerCase();
-      
+      const isCompatible =
+        dropTarget.token === dragData.address ||
+        dropTarget.asset.toLowerCase() === dragData.symbol.toLowerCase();
+
       if (!isCompatible) {
         return {
           isValid: false,
@@ -137,7 +161,7 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
               reason: 'Position has no balance to withdraw',
             };
           }
-          
+
           return {
             isValid: true,
             action: 'withdraw',
@@ -150,7 +174,7 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
               reason: 'Position has no value to remove',
             };
           }
-          
+
           return {
             isValid: true,
             action: 'removeLiquidity',
@@ -162,7 +186,7 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
           };
         }
       }
-      
+
       // Если dropTarget это пул, пока не поддерживаем
       return {
         isValid: false,
@@ -177,18 +201,25 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
   };
 
   const getTokenInfo = (address: string) => {
-    return (tokenList.data.data as any[]).find(token => 
-      token.tokenAddress === address || token.faAddress === address
+    return (tokenList.data.data as any[]).find(
+      token => token.tokenAddress === address || token.faAddress === address
     );
   };
 
-  const handleDrop = (dragData: DragData, dropTarget: InvestmentData | 'wallet') => {
+  const handleDrop = (
+    dragData: DragData,
+    dropTarget: InvestmentData | 'wallet'
+  ) => {
     const validation = validateDrop(dragData, dropTarget);
-    
-    if (validation.isValid && dragData.type === 'token' && dropTarget !== 'wallet') {
+
+    if (
+      validation.isValid &&
+      dragData.type === 'token' &&
+      dropTarget !== 'wallet'
+    ) {
       const protocol = getProtocolByName(dropTarget.protocol);
       const tokenInfo = getTokenInfo(dropTarget.token);
-      
+
       if (protocol && protocol.depositType === 'native') {
         // Get real APY for Amnis Finance
         let apy = dropTarget.totalAPY || 8.4;
@@ -196,41 +227,51 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
           // Use the APY from the dropTarget if available, otherwise use default
           apy = dropTarget.totalAPY || 7.21; // Current Amnis APY from API
         }
-        
+
         // Открываем модальное окно депозита
         const modalData = {
           protocol: {
             name: protocol.name,
             logo: protocol.logoUrl,
             apy: apy,
-            key: (protocol.name === 'Amnis Finance' ? 'amnis' : protocol.name.toLowerCase()) as ProtocolKey
+            key: (protocol.name === 'Amnis Finance'
+              ? 'amnis'
+              : protocol.name.toLowerCase()) as ProtocolKey,
           },
           tokenIn: {
             symbol: dragData.symbol,
             logo: dragData.logoUrl || '/file.svg',
             decimals: dragData.decimals,
-            address: dragData.address
+            address: dragData.address,
           },
           tokenOut: {
             symbol: tokenInfo?.symbol || dropTarget.asset,
             logo: tokenInfo?.logoUrl || '/file.svg',
             decimals: tokenInfo?.decimals || 8,
-            address: dropTarget.token
+            address: dropTarget.token,
           },
-          priceUSD: parseFloat(dragData.price) || 0
+          priceUSD: parseFloat(dragData.price) || 0,
         };
-        
+
         setDepositModalData(modalData);
         setIsDepositModalOpen(true);
-      } else if (protocol && protocol.depositType === 'external' && protocol.depositUrl) {
+      } else if (
+        protocol &&
+        protocol.depositType === 'external' &&
+        protocol.depositUrl
+      ) {
         // Открываем внешний сайт
         window.open(protocol.depositUrl, '_blank');
       }
-    } else if (validation.requiresSwap && dragData.type === 'token' && dropTarget !== 'wallet') {
+    } else if (
+      validation.requiresSwap &&
+      dragData.type === 'token' &&
+      dropTarget !== 'wallet'
+    ) {
       // Открываем модальное окно swap + deposit
       const protocol = getProtocolByName(dropTarget.protocol);
       const tokenInfo = getTokenInfo(dropTarget.token);
-      
+
       if (protocol && protocol.depositType === 'native') {
         // Get real APY for Amnis Finance
         let apy = dropTarget.totalAPY || 8.4;
@@ -238,56 +279,71 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
           // Use the APY from the dropTarget if available, otherwise use default
           apy = dropTarget.totalAPY || 7.21; // Current Amnis APY from API
         }
-        
+
         const modalData = {
           protocol: {
             name: protocol.name,
             logo: protocol.logoUrl,
             apy: apy,
-            key: (protocol.name === 'Amnis Finance' ? 'amnis' : protocol.name.toLowerCase()) as ProtocolKey
+            key: (protocol.name === 'Amnis Finance'
+              ? 'amnis'
+              : protocol.name.toLowerCase()) as ProtocolKey,
           },
           tokenIn: {
             symbol: tokenInfo?.symbol || dropTarget.asset,
             logo: tokenInfo?.logoUrl || '/file.svg',
             decimals: tokenInfo?.decimals || 8,
-            address: dropTarget.token
+            address: dropTarget.token,
           },
           tokenOut: {
             symbol: dragData.symbol,
             logo: dragData.logoUrl || '/file.svg',
             decimals: dragData.decimals,
-            address: dragData.address
+            address: dragData.address,
           },
-          priceUSD: parseFloat(dragData.price) || 0
+          priceUSD: parseFloat(dragData.price) || 0,
         };
-        
+
         setDepositModalData(modalData);
         setIsSwapModalOpen(true);
       }
-    } else if (validation.isValid && dragData.type === 'position' && dropTarget === 'wallet') {
+    } else if (
+      validation.isValid &&
+      dragData.type === 'position' &&
+      dropTarget === 'wallet'
+    ) {
       // Для позиций Echelon открываем withdraw модалку напрямую
       if (dragData.protocol === 'Echelon' && validation.action === 'withdraw') {
-        console.log('DragDropContext: Opening Echelon withdraw modal directly', {
-          positionId: dragData.positionId
-        });
-        
+        console.log(
+          'DragDropContext: Opening Echelon withdraw modal directly',
+          {
+            positionId: dragData.positionId,
+          }
+        );
+
         setPositionModalData({
           type: 'withdraw',
           position: dragData,
-          protocol: 'Echelon'
+          protocol: 'Echelon',
         });
         setIsPositionModalOpen(true);
       }
       // Для позиций Hyperion открываем remove liquidity модалку напрямую
-      else if (dragData.protocol === 'Hyperion' && validation.action === 'removeLiquidity') {
-        console.log('DragDropContext: Opening Hyperion remove liquidity modal directly', {
-          positionId: dragData.positionId
-        });
-        
+      else if (
+        dragData.protocol === 'Hyperion' &&
+        validation.action === 'removeLiquidity'
+      ) {
+        console.log(
+          'DragDropContext: Opening Hyperion remove liquidity modal directly',
+          {
+            positionId: dragData.positionId,
+          }
+        );
+
         setPositionModalData({
           type: 'removeLiquidity',
           position: dragData,
-          protocol: 'Hyperion'
+          protocol: 'Hyperion',
         });
         setIsPositionModalOpen(true);
       }
@@ -321,21 +377,21 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
     setIsDepositModalOpen(false);
     setIsSwapModalOpen(false);
     setDepositModalData(null);
-    
+
     // Закрываем модалки позиций
     setIsPositionModalOpen(false);
     setPositionModalData(null);
-    
+
     // Очищаем все открытые модалки позиций
     const openModalsCount = openModalsRef.current.size;
     openModalsRef.current.clear();
-    
+
     // Очищаем историю событий
     lastEventTimeRef.current.clear();
-    
+
     console.log('DragDropContext: Closed all modals', {
       closedModalsCount: openModalsCount,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -368,7 +424,7 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
   return (
     <DragDropContext.Provider value={value}>
       {children}
-      
+
       {/* Модальные окна */}
       {depositModalData && (
         <>
@@ -380,7 +436,7 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
             tokenOut={depositModalData.tokenOut}
             priceUSD={depositModalData.priceUSD}
           />
-          
+
           <SwapAndDepositModal
             isOpen={isSwapModalOpen}
             onClose={closeSwapModal}
@@ -392,59 +448,71 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
           />
         </>
       )}
-      
+
       {/* Модальные окна позиций */}
       {positionModalData && (
         <>
           {/* Withdraw Modal для Echelon */}
-          {positionModalData.type === 'withdraw' && positionModalData.protocol === 'Echelon' && (
-            <WithdrawModal
-              isOpen={isPositionModalOpen}
-              onClose={closePositionModalDirect}
-              onConfirm={async (amount: bigint) => {
-                if (positionConfirmHandler) {
-                  try {
-                    await positionConfirmHandler();
-                  } catch (error) {
-                    console.error('Error in position confirm handler:', error);
+          {positionModalData.type === 'withdraw' &&
+            positionModalData.protocol === 'Echelon' && (
+              <WithdrawModal
+                isOpen={isPositionModalOpen}
+                onClose={closePositionModalDirect}
+                onConfirm={async (amount: bigint) => {
+                  if (positionConfirmHandler) {
+                    try {
+                      await positionConfirmHandler();
+                    } catch (error) {
+                      console.error(
+                        'Error in position confirm handler:',
+                        error
+                      );
+                    }
+                  } else {
+                    console.log(
+                      'No confirm handler set for position:',
+                      positionModalData.position
+                    );
                   }
-                } else {
-                  console.log('No confirm handler set for position:', positionModalData.position);
-                }
-                closePositionModalDirect();
-              }}
-              position={positionModalData.position}
-              tokenInfo={positionModalData.position.tokenInfo}
-              isLoading={false}
-              userAddress={undefined} // Нужно будет передать адрес пользователя
-            />
-          )}
-          
+                  closePositionModalDirect();
+                }}
+                position={positionModalData.position}
+                tokenInfo={positionModalData.position.tokenInfo}
+                isLoading={false}
+                userAddress={undefined} // Нужно будет передать адрес пользователя
+              />
+            )}
+
           {/* Remove Liquidity Modal для Hyperion */}
-          {positionModalData.type === 'removeLiquidity' && positionModalData.protocol === 'Hyperion' && (
-            <ConfirmRemoveModal
-              isOpen={isPositionModalOpen}
-              onClose={closePositionModalDirect}
-              onConfirm={async () => {
-                if (positionConfirmHandler) {
-                  try {
-                    await positionConfirmHandler();
-                  } catch (error) {
-                    console.error('Error in position confirm handler:', error);
+          {positionModalData.type === 'removeLiquidity' &&
+            positionModalData.protocol === 'Hyperion' && (
+              <ConfirmRemoveModal
+                isOpen={isPositionModalOpen}
+                onClose={closePositionModalDirect}
+                onConfirm={async () => {
+                  if (positionConfirmHandler) {
+                    try {
+                      await positionConfirmHandler();
+                    } catch (error) {
+                      console.error(
+                        'Error in position confirm handler:',
+                        error
+                      );
+                    }
+                  } else {
+                    console.log(
+                      'No confirm handler set for position:',
+                      positionModalData.position
+                    );
                   }
-                } else {
-                  console.log('No confirm handler set for position:', positionModalData.position);
-                }
-                closePositionModalDirect();
-              }}
-              isLoading={false}
-              position={positionModalData.position}
-            />
-          )}
+                  closePositionModalDirect();
+                }}
+                isLoading={false}
+                position={positionModalData.position}
+              />
+            )}
         </>
       )}
-      
-
     </DragDropContext.Provider>
   );
 }
@@ -455,4 +523,4 @@ export function useDragDrop() {
     throw new Error('useDragDrop must be used within a DragDropProvider');
   }
   return context;
-} 
+}

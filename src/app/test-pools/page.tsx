@@ -25,7 +25,7 @@ export default function TestPoolsPage() {
         } catch (error) {
           setResult({
             success: false,
-            error: `Invalid transform function: ${error}`
+            error: `Invalid transform function: ${error}`,
           });
           return;
         }
@@ -44,7 +44,7 @@ export default function TestPoolsPage() {
     } catch (error) {
       setResult({
         success: false,
-        error: `Request failed: ${error}`
+        error: `Request failed: ${error}`,
       });
     } finally {
       setLoading(false);
@@ -52,10 +52,10 @@ export default function TestPoolsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className='container mx-auto p-6 space-y-6'>
       <div>
-        <h1 className="text-2xl font-bold mb-2">Test Pool Sources</h1>
-        <p className="text-muted-foreground">
+        <h1 className='text-2xl font-bold mb-2'>Test Pool Sources</h1>
+        <p className='text-muted-foreground'>
           Test new API sources to ensure they return valid pool data
         </p>
       </div>
@@ -64,23 +64,27 @@ export default function TestPoolsPage() {
         <CardHeader>
           <CardTitle>API Configuration</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           <div>
-            <label className="block text-sm font-medium mb-2">API URL</label>
+            <label className='block text-sm font-medium mb-2'>API URL</label>
             <Input
               value={url}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
-              placeholder="https://your-api.com/pools"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUrl(e.target.value)
+              }
+              placeholder='https://your-api.com/pools'
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className='block text-sm font-medium mb-2'>
               Transform Function (Optional)
             </label>
             <textarea
               value={transformCode}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTransformCode(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setTransformCode(e.target.value)
+              }
               placeholder={`// Transform your API response to InvestmentData format
 return (data.pools || []).map((pool) => ({
   asset: pool.tokenSymbol,
@@ -92,14 +96,14 @@ return (data.pools || []).map((pool) => ({
   protocol: pool.protocolName || 'Your Protocol'
 }));`}
               rows={8}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className='w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
             />
           </div>
 
-          <Button 
-            onClick={testApiSource} 
+          <Button
+            onClick={testApiSource}
             disabled={loading || !url}
-            className="w-full"
+            className='w-full'
           >
             {loading ? 'Testing...' : 'Test API Source'}
           </Button>
@@ -109,32 +113,32 @@ return (data.pools || []).map((pool) => ({
       {result && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className='flex items-center gap-2'>
               Test Results
               {result.success ? (
-                <Badge variant="default" className="bg-green-500">
+                <Badge variant='default' className='bg-green-500'>
                   Success
                 </Badge>
               ) : (
-                <Badge variant="destructive">Failed</Badge>
+                <Badge variant='destructive'>Failed</Badge>
               )}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {result.error ? (
-              <div className="text-red-500">
+              <div className='text-red-500'>
                 <strong>Error:</strong> {result.error}
               </div>
             ) : result.result ? (
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <div>
                   <strong>Status:</strong>{' '}
                   {result.result.isValid ? (
-                    <Badge variant="default" className="bg-green-500">
+                    <Badge variant='default' className='bg-green-500'>
                       Valid
                     </Badge>
                   ) : (
-                    <Badge variant="destructive">Invalid</Badge>
+                    <Badge variant='destructive'>Invalid</Badge>
                   )}
                 </div>
 
@@ -144,22 +148,26 @@ return (data.pools || []).map((pool) => ({
 
                 {result.result.errors.length > 0 && (
                   <div>
-                    <strong className="text-red-500">Errors:</strong>
-                    <ul className="list-disc list-inside text-red-500 mt-1">
-                      {result.result.errors.map((error: string, index: number) => (
-                        <li key={index}>{error}</li>
-                      ))}
+                    <strong className='text-red-500'>Errors:</strong>
+                    <ul className='list-disc list-inside text-red-500 mt-1'>
+                      {result.result.errors.map(
+                        (error: string, index: number) => (
+                          <li key={index}>{error}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 )}
 
                 {result.result.warnings.length > 0 && (
                   <div>
-                    <strong className="text-yellow-500">Warnings:</strong>
-                    <ul className="list-disc list-inside text-yellow-500 mt-1">
-                      {result.result.warnings.map((warning: string, index: number) => (
-                        <li key={index}>{warning}</li>
-                      ))}
+                    <strong className='text-yellow-500'>Warnings:</strong>
+                    <ul className='list-disc list-inside text-yellow-500 mt-1'>
+                      {result.result.warnings.map(
+                        (warning: string, index: number) => (
+                          <li key={index}>{warning}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 )}
@@ -167,7 +175,7 @@ return (data.pools || []).map((pool) => ({
                 {result.result.data.length > 0 && (
                   <div>
                     <strong>Sample Pool:</strong>
-                    <pre className="bg-gray-100 p-2 rounded mt-2 text-sm overflow-x-auto">
+                    <pre className='bg-gray-100 p-2 rounded mt-2 text-sm overflow-x-auto'>
                       {JSON.stringify(result.result.data[0], null, 2)}
                     </pre>
                   </div>
@@ -179,4 +187,4 @@ return (data.pools || []).map((pool) => ({
       )}
     </div>
   );
-} 
+}

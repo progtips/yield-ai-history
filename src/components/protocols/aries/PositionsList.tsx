@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { getProtocolByName } from "@/lib/protocols/getProtocolsList";
-import Image from "next/image";
-import tokenList from "@/lib/data/tokenList.json";
-import { ManagePositionsButton } from "../ManagePositionsButton";
-import { useCollapsible } from "@/contexts/CollapsibleContext";
+import { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { getProtocolByName } from '@/lib/protocols/getProtocolsList';
+import Image from 'next/image';
+import tokenList from '@/lib/data/tokenList.json';
+import { ManagePositionsButton } from '../ManagePositionsButton';
+import { useCollapsible } from '@/contexts/CollapsibleContext';
 
 interface PositionsListProps {
   address?: string;
@@ -68,13 +68,15 @@ interface AriesResponse {
 function getTokenInfo(address: string) {
   // Если адрес содержит ::, берем последнюю часть
   const symbol = address.includes('::') ? address.split('::').pop() : address;
-  return tokenList.data.data.find((token: any) => 
-    token.symbol === symbol || 
-    token.tokenAddress === address
+  return tokenList.data.data.find(
+    (token: any) => token.symbol === symbol || token.tokenAddress === address
   );
 }
 
-export function PositionsList({ address, onPositionsValueChange }: PositionsListProps) {
+export function PositionsList({
+  address,
+  onPositionsValueChange,
+}: PositionsListProps) {
   const { account } = useWallet();
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,7 +85,7 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
   const [totalValue, setTotalValue] = useState(0);
 
   const walletAddress = address || account?.address?.toString();
-  const protocol = getProtocolByName("Aries");
+  const protocol = getProtocolByName('Aries');
 
   useEffect(() => {
     async function loadPositions() {
@@ -95,15 +97,17 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`/api/protocols/aries/userPositions?address=${walletAddress}`);
-        
+        const response = await fetch(
+          `/api/protocols/aries/userPositions?address=${walletAddress}`
+        );
+
         if (!response.ok) {
           throw new Error(`API returned status ${response.status}`);
         }
-        
-        const data = await response.json() as AriesResponse;
+
+        const data = (await response.json()) as AriesResponse;
         console.log('Aries API response:', data); // Добавляем для отладки
-        
+
         if (data.profiles?.profiles) {
           const profiles = Object.values(data.profiles.profiles);
           if (profiles.length > 0) {
@@ -115,7 +119,8 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
               Object.entries(profile.deposits).forEach(([coin, deposit]) => {
                 if (deposit.collateral_coins > 0) {
                   const tokenInfo = getTokenInfo(coin);
-                  const symbol = tokenInfo?.symbol || coin.split('::').pop() || '';
+                  const symbol =
+                    tokenInfo?.symbol || coin.split('::').pop() || '';
                   newPositions.push({
                     assetName: symbol,
                     balance: deposit.collateral_coins.toString(),
@@ -125,8 +130,10 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
                       name: tokenInfo?.name || symbol,
                       symbol: symbol,
                       decimals: tokenInfo?.decimals || 8,
-                      price: (deposit.collateral_value / deposit.collateral_coins).toString()
-                    }
+                      price: (
+                        deposit.collateral_value / deposit.collateral_coins
+                      ).toString(),
+                    },
                   });
                 }
               });
@@ -137,7 +144,8 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
               Object.entries(profile.borrows).forEach(([coin, borrow]) => {
                 if (borrow.borrowed_coins > 0) {
                   const tokenInfo = getTokenInfo(coin);
-                  const symbol = tokenInfo?.symbol || coin.split('::').pop() || '';
+                  const symbol =
+                    tokenInfo?.symbol || coin.split('::').pop() || '';
                   newPositions.push({
                     assetName: symbol,
                     balance: borrow.borrowed_coins.toString(),
@@ -147,8 +155,10 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
                       name: tokenInfo?.name || symbol,
                       symbol: symbol,
                       decimals: tokenInfo?.decimals || 8,
-                      price: (borrow.borrowed_value / borrow.borrowed_coins).toString()
-                    }
+                      price: (
+                        borrow.borrowed_value / borrow.borrowed_coins
+                      ).toString(),
+                    },
                   });
                 }
               });
@@ -181,87 +191,107 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
   }
 
   return (
-    <Card className="w-full h-full flex flex-col">
-      <CardHeader 
-        className="py-2 cursor-pointer hover:bg-accent/50 transition-colors"
+    <Card className='w-full h-full flex flex-col'>
+      <CardHeader
+        className='py-2 cursor-pointer hover:bg-accent/50 transition-colors'
         onClick={() => toggleSection('aries')}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
             {protocol && (
-              <div className="w-5 h-5 relative">
-                <Image 
-                  src={protocol.logoUrl} 
+              <div className='w-5 h-5 relative'>
+                <Image
+                  src={protocol.logoUrl}
                   alt={protocol.name}
                   width={20}
                   height={20}
-                  className="object-contain"
+                  className='object-contain'
                 />
               </div>
             )}
-            <CardTitle className="text-lg">Aries</CardTitle>
+            <CardTitle className='text-lg'>Aries</CardTitle>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-lg">${totalValue.toFixed(2)}</div>
-            <ChevronDown className={cn(
-              "h-5 w-5 transition-transform",
-              isExpanded('aries') ? "transform rotate-0" : "transform -rotate-90"
-            )} />
+          <div className='flex items-center gap-2'>
+            <div className='text-lg'>${totalValue.toFixed(2)}</div>
+            <ChevronDown
+              className={cn(
+                'h-5 w-5 transition-transform',
+                isExpanded('aries')
+                  ? 'transform rotate-0'
+                  : 'transform -rotate-90'
+              )}
+            />
           </div>
         </div>
       </CardHeader>
-      
+
       {isExpanded('aries') && (
-        <CardContent className="flex-1 overflow-y-auto px-3 pt-0">
-          <ScrollArea className="h-full">
+        <CardContent className='flex-1 overflow-y-auto px-3 pt-0'>
+          <ScrollArea className='h-full'>
             {positions.map((position, index) => {
               const tokenInfo = getTokenInfo(position.assetName);
-              const amount = parseFloat(position.balance) / (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
+              const amount =
+                parseFloat(position.balance) /
+                (tokenInfo?.decimals ? 10 ** tokenInfo.decimals : 1e8);
               const value = parseFloat(position.value);
               const isBorrow = position.type === 'borrow';
-              
+
               return (
-                <div key={`${position.assetName}-${index}`} className="mb-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
+                <div key={`${position.assetName}-${index}`} className='mb-2'>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex items-center gap-2'>
                       {tokenInfo?.logoUrl && (
-                        <div className="w-6 h-6 relative">
-                          <Image 
-                            src={tokenInfo.logoUrl} 
+                        <div className='w-6 h-6 relative'>
+                          <Image
+                            src={tokenInfo.logoUrl}
                             alt={tokenInfo.symbol}
                             width={24}
                             height={24}
-                            className="object-contain"
+                            className='object-contain'
                           />
                         </div>
                       )}
-                      <div className="flex items-center gap-2">
-                        <div className={cn(
-                          "text-sm font-medium",
-                          isBorrow && "text-red-500"
-                        )}>{position.assetName}</div>
+                      <div className='flex items-center gap-2'>
+                        <div
+                          className={cn(
+                            'text-sm font-medium',
+                            isBorrow && 'text-red-500'
+                          )}
+                        >
+                          {position.assetName}
+                        </div>
                         {isBorrow && (
-                          <div className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">
+                          <div className='text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20'>
                             Borrow
                           </div>
                         )}
                       </div>
-                      <div className={cn(
-                        "text-xs",
-                        isBorrow ? "text-red-400" : "text-muted-foreground"
-                      )}>
+                      <div
+                        className={cn(
+                          'text-xs',
+                          isBorrow ? 'text-red-400' : 'text-muted-foreground'
+                        )}
+                      >
                         ${parseFloat(position.assetInfo.price).toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={cn(
-                        "text-sm font-medium",
-                        isBorrow && "text-red-500"
-                      )}>${value.toFixed(2)}</div>
-                      <div className={cn(
-                        "text-xs",
-                        isBorrow ? "text-red-400" : "text-muted-foreground"
-                      )}>{amount.toFixed(4)}</div>
+                    <div className='text-right'>
+                      <div
+                        className={cn(
+                          'text-sm font-medium',
+                          isBorrow && 'text-red-500'
+                        )}
+                      >
+                        ${value.toFixed(2)}
+                      </div>
+                      <div
+                        className={cn(
+                          'text-xs',
+                          isBorrow ? 'text-red-400' : 'text-muted-foreground'
+                        )}
+                      >
+                        {amount.toFixed(4)}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -273,4 +303,4 @@ export function PositionsList({ address, onPositionsValueChange }: PositionsList
       )}
     </Card>
   );
-} 
+}

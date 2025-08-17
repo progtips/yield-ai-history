@@ -23,9 +23,11 @@ export default function TestEchelonNewPage() {
     setData(null);
 
     try {
-      const response = await fetch(`/api/protocols/echelon/userPositions?address=${address}`);
+      const response = await fetch(
+        `/api/protocols/echelon/userPositions?address=${address}`
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setData(result);
       } else {
@@ -49,9 +51,11 @@ export default function TestEchelonNewPage() {
     setData(null);
 
     try {
-      const response = await fetch(`/api/protocols/echelon/account-collateral-markets?address=${address}`);
+      const response = await fetch(
+        `/api/protocols/echelon/account-collateral-markets?address=${address}`
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setData(result);
       } else {
@@ -65,25 +69,25 @@ export default function TestEchelonNewPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Test Echelon New API</h1>
-      
+    <div className='container mx-auto p-6 space-y-6'>
+      <h1 className='text-2xl font-bold'>Test Echelon New API</h1>
+
       <Card>
         <CardHeader>
           <CardTitle>Test Configuration</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           <div>
-            <Label htmlFor="address">Wallet Address</Label>
+            <Label htmlFor='address'>Wallet Address</Label>
             <Input
-              id="address"
+              id='address'
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter Aptos wallet address"
+              onChange={e => setAddress(e.target.value)}
+              placeholder='Enter Aptos wallet address'
             />
           </div>
-          
-          <div className="flex gap-4">
+
+          <div className='flex gap-4'>
             <Button onClick={testUserPositions} disabled={loading}>
               Test userPositions API
             </Button>
@@ -96,8 +100,8 @@ export default function TestEchelonNewPage() {
 
       {loading && (
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">Loading...</div>
+          <CardContent className='pt-6'>
+            <div className='text-center'>Loading...</div>
           </CardContent>
         </Card>
       )}
@@ -105,10 +109,10 @@ export default function TestEchelonNewPage() {
       {error && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-red-600">Error</CardTitle>
+            <CardTitle className='text-red-600'>Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="text-sm text-red-600">{error}</pre>
+            <pre className='text-sm text-red-600'>{error}</pre>
           </CardContent>
         </Card>
       )}
@@ -119,7 +123,7 @@ export default function TestEchelonNewPage() {
             <CardTitle>API Response</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="text-sm overflow-auto max-h-96 bg-gray-100 p-4 rounded">
+            <pre className='text-sm overflow-auto max-h-96 bg-gray-100 p-4 rounded'>
               {JSON.stringify(data, null, 2)}
             </pre>
           </CardContent>
@@ -127,4 +131,4 @@ export default function TestEchelonNewPage() {
       )}
     </div>
   );
-} 
+}

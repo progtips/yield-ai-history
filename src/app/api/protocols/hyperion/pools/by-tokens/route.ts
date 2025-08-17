@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sdk } from "@/lib/hyperion";
+import { sdk } from '@/lib/hyperion';
 
 /**
  * @swagger
@@ -49,13 +49,13 @@ import { sdk } from "@/lib/hyperion";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const token1 = searchParams.get("token1");
-    const token2 = searchParams.get("token2");
-    const feeTier = searchParams.get("feeTier");
+    const token1 = searchParams.get('token1');
+    const token2 = searchParams.get('token2');
+    const feeTier = searchParams.get('feeTier');
 
     if (!token1 || !token2 || !feeTier) {
       return NextResponse.json(
-        { error: "token1, token2, and feeTier are required" },
+        { error: 'token1, token2, and feeTier are required' },
         { status: 400 }
       );
     }
@@ -65,26 +65,22 @@ export async function GET(request: Request) {
     const pool = await sdk.Pool.getPoolByTokenPairAndFeeTier({
       token1: token1,
       token2: token2,
-      feeTier: parseInt(feeTier)
+      feeTier: parseInt(feeTier),
     });
 
     if (!pool) {
-      return NextResponse.json(
-        { error: "Pool not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Pool not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      data: pool
+      data: pool,
     });
-
   } catch (error) {
-    console.error("Error fetching Hyperion pool by tokens:", error);
+    console.error('Error fetching Hyperion pool by tokens:', error);
     return NextResponse.json(
-      { error: "Failed to fetch pool" },
+      { error: 'Failed to fetch pool' },
       { status: 500 }
     );
   }
-} 
+}

@@ -42,13 +42,13 @@ All pools must match the `InvestmentData` interface:
 
 ```typescript
 interface InvestmentData {
-  asset: string;        // Token symbol (e.g., "APT", "USDC")
-  provider: string;     // Bridge or provider name
-  totalAPY: number;     // Total APY percentage
-  depositApy: number;   // Deposit APY percentage
-  borrowAPY: number;    // Borrow APY percentage (negative for borrowing)
-  token: string;        // Token address
-  protocol: string;     // Protocol name (e.g., "Echelon", "Joule")
+  asset: string; // Token symbol (e.g., "APT", "USDC")
+  provider: string; // Bridge or provider name
+  totalAPY: number; // Total APY percentage
+  depositApy: number; // Deposit APY percentage
+  borrowAPY: number; // Borrow APY percentage (negative for borrowing)
+  token: string; // Token address
+  protocol: string; // Protocol name (e.g., "Echelon", "Joule")
 }
 ```
 
@@ -72,10 +72,10 @@ export const poolSources: PoolSource[] = [
         depositApy: pool.depositAPY,
         borrowAPY: pool.borrowAPY,
         token: pool.tokenAddress,
-        protocol: pool.protocolName || 'Your Protocol'
+        protocol: pool.protocolName || 'Your Protocol',
       }));
-    }
-  }
+    },
+  },
 ];
 ```
 
@@ -84,6 +84,7 @@ export const poolSources: PoolSource[] = [
 Your API should return data in one of these formats:
 
 **Option A: Direct InvestmentData format**
+
 ```json
 {
   "data": [
@@ -101,6 +102,7 @@ Your API should return data in one of these formats:
 ```
 
 **Option B: Custom format with transform function**
+
 ```json
 {
   "pools": [
@@ -176,4 +178,4 @@ To add new pool categories (like "DeFi", "Staking", etc.), modify the `Investmen
 ## Testing Tools
 
 - `/test-pools` - Test any API source with custom transform functions
-- `/test-hyperion` - Test Hyperion pools integration specifically 
+- `/test-hyperion` - Test Hyperion pools integration specifically

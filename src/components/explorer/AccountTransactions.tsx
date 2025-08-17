@@ -1,12 +1,28 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
-import { Hash, User, Clock, Zap, CheckCircle, XCircle, Copy, ExternalLink } from 'lucide-react';
+import {
+  Hash,
+  User,
+  Clock,
+  Zap,
+  CheckCircle,
+  XCircle,
+  Copy,
+  ExternalLink,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface AccountTransactionsProps {
@@ -14,7 +30,10 @@ interface AccountTransactionsProps {
   initialTransactions: any[];
 }
 
-export function AccountTransactions({ address, initialTransactions }: AccountTransactionsProps) {
+export function AccountTransactions({
+  address,
+  initialTransactions,
+}: AccountTransactionsProps) {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,18 +71,18 @@ export function AccountTransactions({ address, initialTransactions }: AccountTra
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className='flex items-center justify-between'>
           <span>Recent Transactions</span>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant='outline' size='sm' asChild>
             <Link href={`/explorer/transactions?address=${address}`}>
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className='h-4 w-4 mr-2' />
               View All
             </Link>
           </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-hidden">
+        <div className='border rounded-lg overflow-hidden'>
           <Table>
             <TableHeader>
               <TableRow>
@@ -76,54 +95,50 @@ export function AccountTransactions({ address, initialTransactions }: AccountTra
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((tx) => (
-                <TableRow key={tx.hash} className="hover:bg-muted/50">
-                  <TableCell className="font-mono text-sm">
+              {transactions.map(tx => (
+                <TableRow key={tx.hash} className='hover:bg-muted/50'>
+                  <TableCell className='font-mono text-sm'>
                     {tx.version}
                   </TableCell>
-                  <TableCell className="font-mono text-sm">
-                    <div className="flex items-center gap-2">
-                      <Hash className="h-4 w-4 text-muted-foreground" />
+                  <TableCell className='font-mono text-sm'>
+                    <div className='flex items-center gap-2'>
+                      <Hash className='h-4 w-4 text-muted-foreground' />
                       {formatHash(tx.hash)}
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant='ghost'
+                        size='sm'
                         onClick={() => copyToClipboard(tx.hash)}
                       >
-                        <Copy className="h-3 w-3" />
+                        <Copy className='h-3 w-3' />
                       </Button>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={tx.success ? "default" : "destructive"}>
+                    <Badge variant={tx.success ? 'default' : 'destructive'}>
                       {tx.success ? (
-                        <CheckCircle className="h-3 w-3 mr-1" />
+                        <CheckCircle className='h-3 w-3 mr-1' />
                       ) : (
-                        <XCircle className="h-3 w-3 mr-1" />
+                        <XCircle className='h-3 w-3 mr-1' />
                       )}
                       {tx.success ? 'Success' : 'Failed'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm">
-                    <div className="flex items-center gap-1">
-                      <Zap className="h-4 w-4 text-muted-foreground" />
+                  <TableCell className='text-sm'>
+                    <div className='flex items-center gap-1'>
+                      <Zap className='h-4 w-4 text-muted-foreground' />
                       {formatGasUsed(tx.gas_used)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
+                  <TableCell className='text-sm'>
+                    <div className='flex items-center gap-1'>
+                      <Clock className='h-4 w-4 text-muted-foreground' />
                       {formatTimestamp(tx.timestamp)}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
+                    <Button variant='outline' size='sm' asChild>
                       <Link href={`/explorer/tx/${tx.hash}`}>
-                        <ExternalLink className="h-3 w-3 mr-1" />
+                        <ExternalLink className='h-3 w-3 mr-1' />
                         View
                       </Link>
                     </Button>

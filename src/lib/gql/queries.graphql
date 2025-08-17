@@ -1,9 +1,5 @@
 query LatestTransactions($limit: Int!, $offset: Int!) {
-  transactions(
-    limit: $limit
-    offset: $offset
-    order_by: { timestamp: desc }
-  ) {
+  transactions(limit: $limit, offset: $offset, order_by: { timestamp: desc }) {
     version
     hash
     sender
@@ -109,9 +105,7 @@ query AccountTransactions($address: String!, $limit: Int!, $offset: Int!) {
 }
 
 query FungibleAssetBalances($address: String!) {
-  current_fungible_asset_balances(
-    where: { owner_address: { _eq: $address } }
-  ) {
+  current_fungible_asset_balances(where: { owner_address: { _eq: $address } }) {
     amount
     asset_type
     metadata {

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (!result.data || !result.data.userPositions) {
       return NextResponse.json({
         success: true,
-        data: []
+        data: [],
       });
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         market: position.market,
         coin: position.coin,
         supply: position.supply || 0,
-        borrow: position.borrow || 0
+        borrow: position.borrow || 0,
       };
 
       // Add amount and type fields
@@ -50,17 +50,17 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: positions
+      data: positions,
     });
-
   } catch (error) {
     console.error('Error fetching user positions:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       },
       { status: 500 }
     );
   }
-} 
+}

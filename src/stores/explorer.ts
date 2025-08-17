@@ -22,20 +22,20 @@ interface ExplorerState {
   // Сетевая конфигурация
   network: Network;
   setNetwork: (network: Network) => void;
-  
+
   // Фильтры
   filters: ExplorerFilters;
   setFilters: (filters: Partial<ExplorerFilters>) => void;
   resetFilters: () => void;
-  
+
   // Состояние загрузки
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
-  
+
   // Ошибки
   error: string | null;
   setError: (error: string | null) => void;
-  
+
   // Кэш
   cache: Record<string, any>;
   setCache: (key: string, value: any) => void;
@@ -59,51 +59,51 @@ export const useExplorerStore = create<ExplorerState>()(
     (set, get) => ({
       // Сетевая конфигурация
       network: 'mainnet',
-      setNetwork: (network) => set({ network }),
-      
+      setNetwork: network => set({ network }),
+
       // Фильтры
       filters: defaultFilters,
-      setFilters: (newFilters) => 
-        set((state) => ({
-          filters: { ...state.filters, ...newFilters }
+      setFilters: newFilters =>
+        set(state => ({
+          filters: { ...state.filters, ...newFilters },
         })),
       resetFilters: () => set({ filters: defaultFilters }),
-      
+
       // Состояние загрузки
       isLoading: false,
-      setIsLoading: (loading) => set({ isLoading: loading }),
-      
+      setIsLoading: loading => set({ isLoading: loading }),
+
       // Ошибки
       error: null,
-      setError: (error) => set({ error }),
-      
+      setError: error => set({ error }),
+
       // Кэш
       cache: {},
-      setCache: (key, value) => 
-        set((state) => ({
-          cache: { ...state.cache, [key]: { value, timestamp: Date.now() } }
+      setCache: (key, value) =>
+        set(state => ({
+          cache: { ...state.cache, [key]: { value, timestamp: Date.now() } },
         })),
-      getCache: (key) => {
+      getCache: key => {
         const cached = get().cache[key];
         if (!cached) return null;
-        
+
         // Кэш действителен 5 минут
         if (Date.now() - cached.timestamp > 5 * 60 * 1000) {
-          set((state) => {
+          set(state => {
             const newCache = { ...state.cache };
             delete newCache[key];
             return { cache: newCache };
           });
           return null;
         }
-        
+
         return cached.value;
       },
       clearCache: () => set({ cache: {} }),
     }),
     {
       name: 'explorer-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         network: state.network,
         filters: state.filters,
       }),
@@ -112,7 +112,10 @@ export const useExplorerStore = create<ExplorerState>()(
 );
 
 // Селекторы для оптимизации
-export const useExplorerNetwork = () => useExplorerStore((state) => state.network);
-export const useExplorerFilters = () => useExplorerStore((state) => state.filters);
-export const useExplorerLoading = () => useExplorerStore((state) => state.isLoading);
-export const useExplorerError = () => useExplorerStore((state) => state.error);
+export const useExplorerNetwork = () =>
+  useExplorerStore(state => state.network);
+export const useExplorerFilters = () =>
+  useExplorerStore(state => state.filters);
+export const useExplorerLoading = () =>
+  useExplorerStore(state => state.isLoading);
+export const useExplorerError = () => useExplorerStore(state => state.error);

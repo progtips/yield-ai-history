@@ -9,4 +9,4 @@ declare module 'swagger-ui-react' {
 
   const SwaggerUI: ComponentType<SwaggerUIProps>;
   export default SwaggerUI;
-} 
+}

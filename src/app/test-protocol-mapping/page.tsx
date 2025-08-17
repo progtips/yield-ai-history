@@ -1,38 +1,48 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import protocolsList from "@/lib/data/protocolsList.json";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import protocolsList from '@/lib/data/protocolsList.json';
 
 export default function TestProtocolMappingPage() {
   // Function to get protocol name by address
   const getProtocolNameByAddress = (address: string): string => {
-    if (!address || address === 'Unknown' || address.startsWith('Pool/Validator ID:') || address.startsWith('DEX/Pool ID:') || address.startsWith('ID:')) {
+    if (
+      !address ||
+      address === 'Unknown' ||
+      address.startsWith('Pool/Validator ID:') ||
+      address.startsWith('DEX/Pool ID:') ||
+      address.startsWith('ID:')
+    ) {
       return address;
     }
-    
+
     // Normalize address (remove 0x prefix if present, ensure lowercase)
     const normalizedAddress = address.toLowerCase().replace(/^0x/, '');
-    
+
     // Find protocol by contract address
     const protocol = protocolsList.find(p => {
       const protocolWithContract = p as any;
-      const hasContract = protocolWithContract.contract && typeof protocolWithContract.contract === 'string';
-      
+      const hasContract =
+        protocolWithContract.contract &&
+        typeof protocolWithContract.contract === 'string';
+
       if (!hasContract) {
         return false;
       }
-      
+
       // Normalize contract address
-      const normalizedContract = protocolWithContract.contract.toLowerCase().replace(/^0x/, '');
+      const normalizedContract = protocolWithContract.contract
+        .toLowerCase()
+        .replace(/^0x/, '');
       return normalizedContract === normalizedAddress;
     });
-    
+
     if (protocol) {
       return `${protocol.name} (${address.substring(0, 6)}...${address.substring(address.length - 4)})`;
     }
-    
+
     // If no exact match found, return the original address
     return address;
   };
@@ -56,42 +66,48 @@ export default function TestProtocolMappingPage() {
   ];
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className='container mx-auto p-6 space-y-6'>
       <Card>
         <CardHeader>
           <CardTitle>Protocol Mapping Test</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className='space-y-4'>
             <div>
-              <h3 className="text-lg font-medium mb-2">Protocols List:</h3>
-              <div className="bg-gray-50 p-4 rounded text-sm">
+              <h3 className='text-lg font-medium mb-2'>Protocols List:</h3>
+              <div className='bg-gray-50 p-4 rounded text-sm'>
                 {protocolsList.map((protocol: any, index) => (
-                  <div key={index} className="mb-2">
-                    <strong>{protocol.name}:</strong> {protocol.contract || 'NO CONTRACT ADDRESS'}
+                  <div key={index} className='mb-2'>
+                    <strong>{protocol.name}:</strong>{' '}
+                    {protocol.contract || 'NO CONTRACT ADDRESS'}
                   </div>
                 ))}
               </div>
             </div>
-            
+
             <div>
-              <h3 className="text-lg font-medium mb-2">Test Results:</h3>
-              <div className="space-y-2">
+              <h3 className='text-lg font-medium mb-2'>Test Results:</h3>
+              <div className='space-y-2'>
                 {testAddresses.map((address, index) => (
-                  <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded">
-                    <span className="font-mono text-sm">{address}</span>
-                    <span className="text-gray-500">→</span>
-                    <span className="font-medium">{getProtocolNameByAddress(address)}</span>
+                  <div
+                    key={index}
+                    className='flex items-center gap-4 p-2 bg-gray-50 rounded'
+                  >
+                    <span className='font-mono text-sm'>{address}</span>
+                    <span className='text-gray-500'>→</span>
+                    <span className='font-medium'>
+                      {getProtocolNameByAddress(address)}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={() => {
                 console.log('=== Protocol Mapping Test ===');
                 console.log('Protocols List:', protocolsList);
-                
+
                 // Log all protocol addresses
                 console.log('=== All Protocol Addresses ===');
                 protocolsList.forEach((protocol: any) => {
@@ -101,14 +117,14 @@ export default function TestProtocolMappingPage() {
                     console.log(`${protocol.name}: NO CONTRACT ADDRESS`);
                   }
                 });
-                
+
                 console.log('=== Testing Addresses ===');
                 testAddresses.forEach(address => {
                   const result = getProtocolNameByAddress(address);
                   console.log(`${address} -> ${result}`);
                 });
               }}
-              variant="outline"
+              variant='outline'
             >
               Log to Console
             </Button>
@@ -117,4 +133,4 @@ export default function TestProtocolMappingPage() {
       </Card>
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { http } from '@/lib/utils/http';
 import { createErrorResponse, createSuccessResponse } from '@/lib/utils/http';
-import { PanoraPricesService } from "@/lib/services/panora/prices";
+import { PanoraPricesService } from '@/lib/services/panora/prices';
 
 interface PanoraResponse {
   data: Array<{
@@ -67,12 +67,12 @@ interface PanoraResponse {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const chainId = searchParams.get("chainId");
-    const addresses = searchParams.get("addresses");
+    const chainId = searchParams.get('chainId');
+    const addresses = searchParams.get('addresses');
 
     if (!chainId || !addresses) {
       return NextResponse.json(
-        { error: "Chain ID and addresses are required" },
+        { error: 'Chain ID and addresses are required' },
         { status: 400 }
       );
     }
@@ -80,15 +80,15 @@ export async function GET(request: Request) {
     const pricesService = PanoraPricesService.getInstance();
     const response = await pricesService.getPrices(
       parseInt(chainId),
-      addresses.split(",")
+      addresses.split(',')
     );
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching prices:", error);
+    console.error('Error fetching prices:', error);
     return NextResponse.json(
-      { error: "Failed to fetch prices" },
+      { error: 'Failed to fetch prices' },
       { status: 500 }
     );
   }
-} 
+}

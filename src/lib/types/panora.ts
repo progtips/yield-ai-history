@@ -62,6 +62,7 @@ export const SUPPORTED_CHAIN_IDS = {
   // TODO: Add more chains when supported
 } as const;
 
-export type SupportedChainId = typeof SUPPORTED_CHAIN_IDS[keyof typeof SUPPORTED_CHAIN_IDS];
+export type SupportedChainId =
+  (typeof SUPPORTED_CHAIN_IDS)[keyof typeof SUPPORTED_CHAIN_IDS];
 
-export const DEFAULT_CHAIN_ID = SUPPORTED_CHAIN_IDS.APTOS; 
+export const DEFAULT_CHAIN_ID = SUPPORTED_CHAIN_IDS.APTOS;

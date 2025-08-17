@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
-import { Protocol } from "@/lib/protocols/getProtocolsList";
-import { ProtocolKey } from "@/lib/transactions/types";
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
+import { Protocol } from '@/lib/protocols/getProtocolsList';
+import { ProtocolKey } from '@/lib/transactions/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,11 +11,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useState, useEffect } from "react";
-import { DepositModal } from "./deposit-modal";
-import { useWalletData } from "@/contexts/WalletContext";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/alert-dialog';
+import { useState, useEffect } from 'react';
+import { DepositModal } from './deposit-modal';
+import { useWalletData } from '@/contexts/WalletContext';
+import { cn } from '@/lib/utils';
 
 interface DepositButtonProps {
   protocol: Protocol;
@@ -36,16 +36,21 @@ interface DepositButtonProps {
   priceUSD?: number;
 }
 
-export function DepositButton({ 
-  protocol, 
+export function DepositButton({
+  protocol,
   className,
   tokenIn,
   tokenOut = tokenIn,
   balance,
   priceUSD,
 }: DepositButtonProps) {
-  console.log('DepositButton render:', { protocol, tokenIn, balance, priceUSD });
-  
+  console.log('DepositButton render:', {
+    protocol,
+    tokenIn,
+    balance,
+    priceUSD,
+  });
+
   const [isExternalDialogOpen, setIsExternalDialogOpen] = useState(false);
   const [isNativeDialogOpen, setIsNativeDialogOpen] = useState(false);
   const [protocolAPY, setProtocolAPY] = useState<number>(8.4); // Default fallback
@@ -61,7 +66,9 @@ export function DepositButton({
             const data = await response.json();
             if (data.success && data.pools && data.pools.length > 0) {
               // Use APT staking pool APR
-              const aptPool = data.pools.find((pool: any) => pool.asset === 'APT');
+              const aptPool = data.pools.find(
+                (pool: any) => pool.asset === 'APT'
+              );
               if (aptPool && aptPool.apr) {
                 setProtocolAPY(aptPool.apr);
                 console.log('Fetched Amnis APY:', aptPool.apr);
@@ -72,7 +79,7 @@ export function DepositButton({
           console.error('Error fetching Amnis APY:', error);
         }
       };
-      
+
       fetchAmnisAPY();
     }
   }, [protocol.name]);
@@ -88,9 +95,9 @@ export function DepositButton({
       condition: protocol.depositType === 'native' && tokenIn && balance,
       tokenInExists: !!tokenIn,
       balanceExists: !!balance,
-      priceUSDExists: !!priceUSD
+      priceUSDExists: !!priceUSD,
     });
-    
+
     if (protocol.depositType === 'external') {
       console.log('Opening external dialog');
       setIsExternalDialogOpen(true);
@@ -116,55 +123,67 @@ export function DepositButton({
 
   return (
     <>
-      <Button 
-        variant={protocol.depositType === 'native' ? "default" : "secondary"}
+      <Button
+        variant={protocol.depositType === 'native' ? 'default' : 'secondary'}
         className={cn(
           className,
-          protocol.depositType === 'native' && "bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+          protocol.depositType === 'native' &&
+            'bg-primary hover:bg-primary/90 text-primary-foreground font-semibold'
         )}
         onClick={handleClick}
       >
         Deposit
         {protocol.depositType === 'external' && (
-          <ExternalLink className="ml-2 h-4 w-4" />
+          <ExternalLink className='ml-2 h-4 w-4' />
         )}
       </Button>
 
-      <AlertDialog open={isExternalDialogOpen} onOpenChange={setIsExternalDialogOpen}>
+      <AlertDialog
+        open={isExternalDialogOpen}
+        onOpenChange={setIsExternalDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Go to protocol website?</AlertDialogTitle>
             <AlertDialogDescription>
-              You will be redirected to {protocol.name} website to complete the deposit.
+              You will be redirected to {protocol.name} website to complete the
+              deposit.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleExternalConfirm}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={handleExternalConfirm}>
+              Continue
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {protocol.depositType === 'native' && tokenIn && tokenIn.address && balance && (
-        <DepositModal
-          isOpen={isNativeDialogOpen}
-          onClose={() => setIsNativeDialogOpen(false)}
-          protocol={{
-            name: protocol.name,
-            logo: protocol.logoUrl,
-            apy: protocolAPY, // Use real APY data
-            key: (protocol.name === 'Amnis Finance' ? 'amnis' : protocol.name.toLowerCase()) as ProtocolKey
-          }}
-          tokenIn={{
-            symbol: tokenIn.symbol,
-            logo: tokenIn.logo,
-            decimals: tokenIn.decimals,
-            address: tokenIn.address
-          }}
-          tokenOut={tokenIn}
-          priceUSD={priceUSD || 0}
-        />
-      )}
+      {protocol.depositType === 'native' &&
+        tokenIn &&
+        tokenIn.address &&
+        balance && (
+          <DepositModal
+            isOpen={isNativeDialogOpen}
+            onClose={() => setIsNativeDialogOpen(false)}
+            protocol={{
+              name: protocol.name,
+              logo: protocol.logoUrl,
+              apy: protocolAPY, // Use real APY data
+              key: (protocol.name === 'Amnis Finance'
+                ? 'amnis'
+                : protocol.name.toLowerCase()) as ProtocolKey,
+            }}
+            tokenIn={{
+              symbol: tokenIn.symbol,
+              logo: tokenIn.logo,
+              decimals: tokenIn.decimals,
+              address: tokenIn.address,
+            }}
+            tokenOut={tokenIn}
+            priceUSD={priceUSD || 0}
+          />
+        )}
     </>
   );
-} 
+}

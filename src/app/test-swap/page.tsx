@@ -7,8 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, ArrowLeftRight, Info, AlertCircle, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Loader2,
+  ArrowLeftRight,
+  Info,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  ArrowLeft,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWalletData } from '@/contexts/WalletContext';
@@ -39,13 +53,13 @@ export default function TestSwapPage() {
   const [swapResult, setSwapResult] = useState<SwapResult | null>(null);
   const [quoteDebug, setQuoteDebug] = useState<any>(null);
   const [reverseQuoteDebug, setReverseQuoteDebug] = useState<any>(null);
-  
+
   // Token selection
   const [fromToken, setFromToken] = useState<Token | null>(null);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>('');
   const [slippage, setSlippage] = useState<number>(1.0); // 1%
-  
+
   // Available tokens from wallet
   const availableTokens = useMemo(() => {
     return tokens
@@ -55,8 +69,9 @@ export default function TestSwapPage() {
           ...t,
           tokenInfo,
           value: tokenInfo
-            ? (Number(t.amount) / Math.pow(10, tokenInfo.decimals)) * (Number(tokenInfo.usdPrice) || 0)
-            : 0
+            ? (Number(t.amount) / Math.pow(10, tokenInfo.decimals)) *
+              (Number(tokenInfo.usdPrice) || 0)
+            : 0,
         };
       })
       .filter(token => token.value > 0 && token.tokenInfo)
@@ -73,9 +88,10 @@ export default function TestSwapPage() {
 
   function getTokenInfo(address: string): Token | undefined {
     const norm = address.toLowerCase();
-    return (tokenList.data.data as Token[]).find(token =>
-      (token.tokenAddress?.toLowerCase?.() === norm) ||
-      (token.faAddress?.toLowerCase?.() === norm)
+    return (tokenList.data.data as Token[]).find(
+      token =>
+        token.tokenAddress?.toLowerCase?.() === norm ||
+        token.faAddress?.toLowerCase?.() === norm
     );
   }
 
@@ -87,7 +103,9 @@ export default function TestSwapPage() {
     const tokenAddresses = [
       token.tokenAddress ?? undefined,
       token.faAddress ?? undefined,
-    ].filter(Boolean).map(normalizeAddress);
+    ]
+      .filter(Boolean)
+      .map(normalizeAddress);
 
     const found = tokens.find(
       t =>
@@ -105,7 +123,7 @@ export default function TestSwapPage() {
       const token = getTokenInfo(firstToken.address);
       if (token) setFromToken(token);
     }
-    
+
     if (popularTokens.length > 0 && !toToken) {
       // Set USDC as default to token if available
       const usdc = popularTokens.find(t => t.symbol === 'USDC');
@@ -131,7 +149,9 @@ export default function TestSwapPage() {
 
     try {
       const swapService = HyperionSwapService.getInstance();
-      const amountInMinimalUnits = Math.floor(parseFloat(amount) * Math.pow(10, fromToken.decimals));
+      const amountInMinimalUnits = Math.floor(
+        parseFloat(amount) * Math.pow(10, fromToken.decimals)
+      );
 
       // Get quote
       const quote = await swapService.estToAmount({
@@ -159,7 +179,6 @@ export default function TestSwapPage() {
         estimatedFromAmount: reverseQuote.amountIn,
         estimatedToAmount: quote.amountOut,
       });
-
     } catch (error: any) {
       setError(`Quote error: ${error.message || error}`);
     } finally {
@@ -179,10 +198,14 @@ export default function TestSwapPage() {
 
     try {
       const swapService = HyperionSwapService.getInstance();
-      const amountInMinimalUnits = Math.floor(parseFloat(amount) * Math.pow(10, fromToken.decimals));
-      
+      const amountInMinimalUnits = Math.floor(
+        parseFloat(amount) * Math.pow(10, fromToken.decimals)
+      );
+
       // Calculate minimum amount out with slippage
-      const minAmountOut = Math.floor(parseFloat(swapQuote.amount) * (1 - slippage / 100));
+      const minAmountOut = Math.floor(
+        parseFloat(swapQuote.amount) * (1 - slippage / 100)
+      );
 
       // Get swap payload
       const payload = await swapService.getSwapPayload({
@@ -203,7 +226,6 @@ export default function TestSwapPage() {
         receivedAmount: swapQuote.amount,
         receivedSymbol: toToken.symbol,
       });
-
     } catch (error: any) {
       setSwapResult({
         success: false,
@@ -219,10 +241,10 @@ export default function TestSwapPage() {
   };
 
   const formatUSD = (num: number | string) => {
-    return Number(num).toLocaleString('en-US', { 
-      style: 'currency', 
+    return Number(num).toLocaleString('en-US', {
+      style: 'currency',
       currency: 'USD',
-      maximumFractionDigits: 2 
+      maximumFractionDigits: 2,
     });
   };
 
@@ -234,7 +256,10 @@ export default function TestSwapPage() {
   };
 
   // Получить human readable amount для получаемого токена
-  const getHumanAmount = (raw: string | undefined, decimals: number | undefined) => {
+  const getHumanAmount = (
+    raw: string | undefined,
+    decimals: number | undefined
+  ) => {
     if (!raw || !decimals) return 0;
     return Number(raw) / Math.pow(10, decimals);
   };
@@ -246,45 +271,46 @@ export default function TestSwapPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/test">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className='container mx-auto p-6 space-y-6'>
+      <div className='flex items-center gap-4'>
+        <Link href='/test'>
+          <Button variant='outline' size='sm'>
+            <ArrowLeft className='h-4 w-4 mr-2' />
             Back to Tests
           </Button>
         </Link>
       </div>
-      
+
       <div>
-        <h1 className="text-3xl font-bold mb-2">Test Hyperion Swap</h1>
-        <p className="text-muted-foreground">
-          Test swap functionality using Hyperion protocol. This is a testing interface for development purposes.
+        <h1 className='text-3xl font-bold mb-2'>Test Hyperion Swap</h1>
+        <p className='text-muted-foreground'>
+          Test swap functionality using Hyperion protocol. This is a testing
+          interface for development purposes.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* Swap Interface */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image 
-                src="/public/logo.png" 
-                alt="Hyperion" 
-                width={24} 
-                height={24} 
-                className="rounded-full"
+            <CardTitle className='flex items-center gap-2'>
+              <Image
+                src='/public/logo.png'
+                alt='Hyperion'
+                width={24}
+                height={24}
+                className='rounded-full'
               />
               Swap Interface
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             {/* From Token */}
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>From Token</Label>
               <Select
                 value={fromToken?.faAddress || fromToken?.tokenAddress || ''}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   const token = getTokenInfo(value);
                   if (token) setFromToken(token);
                 }}
@@ -292,17 +318,17 @@ export default function TestSwapPage() {
                 <SelectTrigger>
                   <SelectValue>
                     {fromToken ? (
-                      <div className="flex items-center gap-2">
+                      <div className='flex items-center gap-2'>
                         <Image
                           src={fromToken.logoUrl || '/file.svg'}
                           alt={fromToken.symbol}
                           width={20}
                           height={20}
-                          className="rounded-full"
+                          className='rounded-full'
                         />
                         <span>{fromToken.symbol}</span>
                         {fromToken.usdPrice && (
-                          <Badge variant="secondary">
+                          <Badge variant='secondary'>
                             {formatUSD(fromToken.usdPrice)}
                           </Badge>
                         )}
@@ -313,30 +339,45 @@ export default function TestSwapPage() {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="p-2">
-                    <div className="text-sm font-medium mb-2">Your Tokens</div>
-                    {availableTokens.map((token) => {
+                  <div className='p-2'>
+                    <div className='text-sm font-medium mb-2'>Your Tokens</div>
+                    {availableTokens.map(token => {
                       const tokenInfo = token.tokenInfo;
                       if (!tokenInfo) return null;
                       const balance = getTokenBalance(tokenInfo);
                       return (
                         <SelectItem
-                          key={tokenInfo.faAddress || tokenInfo.tokenAddress || ''}
-                          value={tokenInfo.faAddress || tokenInfo.tokenAddress || ''}
+                          key={
+                            tokenInfo.faAddress || tokenInfo.tokenAddress || ''
+                          }
+                          value={
+                            tokenInfo.faAddress || tokenInfo.tokenAddress || ''
+                          }
                         >
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-2">
+                          <div className='flex items-center justify-between w-full'>
+                            <div className='flex items-center gap-2'>
                               <Image
                                 src={tokenInfo.logoUrl || '/file.svg'}
                                 alt={tokenInfo.symbol}
                                 width={16}
                                 height={16}
-                                className="rounded-full"
+                                className='rounded-full'
                               />
                               <span>{tokenInfo.symbol}</span>
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {getHumanAmount(balance.balance.toString(), tokenInfo.decimals)} (${formatNumber(getHumanAmount(balance.balance.toString(), tokenInfo.decimals) * getTokenPrice(tokenInfo))})
+                            <div className='text-xs text-muted-foreground'>
+                              {getHumanAmount(
+                                balance.balance.toString(),
+                                tokenInfo.decimals
+                              )}{' '}
+                              ($
+                              {formatNumber(
+                                getHumanAmount(
+                                  balance.balance.toString(),
+                                  tokenInfo.decimals
+                                ) * getTokenPrice(tokenInfo)
+                              )}
+                              )
                             </div>
                           </div>
                         </SelectItem>
@@ -345,30 +386,41 @@ export default function TestSwapPage() {
                   </div>
                 </SelectContent>
               </Select>
-              
+
               {fromToken && (
-                <div className="text-sm text-muted-foreground">
-                  Balance: {getHumanAmount(getTokenBalance(fromToken).balance.toString(), fromToken.decimals)} {fromToken.symbol}
-                  {' '}({formatUSD(getHumanAmount(getTokenBalance(fromToken).balance.toString(), fromToken.decimals) * getTokenPrice(fromToken))})
+                <div className='text-sm text-muted-foreground'>
+                  Balance:{' '}
+                  {getHumanAmount(
+                    getTokenBalance(fromToken).balance.toString(),
+                    fromToken.decimals
+                  )}{' '}
+                  {fromToken.symbol} (
+                  {formatUSD(
+                    getHumanAmount(
+                      getTokenBalance(fromToken).balance.toString(),
+                      fromToken.decimals
+                    ) * getTokenPrice(fromToken)
+                  )}
+                  )
                 </div>
               )}
             </div>
 
             {/* Amount Input */}
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>Amount</Label>
               <Input
-                type="number"
-                placeholder="0.0"
+                type='number'
+                placeholder='0.0'
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="text-lg"
+                onChange={e => setAmount(e.target.value)}
+                className='text-lg'
               />
               {fromToken && (
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                <div className='flex gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
                     onClick={() => {
                       const balance = getTokenBalance(fromToken);
                       setAmount((balance.balance * 0.5).toString());
@@ -376,9 +428,9 @@ export default function TestSwapPage() {
                   >
                     Half
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant='outline'
+                    size='sm'
                     onClick={() => {
                       const balance = getTokenBalance(fromToken);
                       setAmount(balance.balance.toString());
@@ -391,18 +443,18 @@ export default function TestSwapPage() {
             </div>
 
             {/* Swap Direction */}
-            <div className="flex justify-center">
-              <div className="p-2 bg-muted rounded-full">
-                <ArrowLeftRight className="h-4 w-4" />
+            <div className='flex justify-center'>
+              <div className='p-2 bg-muted rounded-full'>
+                <ArrowLeftRight className='h-4 w-4' />
               </div>
             </div>
 
             {/* To Token */}
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>To Token</Label>
               <Select
                 value={toToken?.faAddress || toToken?.tokenAddress || ''}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   const token = getTokenInfo(value);
                   if (token) setToToken(token);
                 }}
@@ -410,17 +462,17 @@ export default function TestSwapPage() {
                 <SelectTrigger>
                   <SelectValue>
                     {toToken ? (
-                      <div className="flex items-center gap-2">
+                      <div className='flex items-center gap-2'>
                         <Image
                           src={toToken.logoUrl || '/file.svg'}
                           alt={toToken.symbol}
                           width={20}
                           height={20}
-                          className="rounded-full"
+                          className='rounded-full'
                         />
                         <span>{toToken.symbol}</span>
                         {toToken.usdPrice && (
-                          <Badge variant="secondary">
+                          <Badge variant='secondary'>
                             {formatUSD(toToken.usdPrice)}
                           </Badge>
                         )}
@@ -431,24 +483,26 @@ export default function TestSwapPage() {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="p-2">
-                    <div className="text-sm font-medium mb-2">Popular Tokens</div>
-                    {popularTokens.map((token) => (
+                  <div className='p-2'>
+                    <div className='text-sm font-medium mb-2'>
+                      Popular Tokens
+                    </div>
+                    {popularTokens.map(token => (
                       <SelectItem
                         key={token.faAddress || token.tokenAddress || ''}
                         value={token.faAddress || token.tokenAddress || ''}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className='flex items-center gap-2'>
                           <Image
                             src={token.logoUrl || '/file.svg'}
                             alt={token.symbol}
                             width={16}
                             height={16}
-                            className="rounded-full"
+                            className='rounded-full'
                           />
                           <span>{token.symbol}</span>
                           {token.usdPrice && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className='text-xs text-muted-foreground'>
                               {formatUSD(token.usdPrice)}
                             </span>
                           )}
@@ -461,47 +515,50 @@ export default function TestSwapPage() {
             </div>
 
             {/* Slippage */}
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>Slippage Tolerance</Label>
-              <Select value={slippage.toString()} onValueChange={(value) => setSlippage(Number(value))}>
+              <Select
+                value={slippage.toString()}
+                onValueChange={value => setSlippage(Number(value))}
+              >
                 <SelectTrigger>
                   <SelectValue>{slippage}%</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0.5">0.5%</SelectItem>
-                  <SelectItem value="1.0">1.0%</SelectItem>
-                  <SelectItem value="2.0">2.0%</SelectItem>
-                  <SelectItem value="5.0">5.0%</SelectItem>
+                  <SelectItem value='0.5'>0.5%</SelectItem>
+                  <SelectItem value='1.0'>1.0%</SelectItem>
+                  <SelectItem value='2.0'>2.0%</SelectItem>
+                  <SelectItem value='5.0'>5.0%</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button 
-                onClick={getQuote} 
+            <div className='flex gap-2'>
+              <Button
+                onClick={getQuote}
                 disabled={loading || !fromToken || !toToken || !amount}
-                className="flex-1"
+                className='flex-1'
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     Getting Quote...
                   </>
                 ) : (
                   'Get Quote'
                 )}
               </Button>
-              
-              <Button 
-                onClick={executeSwap} 
+
+              <Button
+                onClick={executeSwap}
                 disabled={loading || !swapQuote}
-                variant="default"
-                className="flex-1"
+                variant='default'
+                className='flex-1'
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     Executing...
                   </>
                 ) : (
@@ -511,47 +568,66 @@ export default function TestSwapPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="h-4 w-4 text-red-500" />
-                <span className="text-red-700 text-sm">{error}</span>
+              <div className='flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg'>
+                <AlertCircle className='h-4 w-4 text-red-500' />
+                <span className='text-red-700 text-sm'>{error}</span>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Results Panel */}
-        <div className="space-y-6">
+        <div className='space-y-6'>
           {/* Quote Results */}
           {swapQuote && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5" />
+                <CardTitle className='flex items-center gap-2'>
+                  <Info className='h-5 w-5' />
                   Swap Quote
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">You Pay:</span>
-                  <div className="text-right">
-                    <div className="font-medium">{getHumanAmount(amount, fromToken?.decimals)} {fromToken?.symbol}</div>
+              <CardContent className='space-y-3'>
+                <div className='flex justify-between items-center'>
+                  <span className='text-sm text-muted-foreground'>
+                    You Pay:
+                  </span>
+                  <div className='text-right'>
+                    <div className='font-medium'>
+                      {getHumanAmount(amount, fromToken?.decimals)}{' '}
+                      {fromToken?.symbol}
+                    </div>
                     {fromToken?.usdPrice && (
-                      <div className="text-sm text-muted-foreground">
-                        {formatUSD(getHumanAmount(amount, fromToken?.decimals) * getTokenPrice(fromToken))}
+                      <div className='text-sm text-muted-foreground'>
+                        {formatUSD(
+                          getHumanAmount(amount, fromToken?.decimals) *
+                            getTokenPrice(fromToken)
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">You Receive:</span>
-                  <div className="text-right">
-                    <div className="font-medium">
-                      {getHumanAmount(swapQuote.estimatedToAmount || swapQuote.amount, toToken?.decimals)} {toToken?.symbol}
+
+                <div className='flex justify-between items-center'>
+                  <span className='text-sm text-muted-foreground'>
+                    You Receive:
+                  </span>
+                  <div className='text-right'>
+                    <div className='font-medium'>
+                      {getHumanAmount(
+                        swapQuote.estimatedToAmount || swapQuote.amount,
+                        toToken?.decimals
+                      )}{' '}
+                      {toToken?.symbol}
                     </div>
                     {toToken?.usdPrice && (
-                      <div className="text-sm text-muted-foreground">
-                        {formatUSD(getHumanAmount(swapQuote.estimatedToAmount || swapQuote.amount, toToken?.decimals) * getTokenPrice(toToken))}
+                      <div className='text-sm text-muted-foreground'>
+                        {formatUSD(
+                          getHumanAmount(
+                            swapQuote.estimatedToAmount || swapQuote.amount,
+                            toToken?.decimals
+                          ) * getTokenPrice(toToken)
+                        )}
                       </div>
                     )}
                   </div>
@@ -559,19 +635,37 @@ export default function TestSwapPage() {
 
                 <Separator />
 
-                <div className="text-xs text-muted-foreground">
+                <div className='text-xs text-muted-foreground'>
                   <div>Swap Path: {swapQuote.path.join(' → ')}</div>
                   <div>Slippage: {slippage}%</div>
-                  <div>Min Received: {getHumanAmount(swapQuote.estimatedToAmount || swapQuote.amount, toToken?.decimals) * (1 - slippage / 100)} {toToken?.symbol}</div>
+                  <div>
+                    Min Received:{' '}
+                    {getHumanAmount(
+                      swapQuote.estimatedToAmount || swapQuote.amount,
+                      toToken?.decimals
+                    ) *
+                      (1 - slippage / 100)}{' '}
+                    {toToken?.symbol}
+                  </div>
                 </div>
 
                 {/* Debug info if amount is 0 */}
-                {((swapQuote.amount === '0' || swapQuote.estimatedToAmount === '0') || error) && (
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                    <div className="font-bold text-yellow-700 mb-2">Debug Info (Hyperion API):</div>
-                    <div className="text-xs text-yellow-900 whitespace-pre-wrap break-all">
-                      <div>estToAmount (quote): {JSON.stringify(quoteDebug, null, 2)}</div>
-                      <div>estFromAmount (reverseQuote): {JSON.stringify(reverseQuoteDebug, null, 2)}</div>
+                {(swapQuote.amount === '0' ||
+                  swapQuote.estimatedToAmount === '0' ||
+                  error) && (
+                  <div className='mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded'>
+                    <div className='font-bold text-yellow-700 mb-2'>
+                      Debug Info (Hyperion API):
+                    </div>
+                    <div className='text-xs text-yellow-900 whitespace-pre-wrap break-all'>
+                      <div>
+                        estToAmount (quote):{' '}
+                        {JSON.stringify(quoteDebug, null, 2)}
+                      </div>
+                      <div>
+                        estFromAmount (reverseQuote):{' '}
+                        {JSON.stringify(reverseQuoteDebug, null, 2)}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -583,49 +677,60 @@ export default function TestSwapPage() {
           {swapResult && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className='flex items-center gap-2'>
                   {swapResult.success ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className='h-5 w-5 text-green-500' />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-500" />
+                    <XCircle className='h-5 w-5 text-red-500' />
                   )}
                   Swap Result
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className='space-y-3'>
                 {swapResult.success ? (
                   <>
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="font-medium">Swap executed successfully!</span>
+                    <div className='flex items-center gap-2 text-green-600'>
+                      <CheckCircle className='h-4 w-4' />
+                      <span className='font-medium'>
+                        Swap executed successfully!
+                      </span>
                     </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Transaction Hash:</span>
-                        <span className="font-mono text-xs">{swapResult.hash}</span>
+
+                    <div className='space-y-2 text-sm'>
+                      <div className='flex justify-between'>
+                        <span className='text-muted-foreground'>
+                          Transaction Hash:
+                        </span>
+                        <span className='font-mono text-xs'>
+                          {swapResult.hash}
+                        </span>
                       </div>
-                      
+
                       {swapResult.receivedAmount && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Received:</span>
-                          <span className="font-medium">
-                            {formatNumber(swapResult.receivedAmount)} {swapResult.receivedSymbol}
+                        <div className='flex justify-between'>
+                          <span className='text-muted-foreground'>
+                            Received:
+                          </span>
+                          <span className='font-medium'>
+                            {formatNumber(swapResult.receivedAmount)}{' '}
+                            {swapResult.receivedSymbol}
                           </span>
                         </div>
                       )}
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <XCircle className="h-4 w-4" />
-                    <span className="font-medium">Swap failed</span>
+                  <div className='flex items-center gap-2 text-red-600'>
+                    <XCircle className='h-4 w-4' />
+                    <span className='font-medium'>Swap failed</span>
                   </div>
                 )}
-                
+
                 {swapResult.error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="text-sm text-red-700">{swapResult.error}</div>
+                  <div className='p-3 bg-red-50 border border-red-200 rounded-lg'>
+                    <div className='text-sm text-red-700'>
+                      {swapResult.error}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -635,25 +740,27 @@ export default function TestSwapPage() {
           {/* Info Panel */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2'>
+                <Info className='h-5 w-5' />
                 Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <CardContent className='space-y-3 text-sm text-muted-foreground'>
               <div>
-                <strong>This is a test interface</strong> for development and testing purposes.
-                Real transactions are not executed in this mode.
+                <strong>This is a test interface</strong> for development and
+                testing purposes. Real transactions are not executed in this
+                mode.
               </div>
-              
+
               <div>
-                <strong>Hyperion Protocol:</strong> A decentralized exchange on Aptos blockchain
-                providing efficient token swaps with competitive pricing.
+                <strong>Hyperion Protocol:</strong> A decentralized exchange on
+                Aptos blockchain providing efficient token swaps with
+                competitive pricing.
               </div>
-              
+
               <div>
                 <strong>Features:</strong>
-                <ul className="list-disc list-inside mt-1 space-y-1">
+                <ul className='list-disc list-inside mt-1 space-y-1'>
                   <li>Multi-hop routing for best prices</li>
                   <li>Low slippage and fees</li>
                   <li>Real-time price quotes</li>
@@ -662,10 +769,10 @@ export default function TestSwapPage() {
               </div>
 
               {userAddress && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm">
+                <div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                  <div className='text-sm'>
                     <strong>Connected Wallet:</strong>
-                    <div className="font-mono text-xs mt-1">{userAddress}</div>
+                    <div className='font-mono text-xs mt-1'>{userAddress}</div>
                   </div>
                 </div>
               )}
@@ -675,4 +782,4 @@ export default function TestSwapPage() {
       </div>
     </div>
   );
-} 
+}

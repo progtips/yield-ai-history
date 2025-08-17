@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,14 +58,14 @@ export function AccountBalances({ balances }: AccountBalancesProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="h-5 w-5" />
+          <CardTitle className='flex items-center gap-2'>
+            <Coins className='h-5 w-5' />
             Fungible Asset Balances
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Coins className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <div className='text-center py-8 text-muted-foreground'>
+            <Coins className='h-12 w-12 mx-auto mb-4 opacity-50' />
             <p>No fungible assets found</p>
           </div>
         </CardContent>
@@ -76,46 +76,46 @@ export function AccountBalances({ balances }: AccountBalancesProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Coins className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <Coins className='h-5 w-5' />
           Fungible Asset Balances ({balances.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {balances.map((balance, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+              className='flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50'
             >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Coins className="h-5 w-5 text-primary" />
+              <div className='flex items-center gap-3'>
+                <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center'>
+                  <Coins className='h-5 w-5 text-primary' />
                 </div>
                 <div>
-                  <div className="font-medium">{getTokenName(balance)}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className='font-medium'>{getTokenName(balance)}</div>
+                  <div className='text-sm text-muted-foreground'>
                     {getTokenSymbol(balance)}
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="font-mono font-medium">
+
+              <div className='flex items-center gap-3'>
+                <div className='text-right'>
+                  <div className='font-mono font-medium'>
                     {formatAmount(balance.amount, balance.metadata?.decimals)}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className='text-xs text-muted-foreground'>
                     {getTokenSymbol(balance)}
                   </div>
                 </div>
-                
+
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={() => copyToClipboard(balance.asset_type)}
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className='h-4 w-4' />
                 </Button>
               </div>
             </div>

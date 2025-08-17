@@ -5,7 +5,11 @@ export interface YieldResult {
   yearly: number;
 }
 
-export function calcYield(apy: number, amount: bigint, decimals: number): YieldResult {
+export function calcYield(
+  apy: number,
+  amount: bigint,
+  decimals: number
+): YieldResult {
   const amountFloat = Number(amount) / Math.pow(10, decimals);
   const apyDecimal = apy / 100; // Convert percentage to decimal
 
@@ -18,6 +22,6 @@ export function calcYield(apy: number, amount: bigint, decimals: number): YieldR
     daily,
     weekly,
     monthly,
-    yearly
+    yearly,
   };
-} 
+}

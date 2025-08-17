@@ -56,4 +56,4 @@ export interface DragDropState {
   isDragging: boolean;
   dragData: DragData | null;
   validationResult: DropValidationResult | null;
-} 
+}

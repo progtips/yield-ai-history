@@ -11,20 +11,33 @@ export function useClaimRewards() {
   const { toast } = useToast();
 
   const claimRewards = useCallback(
-    async (protocolKey: ProtocolKey, positionIds: string[], tokenTypes: string[]) => {
+    async (
+      protocolKey: ProtocolKey,
+      positionIds: string[],
+      tokenTypes: string[]
+    ) => {
       try {
         setIsLoading(true);
         const protocolInstance = protocols[protocolKey];
-        if (!protocolInstance) throw new Error(`Protocol ${protocolKey} not found`);
-        if (typeof protocolInstance.buildClaimRewards !== 'function') throw new Error(`Protocol ${protocolKey} does not have buildClaimRewards method`);
-        const payload = await protocolInstance.buildClaimRewards(positionIds, tokenTypes);
-        if (!payload || typeof payload !== 'object') throw new Error('Invalid payload generated');
-        if (!wallet.connected || !wallet.signAndSubmitTransaction) throw new Error('Wallet not connected');
+        if (!protocolInstance)
+          throw new Error(`Protocol ${protocolKey} not found`);
+        if (typeof protocolInstance.buildClaimRewards !== 'function')
+          throw new Error(
+            `Protocol ${protocolKey} does not have buildClaimRewards method`
+          );
+        const payload = await protocolInstance.buildClaimRewards(
+          positionIds,
+          tokenTypes
+        );
+        if (!payload || typeof payload !== 'object')
+          throw new Error('Invalid payload generated');
+        if (!wallet.connected || !wallet.signAndSubmitTransaction)
+          throw new Error('Wallet not connected');
         const response = await wallet.signAndSubmitTransaction({
           data: {
             function: payload.function as `${string}::${string}::${string}`,
             typeArguments: payload.type_arguments,
-            functionArguments: payload.arguments
+            functionArguments: payload.arguments,
           },
           options: { maxGasAmount: 20000 }, // Network limit is 20000
         });
@@ -33,11 +46,24 @@ export function useClaimRewards() {
           const delay = 2000;
           for (let i = 0; i < maxAttempts; i++) {
             try {
-              const txResponse = await fetch(`https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${response.hash}`);
+              const txResponse = await fetch(
+                `https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${response.hash}`
+              );
               const txData = await txResponse.json();
-              if (txData.success && txData.vm_status === 'Executed successfully') {
+              if (
+                txData.success &&
+                txData.vm_status === 'Executed successfully'
+              ) {
                 const action = (
-                  <ToastAction altText="View in Explorer" onClick={() => window.open(`https://explorer.aptoslabs.com/txn/${response.hash}?network=mainnet`, '_blank')}>
+                  <ToastAction
+                    altText='View in Explorer'
+                    onClick={() =>
+                      window.open(
+                        `https://explorer.aptoslabs.com/txn/${response.hash}?network=mainnet`,
+                        '_blank'
+                      )
+                    }
+                  >
                     View in Explorer
                   </ToastAction>
                 );
@@ -47,7 +73,11 @@ export function useClaimRewards() {
                   action,
                 });
                 setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('refreshPositions', { detail: { protocol: protocolKey } }));
+                  window.dispatchEvent(
+                    new CustomEvent('refreshPositions', {
+                      detail: { protocol: protocolKey },
+                    })
+                  );
                 }, 2000);
                 return response;
               } else if (txData.vm_status) {
@@ -62,7 +92,8 @@ export function useClaimRewards() {
       } catch (error) {
         toast({
           title: 'Error',
-          description: error instanceof Error ? error.message : 'Failed to claim rewards',
+          description:
+            error instanceof Error ? error.message : 'Failed to claim rewards',
           variant: 'destructive',
         });
         throw error;
@@ -77,4 +108,4 @@ export function useClaimRewards() {
     claimRewards,
     isLoading,
   };
-} 
+}

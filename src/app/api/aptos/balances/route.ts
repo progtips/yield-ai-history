@@ -25,11 +25,13 @@ export async function POST(request: NextRequest) {
       headers['Authorization'] = `Bearer ${process.env.APTOS_API_KEY}`;
     }
 
-    const response = await fetch(`https://indexer.mainnet.aptoslabs.com/v1/graphql`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        query: `
+    const response = await fetch(
+      `https://indexer.mainnet.aptoslabs.com/v1/graphql`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          query: `
           query GetAccountBalances($address: String!) {
             current_fungible_asset_balances(
               where: {owner_address: {_eq: $address}, amount: {_gt: "0"}}
@@ -40,9 +42,10 @@ export async function POST(request: NextRequest) {
             }
           }
         `,
-        variables: { address },
-      }),
-    });
+          variables: { address },
+        }),
+      }
+    );
 
     if (!response.ok) {
       console.error('Aptos API error:', response.status, response.statusText);
@@ -61,12 +64,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(createSuccessResponse(result));
   } catch (error) {
     console.error('Error in balances route:', error);
-    
+
     if (error instanceof Error) {
-      return NextResponse.json(
-        createErrorResponse(error),
-        { status: 500 }
-      );
+      return NextResponse.json(createErrorResponse(error), { status: 500 });
     }
 
     return NextResponse.json(
@@ -74,4 +74,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

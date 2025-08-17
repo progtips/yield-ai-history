@@ -25,19 +25,22 @@ export async function GET(request: NextRequest) {
     console.log('Query params:', queryParams.toString());
     console.log('API Key present:', !!process.env.PANORA_API_KEY);
 
-    const response = await fetch(`${baseUrl}/prices?${queryParams.toString()}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.PANORA_API_KEY || '',
+    const response = await fetch(
+      `${baseUrl}/prices?${queryParams.toString()}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.PANORA_API_KEY || '',
+        },
       }
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API Error:', {
         status: response.status,
         statusText: response.statusText,
-        body: errorText
+        body: errorText,
       });
       throw new Error(`Failed to fetch prices: ${response.statusText}`);
     }
@@ -46,12 +49,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(createSuccessResponse(data));
   } catch (error) {
     console.error('Error in tokenPrices route:', error);
-    
+
     if (error instanceof Error) {
-      return NextResponse.json(
-        createErrorResponse(error),
-        { status: 500 }
-      );
+      return NextResponse.json(createErrorResponse(error), { status: 500 });
     }
 
     return NextResponse.json(
@@ -59,4 +59,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

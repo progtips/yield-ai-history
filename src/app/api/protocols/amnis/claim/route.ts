@@ -54,20 +54,23 @@ export async function POST(request: Request) {
 
     if (!positionIds || !Array.isArray(positionIds)) {
       return NextResponse.json(
-        { error: "positionIds array is required" },
+        { error: 'positionIds array is required' },
         { status: 400 }
       );
     }
 
     const protocol = new AmnisProtocol();
-    const payload = await protocol.buildClaimRewards(positionIds, tokenTypes || []);
+    const payload = await protocol.buildClaimRewards(
+      positionIds,
+      tokenTypes || []
+    );
 
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Error generating claim rewards payload:", error);
+    console.error('Error generating claim rewards payload:', error);
     return NextResponse.json(
-      { error: "Failed to generate claim rewards payload" },
+      { error: 'Failed to generate claim rewards payload' },
       { status: 500 }
     );
   }
-} 
+}

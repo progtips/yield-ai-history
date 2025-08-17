@@ -9,5 +9,7 @@ interface TokenListData {
 }
 
 export const getTokenList = (chainId: number = 1): Token[] => {
-  return (tokenList as TokenListData).data.data.filter((token: Token) => token.chainId === chainId);
-}; 
+  return (tokenList as TokenListData).data.data.filter(
+    (token: Token) => token.chainId === chainId
+  );
+};

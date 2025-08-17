@@ -13,11 +13,17 @@ export async function POST(request: NextRequest) {
       slippagePercentage,
       integratorFeeAddress,
       integratorFeePercentage,
-      getTransactionData
+      getTransactionData,
     } = body;
 
     // Validate required fields
-    if (!chainId || !fromTokenAddress || !toTokenAddress || !fromTokenAmount || !toWalletAddress) {
+    if (
+      !chainId ||
+      !fromTokenAddress ||
+      !toTokenAddress ||
+      !fromTokenAmount ||
+      !toWalletAddress
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -29,14 +35,11 @@ export async function POST(request: NextRequest) {
       fromToken: fromTokenAddress,
       toToken: toTokenAddress,
       amount: fromTokenAmount,
-      slippage: parseFloat(slippagePercentage || "1") / 100, // Convert percentage to decimal
+      slippage: parseFloat(slippagePercentage || '1') / 100, // Convert percentage to decimal
     });
 
     if (!response.success) {
-      return NextResponse.json(
-        { error: response.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: response.error }, { status: 400 });
     }
 
     return NextResponse.json(response.data);
@@ -47,4 +50,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

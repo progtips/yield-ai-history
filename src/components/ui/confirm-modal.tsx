@@ -5,8 +5,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -31,14 +31,12 @@ export function ConfirmModal({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant='outline' onClick={onClose}>
             Отмена
           </Button>
-          <Button onClick={onConfirm}>
-            Подтвердить
-          </Button>
+          <Button onClick={onConfirm}>Подтвердить</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-} 
+}

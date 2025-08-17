@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     console.log('execute-swap route called');
     const body = await request.json();
     console.log('Request body:', body);
-    
+
     const { quoteData, walletAddress } = body;
 
     if (!quoteData) {
@@ -32,15 +32,17 @@ export async function POST(request: NextRequest) {
 
     if (!response.success) {
       console.log('Swap failed:', response.error);
-      return NextResponse.json(
-        { error: response.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: response.error }, { status: 400 });
     }
 
     // Validate the returned payload structure
     const payload = response.data;
-    if (!payload || !payload.function || !Array.isArray(payload.type_arguments) || !Array.isArray(payload.arguments)) {
+    if (
+      !payload ||
+      !payload.function ||
+      !Array.isArray(payload.type_arguments) ||
+      !Array.isArray(payload.arguments)
+    ) {
       console.error('Invalid payload structure returned:', payload);
       return NextResponse.json(
         { error: 'Invalid transaction payload structure' },
@@ -52,9 +54,9 @@ export async function POST(request: NextRequest) {
     console.log('Payload structure:', {
       function: payload.function,
       typeArgumentsCount: payload.type_arguments.length,
-      argumentsCount: payload.arguments.length
+      argumentsCount: payload.arguments.length,
     });
-    
+
     return NextResponse.json(payload);
   } catch (error: any) {
     console.error('Error in execute-swap route:', error);
@@ -63,4 +65,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

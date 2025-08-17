@@ -1,20 +1,20 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { WalletProvider } from "@/lib/WalletProvider";
-import { WalletDataProvider } from "@/contexts/WalletContext";
-import { ProtocolProvider } from "@/lib/contexts/ProtocolContext";
-import { DragDropProvider } from "@/contexts/DragDropContext";
-import { Toaster } from "@/components/ui/toaster";
-import { AlphaBanner } from "@/components/ui/alpha-banner";
-import { Analytics } from "@vercel/analytics/next";
-import * as Sentry from "@sentry/nextjs";
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { WalletProvider } from '@/lib/WalletProvider';
+import { WalletDataProvider } from '@/contexts/WalletContext';
+import { ProtocolProvider } from '@/lib/contexts/ProtocolContext';
+import { DragDropProvider } from '@/contexts/DragDropContext';
+import { Toaster } from '@/components/ui/toaster';
+import { AlphaBanner } from '@/components/ui/alpha-banner';
+import { Analytics } from '@vercel/analytics/next';
+import * as Sentry from '@sentry/nextjs';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Yield AI",
-  description: "AI-powered yield farming platform",
+  title: 'Yield AI',
+  description: 'AI-powered yield farming platform',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
@@ -48,9 +48,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <body className={inter.className}>
         <WalletProvider>
           <WalletDataProvider>

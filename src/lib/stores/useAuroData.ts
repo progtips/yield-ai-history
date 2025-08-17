@@ -8,34 +8,34 @@ export const useAuroData = (address?: string) => {
     rewards,
     pools,
     prices,
-    
+
     // Loading states
     positionsLoading,
     rewardsLoading,
     poolsLoading,
     pricesLoading,
-    
+
     // Error states
     positionsError,
     rewardsError,
     poolsError,
     pricesError,
-    
+
     // Actions
     fetchPositions,
     fetchRewards,
     fetchPools,
     fetchPrices,
-    
+
     // Getters
     getPosition,
     getPositionRewards,
     getTokenPrice,
     getPool,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   } = useAuroStore();
 
   // Auto-fetch positions when address changes
@@ -63,7 +63,7 @@ export const useAuroData = (address?: string) => {
   useEffect(() => {
     if (positions.length > 0) {
       const tokenAddresses = new Set<string>();
-      
+
       positions.forEach(position => {
         if (position.collateralTokenAddress) {
           tokenAddresses.add(position.collateralTokenAddress);
@@ -72,7 +72,7 @@ export const useAuroData = (address?: string) => {
           tokenAddresses.add(position.debtTokenInfo.faAddress);
         }
       });
-      
+
       if (tokenAddresses.size > 0) {
         fetchPrices(Array.from(tokenAddresses));
       }
@@ -82,22 +82,19 @@ export const useAuroData = (address?: string) => {
   // Manual refresh function
   const refreshData = useCallback(async () => {
     if (!address) return;
-    
+
     console.log('[useAuroData] Manual refresh triggered');
-    
+
     // First fetch positions to get token addresses
     await fetchPositions(address);
-    
+
     // Then fetch other data in parallel
-    await Promise.all([
-      fetchPools(),
-      fetchRewards(address)
-    ]);
-    
+    await Promise.all([fetchPools(), fetchRewards(address)]);
+
     // Fetch prices after positions are loaded
     if (positions.length > 0) {
       const tokenAddresses = new Set<string>();
-      
+
       positions.forEach(position => {
         if (position.collateralTokenAddress) {
           tokenAddresses.add(position.collateralTokenAddress);
@@ -106,17 +103,28 @@ export const useAuroData = (address?: string) => {
           tokenAddresses.add(position.debtTokenInfo.faAddress);
         }
       });
-      
+
       if (tokenAddresses.size > 0) {
-        console.log('[useAuroData] Fetching prices for tokens:', Array.from(tokenAddresses));
+        console.log(
+          '[useAuroData] Fetching prices for tokens:',
+          Array.from(tokenAddresses)
+        );
         await fetchPrices(Array.from(tokenAddresses), true); // Force refresh
       }
     }
-  }, [address, fetchPositions, fetchPools, fetchRewards, fetchPrices, positions]);
+  }, [
+    address,
+    fetchPositions,
+    fetchPools,
+    fetchRewards,
+    fetchPrices,
+    positions,
+  ]);
 
   // Check if any data is loading
-  const isLoading = positionsLoading || rewardsLoading || poolsLoading || pricesLoading;
-  
+  const isLoading =
+    positionsLoading || rewardsLoading || poolsLoading || pricesLoading;
+
   // Check if there are any errors
   const hasError = positionsError || rewardsError || poolsError || pricesError;
 
@@ -126,36 +134,36 @@ export const useAuroData = (address?: string) => {
     rewards,
     pools,
     prices,
-    
+
     // Loading states
     isLoading,
     positionsLoading,
     rewardsLoading,
     poolsLoading,
     pricesLoading,
-    
+
     // Error states
     hasError,
     positionsError,
     rewardsError,
     poolsError,
     pricesError,
-    
+
     // Actions
     refreshData,
     fetchPositions,
     fetchRewards,
     fetchPools,
     fetchPrices,
-    
+
     // Getters
     getPosition,
     getPositionRewards,
     getTokenPrice,
     getPool,
-    
+
     // Utilities
     clearData,
-    isDataStale
+    isDataStale,
   };
-}; 
+};

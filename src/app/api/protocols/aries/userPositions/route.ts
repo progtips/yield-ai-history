@@ -58,11 +58,11 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const address = searchParams.get("address");
+    const address = searchParams.get('address');
 
     if (!address) {
       return NextResponse.json(
-        { error: "Address is required" },
+        { error: 'Address is required' },
         { status: 400 }
       );
     }
@@ -70,14 +70,15 @@ export async function GET(request: Request) {
     const externalApiUrl = `https://yield-a.vercel.app/api/aries/userPositions?address=${address}`;
     const response = await fetch(externalApiUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'application/json',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Origin': 'http://localhost:3000',
-        'Referer': 'http://localhost:3000/'
-      }
+        Origin: 'http://localhost:3000',
+        Referer: 'http://localhost:3000/',
+      },
     });
-    
+
     if (!response.ok) {
       throw new Error(`External API returned ${response.status}`);
     }
@@ -85,10 +86,10 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching Aries user positions:", error);
+    console.error('Error fetching Aries user positions:', error);
     return NextResponse.json(
-      { error: "Failed to fetch user positions" },
+      { error: 'Failed to fetch user positions' },
       { status: 500 }
     );
   }
-} 
+}

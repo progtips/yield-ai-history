@@ -24,4 +24,4 @@ export function getProtocolsList(): Protocol[] {
 
 export function getProtocolByName(name: string): Protocol | undefined {
   return (protocolsList as Protocol[]).find(protocol => protocol.name === name);
-} 
+}

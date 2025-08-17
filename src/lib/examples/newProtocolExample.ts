@@ -11,7 +11,7 @@ const newProtocolSource: PoolSource = {
   transform: (data: any) => {
     // Transform the API response to match InvestmentData format
     // This function should convert your API's data structure to the expected format
-    
+
     return (data.pools || []).map((pool: any) => ({
       asset: pool.tokenSymbol || pool.asset,
       provider: pool.protocol || 'New Protocol',
@@ -19,9 +19,9 @@ const newProtocolSource: PoolSource = {
       depositApy: pool.depositAPY || pool.supplyAPY || 0,
       borrowAPY: pool.borrowAPY || 0,
       token: pool.tokenAddress || pool.address,
-      protocol: pool.protocolName || 'New Protocol'
+      protocol: pool.protocolName || 'New Protocol',
     }));
-  }
+  },
 };
 
 // Step 2: Add the source to the configuration
@@ -60,4 +60,4 @@ const newProtocolSource: PoolSource = {
 }
 */
 
-export { newProtocolSource }; 
+export { newProtocolSource };

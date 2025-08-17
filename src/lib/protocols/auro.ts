@@ -1,42 +1,52 @@
-import { BaseProtocol } from "./BaseProtocol";
+import { BaseProtocol } from './BaseProtocol';
 
 export class AuroProtocol implements BaseProtocol {
-  name = "Auro Finance";
+  name = 'Auro Finance';
 
   async buildDeposit(amountOctas: bigint, token: string) {
     // TODO: Implement Auro Finance deposit transaction
     // This will need to be implemented based on Auro Finance's smart contract structure
     return {
-      type: "entry_function_payload" as const,
-      function: "0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c::auro_pool::deposit",
+      type: 'entry_function_payload' as const,
+      function:
+        '0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c::auro_pool::deposit',
       type_arguments: [token],
-      arguments: [amountOctas.toString()]
+      arguments: [amountOctas.toString()],
     };
   }
 
-  async buildWithdraw(marketAddress: string, amountOctas: bigint, token: string) {
+  async buildWithdraw(
+    marketAddress: string,
+    amountOctas: bigint,
+    token: string
+  ) {
     // TODO: Implement Auro Finance withdraw transaction
     return {
-      type: "entry_function_payload" as const,
-      function: "0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c::auro_pool::withdraw",
+      type: 'entry_function_payload' as const,
+      function:
+        '0x50a340a19e6ada1be07192c042786ca6a9651d5c845acc8727e8c6416a56a32c::auro_pool::withdraw',
       type_arguments: [token],
-      arguments: [marketAddress, amountOctas.toString()]
+      arguments: [marketAddress, amountOctas.toString()],
     };
   }
 
-  async buildClaimRewards(positionIds: string[], _tokenTypes: string[]): Promise<{
+  async buildClaimRewards(
+    positionIds: string[],
+    _tokenTypes: string[]
+  ): Promise<{
     type: 'entry_function_payload';
     function: string;
     type_arguments: string[];
     arguments: [string[], any[]];
   }> {
     // Захардкоженный массив type_arguments как в примере пользователя
-    const type_arguments = Array(15).fill("0x1::aptos_coin::AptosCoin");
+    const type_arguments = Array(15).fill('0x1::aptos_coin::AptosCoin');
     return {
-      type: "entry_function_payload" as const,
-      function: "0xd039ef33e378c10544491855a2ef99cd77bf1a610fd52cc43117cd96e1c73465::auro_router::claim_rewards",
+      type: 'entry_function_payload' as const,
+      function:
+        '0xd039ef33e378c10544491855a2ef99cd77bf1a610fd52cc43117cd96e1c73465::auro_router::claim_rewards',
       type_arguments,
       arguments: [positionIds, []], // tuple
     };
   }
-} 
+}

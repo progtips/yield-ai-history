@@ -3,21 +3,25 @@
 ## 🎯 Принципы разработки
 
 ### 1. Пользователь-центричность
+
 - **Всегда думайте о пользователе**: Каждая функция должна решать реальную проблему
 - **Простота превыше всего**: Сложные функции должны быть простыми в использовании
 - **Консистентность**: Единообразный опыт во всем приложении
 
 ### 2. Безопасность
+
 - **Никогда не храните приватные ключи**: Все подписи только локально
 - **Валидация данных**: Проверяйте все входные данные
 - **Обработка ошибок**: Понятные сообщения об ошибках
 
 ### 3. Производительность
+
 - **Оптимизация загрузки**: Ленивая загрузка и кэширование
 - **Минимизация запросов**: Объединяйте API вызовы
 - **Мониторинг**: Отслеживайте производительность
 
 ### 4. Масштабируемость
+
 - **Модульная архитектура**: Легко добавлять новые протоколы
 - **Переиспользуемые компоненты**: Избегайте дублирования кода
 - **Типизация**: Используйте TypeScript для безопасности
@@ -27,6 +31,7 @@
 ### 1. Планирование новой функции
 
 **Вопросы для анализа:**
+
 - Какую проблему решает эта функция?
 - Кто является целевым пользователем?
 - Как это вписывается в общую архитектуру?
@@ -34,32 +39,38 @@
 - Нужны ли новые UI компоненты?
 
 **Документация:**
+
 ```markdown
 ## Функция: [История транзакций]
 
-
 ### Цель
+
 [
 Цель истории транзакций - определить доходность инвестиций в DeFi.
 
 ]
 
 ### Пользователи
+
 [Кто будет использовать]
 
 ### Архитектура
+
 [Как интегрируется в систему]
 
 ### API
+
 [Новые endpoints]
 
 ### UI/UX
+
 [Новые компоненты и интерфейс]
 ```
 
 ### 2. Структура кода
 
 #### Компоненты
+
 ```typescript
 // Всегда используйте TypeScript
 interface ComponentProps {
@@ -70,9 +81,9 @@ interface ComponentProps {
 }
 
 // Функциональные компоненты с типизацией
-export const Component: React.FC<ComponentProps> = ({ 
-  required, 
-  optional = 0 
+export const Component: React.FC<ComponentProps> = ({
+  required,
+  optional = 0
 }) => {
   // Логика компонента
   return <div>{required}</div>;
@@ -80,6 +91,7 @@ export const Component: React.FC<ComponentProps> = ({
 ```
 
 #### Протоколы
+
 ```typescript
 // Наследуйтесь от BaseProtocol
 export class NewProtocol extends BaseProtocol {
@@ -87,7 +99,7 @@ export class NewProtocol extends BaseProtocol {
   async getPools(): Promise<Pool[]> {
     // Логика получения пулов
   }
-  
+
   async getUserPositions(address: string): Promise<Position[]> {
     // Логика получения позиций
   }
@@ -95,6 +107,7 @@ export class NewProtocol extends BaseProtocol {
 ```
 
 #### API Endpoints
+
 ```typescript
 // Используйте типизированные ответы
 export async function GET(request: Request) {
@@ -102,10 +115,7 @@ export async function GET(request: Request) {
     // Логика API
     return NextResponse.json({ data: result });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Описание ошибки' }, 
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Описание ошибки' }, { status: 500 });
   }
 }
 ```
@@ -113,12 +123,14 @@ export async function GET(request: Request) {
 ### 3. Именование
 
 #### Файлы и папки
+
 - **Компоненты**: PascalCase (`PositionCard.tsx`)
 - **Утилиты**: camelCase (`formatAmount.ts`)
 - **Константы**: UPPER_SNAKE_CASE (`API_ENDPOINTS.ts`)
 - **Типы**: PascalCase (`PoolData.ts`)
 
 #### Переменные и функции
+
 - **Переменные**: camelCase (`userBalance`)
 - **Функции**: camelCase (`calculateAPY`)
 - **Константы**: UPPER_SNAKE_CASE (`MAX_RETRY_ATTEMPTS`)
@@ -127,6 +139,7 @@ export async function GET(request: Request) {
 ### 4. Комментарии и документация
 
 #### JSDoc для функций
+
 ```typescript
 /**
  * Рассчитывает APY на основе депозита и доходности
@@ -135,12 +148,17 @@ export async function GET(request: Request) {
  * @param period - Период в днях
  * @returns APY в процентах
  */
-export function calculateAPY(deposit: number, reward: number, period: number): number {
+export function calculateAPY(
+  deposit: number,
+  reward: number,
+  period: number
+): number {
   // Логика расчета
 }
 ```
 
 #### Утилитарные функции
+
 ```typescript
 /**
  * Форматирует техническое имя функции в понятное пользователю название действия
@@ -148,12 +166,16 @@ export function calculateAPY(deposit: number, reward: number, period: number): n
  * @param showFullPath - Показывать ли полный путь функции если маппинг не найден
  * @returns Понятное название действия (например, "Stake")
  */
-export function formatFunctionName(functionName: string, showFullPath?: boolean): string {
+export function formatFunctionName(
+  functionName: string,
+  showFullPath?: boolean
+): string {
   // Логика форматирования
 }
 ```
 
 #### Комментарии в коде
+
 ```typescript
 // Сложная логика требует объяснения
 const adjustedAmount = amount * (1 + slippageTolerance);
@@ -168,21 +190,25 @@ const adjustedAmount = amount * (1 + slippageTolerance);
 ### 1. Типы тестов
 
 #### Unit тесты
+
 - Тестируйте отдельные функции
 - Используйте моки для внешних зависимостей
 - Покрывайте edge cases
 
 #### Integration тесты
+
 - Тестируйте взаимодействие компонентов
 - Проверяйте API endpoints
 - Тестируйте пользовательские сценарии
 
 #### E2E тесты
+
 - Тестируйте полные пользовательские потоки
 - Проверяйте интеграцию с кошельками
 - Тестируйте транзакции
 
 ### 2. Тестовые данные
+
 ```typescript
 // Создавайте реалистичные тестовые данные
 export const mockPool: Pool = {
@@ -198,6 +224,7 @@ export const mockPool: Pool = {
 ## 🔧 Инструменты разработки
 
 ### 1. ESLint и Prettier
+
 ```json
 // .eslintrc.json
 {
@@ -210,6 +237,7 @@ export const mockPool: Pool = {
 ```
 
 ### 2. Git hooks
+
 ```bash
 # pre-commit
 npm run lint
@@ -220,6 +248,7 @@ npm run type-check
 ```
 
 ### 3. VS Code настройки
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -232,6 +261,7 @@ npm run type-check
 ## 📦 Управление зависимостями
 
 ### 1. Добавление новых пакетов
+
 ```bash
 # Основные зависимости
 pnpm add package-name
@@ -244,6 +274,7 @@ pnpm add -D bundle-analyzer
 ```
 
 ### 2. Обновление зависимостей
+
 ```bash
 # Регулярно обновляйте зависимости
 pnpm update
@@ -255,6 +286,7 @@ pnpm audit
 ## 🚀 Деплой и мониторинг
 
 ### 1. Environment variables
+
 ```bash
 # .env.local
 NEXT_PUBLIC_APTOS_NODE_URL=https://fullnode.mainnet.aptoslabs.com
@@ -262,6 +294,7 @@ NEXT_PUBLIC_PANORA_API_URL=https://api.panora.exchange
 ```
 
 ### 2. Мониторинг
+
 - **Vercel Analytics**: Отслеживание производительности
 - **Error tracking**: Sentry для ошибок
 - **User analytics**: Понимание поведения пользователей
@@ -269,16 +302,19 @@ NEXT_PUBLIC_PANORA_API_URL=https://api.panora.exchange
 ## 🤝 Работа в команде
 
 ### 1. Code Review
+
 - **Обязательный review**: Все PR должны быть проверены
 - **Автоматические проверки**: CI/CD pipeline
 - **Конструктивная обратная связь**: Фокус на улучшении кода
 
 ### 2. Документация
+
 - **README**: Обновляйте при изменении API
 - **Комментарии**: Объясняйте сложную логику
 - **Changelog**: Ведите историю изменений
 
 ### 3. Коммуникация
+
 - **Issues**: Используйте GitHub Issues для задач
 - **Discussions**: Обсуждайте архитектурные решения
 - **Regular sync**: Еженедельные встречи команды
@@ -286,16 +322,19 @@ NEXT_PUBLIC_PANORA_API_URL=https://api.panora.exchange
 ## 🎯 Метрики качества
 
 ### 1. Код
+
 - **TypeScript coverage**: 100% типизация
 - **ESLint errors**: 0 ошибок
 - **Test coverage**: >80% покрытие
 
 ### 2. Производительность
+
 - **Lighthouse score**: >90
 - **Bundle size**: <500KB
 - **Load time**: <3s
 
 ### 3. Пользовательский опыт
+
 - **Error rate**: <1%
 - **Success rate**: >95%
 - **User satisfaction**: >4.5/5
@@ -303,19 +342,22 @@ NEXT_PUBLIC_PANORA_API_URL=https://api.panora.exchange
 ## 🔄 Процесс релиза
 
 ### 1. Подготовка
+
 - [ ] Все тесты проходят
 - [ ] Документация обновлена
 - [ ] Changelog заполнен
 - [ ] Code review завершен
 
 ### 2. Релиз
+
 - [ ] Создать release tag
 - [ ] Деплой на staging
 - [ ] Тестирование на staging
 - [ ] Деплой на production
 
 ### 3. Пост-релиз
+
 - [ ] Мониторинг ошибок
 - [ ] Проверка метрик
 - [ ] Сбор обратной связи
-- [ ] Планирование следующих итераций 
+- [ ] Планирование следующих итераций

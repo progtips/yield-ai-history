@@ -18,6 +18,7 @@ APTOS_API_KEY=your_aptos_api_key_here
 When deploying to Vercel, set these environment variables in your Vercel dashboard:
 
 ### Development Environment
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 NEXT_PUBLIC_EXTERNAL_API_URL=https://yield-a.vercel.app
@@ -25,6 +26,7 @@ APTOS_API_KEY=your_aptos_api_key_here
 ```
 
 ### Production Environment
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://your-production-domain.vercel.app
 NEXT_PUBLIC_EXTERNAL_API_URL=https://yield-a.vercel.app
@@ -57,4 +59,4 @@ APTOS_API_KEY=your_aptos_api_key_here
 - The portfolio API will use `NEXT_PUBLIC_API_BASE_URL` to fetch data from protocol endpoints
 - External API calls (like Aries, Joule) will continue to use the hardcoded `https://yield-a.vercel.app` URL
 - Make sure your production domain is correct in the `NEXT_PUBLIC_API_BASE_URL`
-- `APTOS_API_KEY` is required for Auro Finance integration to work properly 
+- `APTOS_API_KEY` is required for Auro Finance integration to work properly

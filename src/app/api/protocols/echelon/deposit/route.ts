@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     if (!token || !amount) {
       return NextResponse.json(
-        { error: "Token and amount are required" },
+        { error: 'Token and amount are required' },
         { status: 400 }
       );
     }
@@ -60,20 +60,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Error generating deposit payload:", error);
-    
+    console.error('Error generating deposit payload:', error);
+
     if (error instanceof Error) {
-      if (error.message.includes("Market not found")) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        );
+      if (error.message.includes('Market not found')) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
       }
     }
 
     return NextResponse.json(
-      { error: "Failed to generate deposit payload" },
+      { error: 'Failed to generate deposit payload' },
       { status: 500 }
     );
   }
-} 
+}

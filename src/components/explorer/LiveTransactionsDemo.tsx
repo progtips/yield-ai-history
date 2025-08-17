@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,14 +9,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { Wifi, WifiOff, Bell, Play, Pause } from 'lucide-react';
 
 export function LiveTransactionsDemo() {
-  const { 
-    isLive, 
-    setIsLive, 
-    newTransactionsCount, 
+  const {
+    isLive,
+    setIsLive,
+    newTransactionsCount,
     resetNewTransactionsCount,
-    prependNewTransactions 
+    prependNewTransactions,
   } = useTransactionsStore();
-  
+
   const { toast } = useToast();
   const [demoCounter, setDemoCounter] = useState(0);
 
@@ -33,8 +33,8 @@ export function LiveTransactionsDemo() {
         type: 'entry_function_payload',
         function: '0x1::coin::transfer',
         type_arguments: ['0x1::aptos_coin::AptosCoin'],
-        arguments: ['0x123...', '1000000']
-      }
+        arguments: ['0x123...', '1000000'],
+      },
     };
 
     prependNewTransactions([newTx]);
@@ -45,9 +45,9 @@ export function LiveTransactionsDemo() {
       title: `+1 new transaction`,
       description: `Version: ${newTx.version}`,
       action: (
-        <button 
+        <button
           onClick={() => resetNewTransactionsCount()}
-          className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded"
+          className='text-xs bg-primary text-primary-foreground px-2 py-1 rounded'
         >
           Dismiss
         </button>
@@ -64,48 +64,53 @@ export function LiveTransactionsDemo() {
   }, [isLive]);
 
   return (
-    <Card className="mb-6">
+    <Card className='mb-6'>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <Bell className='h-5 w-5' />
           Live Transactions Demo
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
+      <CardContent className='space-y-4'>
+        <div className='flex items-center gap-4'>
           <Button
-            variant={isLive ? "default" : "outline"}
+            variant={isLive ? 'default' : 'outline'}
             onClick={() => setIsLive(!isLive)}
-            className="flex items-center gap-2"
+            className='flex items-center gap-2'
           >
-            {isLive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {isLive ? (
+              <Pause className='h-4 w-4' />
+            ) : (
+              <Play className='h-4 w-4' />
+            )}
             {isLive ? 'Stop Demo' : 'Start Demo'}
           </Button>
-          
-          <Badge variant={isLive ? "default" : "secondary"}>
+
+          <Badge variant={isLive ? 'default' : 'secondary'}>
             {isLive ? 'Auto-adding every 3s' : 'Manual mode'}
           </Badge>
-          
+
           {newTransactionsCount > 0 && (
-            <Badge 
-              variant="default" 
-              className="flex items-center gap-1 cursor-pointer hover:bg-primary/90"
+            <Badge
+              variant='default'
+              className='flex items-center gap-1 cursor-pointer hover:bg-primary/90'
               onClick={resetNewTransactionsCount}
             >
-              <Bell className="h-3 w-3" />
-              +{newTransactionsCount} new
+              <Bell className='h-3 w-3' />+{newTransactionsCount} new
             </Badge>
           )}
         </div>
-        
-        <div className="text-sm text-muted-foreground">
-          <p>• Включите "Live" режим для автоматического добавления транзакций</p>
+
+        <div className='text-sm text-muted-foreground'>
+          <p>
+            • Включите "Live" режим для автоматического добавления транзакций
+          </p>
           <p>• Нажмите "Add Demo TX" для ручного добавления</p>
           <p>• Кликните на бейдж "+N new" для сброса счетчика</p>
         </div>
-        
+
         <Button
-          variant="outline"
+          variant='outline'
           onClick={addDemoTransaction}
           disabled={isLive}
         >

@@ -1,4 +1,10 @@
-import { TokenListResponse, TokenListError, SUPPORTED_CHAIN_IDS, SupportedChainId, DEFAULT_CHAIN_ID } from '../../types/panora';
+import {
+  TokenListResponse,
+  TokenListError,
+  SUPPORTED_CHAIN_IDS,
+  SupportedChainId,
+  DEFAULT_CHAIN_ID,
+} from '../../types/panora';
 
 export class PanoraTokensService {
   private readonly apiKey: string;
@@ -17,19 +23,25 @@ export class PanoraTokensService {
   }
 
   private validateChainId(chainId: number): chainId is SupportedChainId {
-    return Object.values(SUPPORTED_CHAIN_IDS).includes(chainId as SupportedChainId);
+    return Object.values(SUPPORTED_CHAIN_IDS).includes(
+      chainId as SupportedChainId
+    );
   }
 
-  async getTokenList(chainId: number = DEFAULT_CHAIN_ID): Promise<TokenListResponse> {
+  async getTokenList(
+    chainId: number = DEFAULT_CHAIN_ID
+  ): Promise<TokenListResponse> {
     if (!this.validateChainId(chainId)) {
-      throw new Error(`Unsupported chainId: ${chainId}. Supported chains: ${Object.values(SUPPORTED_CHAIN_IDS).join(', ')}`);
+      throw new Error(
+        `Unsupported chainId: ${chainId}. Supported chains: ${Object.values(SUPPORTED_CHAIN_IDS).join(', ')}`
+      );
     }
 
     try {
       const response = await fetch(this.tokenListEndpoint, {
         headers: {
           'x-api-key': this.apiKey,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       });
 
@@ -46,4 +58,4 @@ export class PanoraTokensService {
       throw new Error('Failed to fetch token list');
     }
   }
-} 
+}

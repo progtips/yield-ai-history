@@ -26,32 +26,41 @@ export async function POST(request: NextRequest) {
     const response = await http.get<AptosResource[]>(url, {
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     console.log('Aptos API response type:', typeof response);
     console.log('Aptos API response is array:', Array.isArray(response));
-    console.log('Aptos API response length:', Array.isArray(response) ? response.length : 'N/A');
-    console.log('Aptos API response first item:', Array.isArray(response) && response.length > 0 ? response[0] : 'N/A');
+    console.log(
+      'Aptos API response length:',
+      Array.isArray(response) ? response.length : 'N/A'
+    );
+    console.log(
+      'Aptos API response first item:',
+      Array.isArray(response) && response.length > 0 ? response[0] : 'N/A'
+    );
 
     if (!response || !Array.isArray(response)) {
       console.error('Invalid response format:', response);
       return NextResponse.json(
-        createErrorResponse(new Error('Invalid response format from Aptos API')),
+        createErrorResponse(
+          new Error('Invalid response format from Aptos API')
+        ),
         { status: 500 }
       );
     }
 
-    console.log('Returning successful response with', response.length, 'resources');
+    console.log(
+      'Returning successful response with',
+      response.length,
+      'resources'
+    );
     return NextResponse.json(createSuccessResponse(response));
   } catch (error) {
     console.error('Error in resources route:', error);
-    
+
     if (error instanceof Error) {
-      return NextResponse.json(
-        createErrorResponse(error),
-        { status: 500 }
-      );
+      return NextResponse.json(createErrorResponse(error), { status: 500 });
     }
 
     return NextResponse.json(
@@ -59,4 +68,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

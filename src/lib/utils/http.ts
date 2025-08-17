@@ -13,7 +13,10 @@ export const createSuccessResponse = <T>(data: T): ApiResponse<T> => {
 };
 
 export const http = {
-  async get<T>(url: string, options?: { headers?: Record<string, string> }): Promise<T> {
+  async get<T>(
+    url: string,
+    options?: { headers?: Record<string, string> }
+  ): Promise<T> {
     const response = await fetch(url, {
       method: 'GET',
       headers: options?.headers,
@@ -26,7 +29,11 @@ export const http = {
     return response.json();
   },
 
-  async post<T>(url: string, body: any, options?: { headers?: Record<string, string> }): Promise<T> {
+  async post<T>(
+    url: string,
+    body: any,
+    options?: { headers?: Record<string, string> }
+  ): Promise<T> {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -41,5 +48,5 @@ export const http = {
     }
 
     return response.json();
-  }
-}; 
+  },
+};

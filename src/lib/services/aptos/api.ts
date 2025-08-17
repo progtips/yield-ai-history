@@ -4,10 +4,15 @@ export class AptosApiService {
   async getBalances(address: string) {
     try {
       // Use our server API endpoint instead of direct Aptos API call
-      const response = await fetch(`/api/aptos/walletBalance?address=${address}`);
-      
+      const response = await fetch(
+        `/api/aptos/walletBalance?address=${address}`
+      );
+
       if (!response.ok) {
-        console.error('Failed to fetch balances from server API:', response.status);
+        console.error(
+          'Failed to fetch balances from server API:',
+          response.status
+        );
         return { balances: [] };
       }
 
@@ -24,4 +29,4 @@ export class AptosApiService {
       return { balances: [] };
     }
   }
-} 
+}

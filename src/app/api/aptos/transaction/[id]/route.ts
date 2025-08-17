@@ -6,7 +6,7 @@ export async function GET(
 ) {
   try {
     const transactionId = params.id;
-    
+
     if (!transactionId) {
       return NextResponse.json(
         { error: 'Transaction ID is required' },
@@ -19,7 +19,7 @@ export async function GET(
       `https://indexer.mainnet.aptoslabs.com/v1/transactions/by_version/${transactionId}`,
       {
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       }
     );
@@ -51,16 +51,18 @@ export async function GET(
         type_arguments: transactionData.payload?.type_arguments || [],
         arguments: transactionData.payload?.arguments || [],
       },
-      events: transactionData.events?.map((event: any) => ({
-        type: event.type,
-        data: event.data,
-      })) || [],
-      changes: transactionData.changes?.map((change: any) => ({
-        type: change.type,
-        address: change.address,
-        state_key_hash: change.state_key_hash,
-        data: change.data,
-      })) || [],
+      events:
+        transactionData.events?.map((event: any) => ({
+          type: event.type,
+          data: event.data,
+        })) || [],
+      changes:
+        transactionData.changes?.map((change: any) => ({
+          type: change.type,
+          address: change.address,
+          state_key_hash: change.state_key_hash,
+          data: change.data,
+        })) || [],
     };
 
     return NextResponse.json(transformedTransaction);
@@ -71,4 +73,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

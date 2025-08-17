@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { 
-  getProtocolByModule, 
-  getProtocolByAddress, 
+import {
+  getProtocolByModule,
+  getProtocolByAddress,
   getOperationByPayload,
   ProtocolType,
   OperationType,
   Protocol,
-  Operation
+  Operation,
 } from '@/config/protocols';
 
 interface ProtocolBadgeProps {
@@ -32,14 +32,14 @@ interface ProtocolOperationBadgesProps {
 }
 
 // Компонент для отображения бейджа протокола
-export function ProtocolBadge({ 
-  moduleId, 
-  address, 
-  protocolType, 
-  className = "" 
+export function ProtocolBadge({
+  moduleId,
+  address,
+  protocolType,
+  className = '',
 }: ProtocolBadgeProps) {
   let protocol: Protocol;
-  
+
   if (protocolType) {
     // Если передан тип протокола напрямую
     protocol = getProtocolByAddress(protocolType);
@@ -54,8 +54,8 @@ export function ProtocolBadge({
   }
 
   return (
-    <Badge 
-      variant="secondary" 
+    <Badge
+      variant='secondary'
       className={`${protocol.color} text-white hover:${protocol.color} ${className}`}
       title={protocol.description}
     >
@@ -65,13 +65,13 @@ export function ProtocolBadge({
 }
 
 // Компонент для отображения бейджа операции
-export function OperationBadge({ 
-  payload, 
-  operationType, 
-  className = "" 
+export function OperationBadge({
+  payload,
+  operationType,
+  className = '',
 }: OperationBadgeProps) {
   let operation: Operation;
-  
+
   if (operationType) {
     // Если передан тип операции напрямую
     operation = getOperationByPayload({ function: operationType });
@@ -83,8 +83,8 @@ export function OperationBadge({
   }
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant='outline'
       className={`${operation.color} text-white border-${operation.color.replace('bg-', '')} hover:${operation.color} ${className}`}
       title={operation.description}
     >
@@ -94,46 +94,43 @@ export function OperationBadge({
 }
 
 // Компонент для отображения обоих бейджей (протокол + операция)
-export function ProtocolOperationBadges({ 
-  moduleId, 
-  address, 
-  payload, 
-  className = "" 
+export function ProtocolOperationBadges({
+  moduleId,
+  address,
+  payload,
+  className = '',
 }: ProtocolOperationBadgesProps) {
-  const protocol = moduleId 
-    ? getProtocolByModule(moduleId) 
-    : address 
-    ? getProtocolByAddress(address) 
-    : getProtocolByAddress('unknown');
+  const protocol = moduleId
+    ? getProtocolByModule(moduleId)
+    : address
+      ? getProtocolByAddress(address)
+      : getProtocolByAddress('unknown');
 
-  const operation = payload 
-    ? getOperationByPayload(payload) 
+  const operation = payload
+    ? getOperationByPayload(payload)
     : getOperationByPayload({ function: 'unknown' });
 
   return (
     <div className={`flex gap-2 items-center ${className}`}>
-      <ProtocolBadge 
-        moduleId={moduleId} 
-        address={address} 
-        className="text-xs"
+      <ProtocolBadge
+        moduleId={moduleId}
+        address={address}
+        className='text-xs'
       />
-      <OperationBadge 
-        payload={payload} 
-        className="text-xs"
-      />
+      <OperationBadge payload={payload} className='text-xs' />
     </div>
   );
 }
 
 // Компонент для отображения только протокола (компактный)
-export function CompactProtocolBadge({ 
-  moduleId, 
-  address, 
-  protocolType, 
-  className = "" 
+export function CompactProtocolBadge({
+  moduleId,
+  address,
+  protocolType,
+  className = '',
 }: ProtocolBadgeProps) {
   let protocol: Protocol;
-  
+
   if (protocolType) {
     protocol = getProtocolByAddress(protocolType);
   } else if (moduleId) {
@@ -145,8 +142,8 @@ export function CompactProtocolBadge({
   }
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant='outline'
       className={`${protocol.color} text-white border-${protocol.color.replace('bg-', '')} text-xs px-2 py-0.5 ${className}`}
       title={protocol.description}
     >
@@ -156,13 +153,13 @@ export function CompactProtocolBadge({
 }
 
 // Компонент для отображения только операции (компактный)
-export function CompactOperationBadge({ 
-  payload, 
-  operationType, 
-  className = "" 
+export function CompactOperationBadge({
+  payload,
+  operationType,
+  className = '',
 }: OperationBadgeProps) {
   let operation: Operation;
-  
+
   if (operationType) {
     operation = getOperationByPayload({ function: operationType });
   } else if (payload) {
@@ -172,8 +169,8 @@ export function CompactOperationBadge({
   }
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant='outline'
       className={`${operation.color} text-white border-${operation.color.replace('bg-', '')} text-xs px-2 py-0.5 ${className}`}
       title={operation.description}
     >
@@ -183,14 +180,14 @@ export function CompactOperationBadge({
 }
 
 // Компонент для отображения протокола с иконкой
-export function ProtocolBadgeWithIcon({ 
-  moduleId, 
-  address, 
-  protocolType, 
-  className = "" 
+export function ProtocolBadgeWithIcon({
+  moduleId,
+  address,
+  protocolType,
+  className = '',
 }: ProtocolBadgeProps) {
   let protocol: Protocol;
-  
+
   if (protocolType) {
     protocol = getProtocolByAddress(protocolType);
   } else if (moduleId) {
@@ -230,25 +227,25 @@ export function ProtocolBadgeWithIcon({
   };
 
   return (
-    <Badge 
-      variant="secondary" 
+    <Badge
+      variant='secondary'
       className={`${protocol.color} text-white hover:${protocol.color} ${className}`}
       title={protocol.description}
     >
-      <span className="mr-1">{getProtocolIcon(protocol.type)}</span>
+      <span className='mr-1'>{getProtocolIcon(protocol.type)}</span>
       {protocol.displayName}
     </Badge>
   );
 }
 
 // Компонент для отображения операции с иконкой
-export function OperationBadgeWithIcon({ 
-  payload, 
-  operationType, 
-  className = "" 
+export function OperationBadgeWithIcon({
+  payload,
+  operationType,
+  className = '',
 }: OperationBadgeProps) {
   let operation: Operation;
-  
+
   if (operationType) {
     operation = getOperationByPayload({ function: operationType });
   } else if (payload) {
@@ -302,12 +299,12 @@ export function OperationBadgeWithIcon({
   };
 
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant='outline'
       className={`${operation.color} text-white border-${operation.color.replace('bg-', '')} hover:${operation.color} ${className}`}
       title={operation.description}
     >
-      <span className="mr-1">{getOperationIcon(operation.type)}</span>
+      <span className='mr-1'>{getOperationIcon(operation.type)}</span>
       {operation.displayName}
     </Badge>
   );

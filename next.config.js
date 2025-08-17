@@ -25,9 +25,9 @@ const nextConfig = {
       'app.echelon.market',
       'tapp.exchange',
       'app.meso.finance',
-      'app.auro.finance'
+      'app.auro.finance',
     ],
   },
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;

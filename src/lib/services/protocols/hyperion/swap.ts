@@ -1,4 +1,4 @@
-import { Network } from "@aptos-labs/ts-sdk";
+import { Network } from '@aptos-labs/ts-sdk';
 import { initHyperionSDK } from '@hyperionxyz/sdk';
 
 export class HyperionSwapService {
@@ -19,7 +19,12 @@ export class HyperionSwapService {
     return HyperionSwapService.instance;
   }
 
-  async getQuoteAndPath(params: { amount: number; from: string; to: string; safeMode?: boolean }) {
+  async getQuoteAndPath(params: {
+    amount: number;
+    from: string;
+    to: string;
+    safeMode?: boolean;
+  }) {
     try {
       // amount — это fromTokenAmount в минимальных единицах (например, 10^decimals)
       const result = await this.sdk.Swap.estToAmount({
@@ -35,7 +40,12 @@ export class HyperionSwapService {
     }
   }
 
-  async estFromAmount(params: { amount: number; from: string; to: string; safeMode?: boolean }) {
+  async estFromAmount(params: {
+    amount: number;
+    from: string;
+    to: string;
+    safeMode?: boolean;
+  }) {
     try {
       const result = await this.sdk.Swap.estFromAmount({
         amount: params.amount,
@@ -50,7 +60,12 @@ export class HyperionSwapService {
     }
   }
 
-  async estToAmount(params: { amount: number; from: string; to: string; safeMode?: boolean }) {
+  async estToAmount(params: {
+    amount: number;
+    from: string;
+    to: string;
+    safeMode?: boolean;
+  }) {
     try {
       const result = await this.sdk.Swap.estToAmount({
         amount: params.amount,
@@ -65,13 +80,13 @@ export class HyperionSwapService {
     }
   }
 
-  async getSwapPayload(params: { 
-    currencyA: string; 
-    currencyB: string; 
-    currencyAAmount: string; 
-    currencyBAmount: string; 
-    slippage: number; 
-    poolRoute: string[]; 
+  async getSwapPayload(params: {
+    currencyA: string;
+    currencyB: string;
+    currencyAAmount: string;
+    currencyBAmount: string;
+    slippage: number;
+    poolRoute: string[];
     recipient: string;
     typeArgs?: string[];
   }) {
@@ -91,4 +106,4 @@ export class HyperionSwapService {
       throw error;
     }
   }
-} 
+}

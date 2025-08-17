@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { CheckCircle, AlertCircle } from "lucide-react";
-import tokenList from "@/lib/data/tokenList.json";
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useToast } from '@/components/ui/use-toast';
+import { ToastAction } from '@/components/ui/toast';
+import { CheckCircle, AlertCircle } from 'lucide-react';
+import tokenList from '@/lib/data/tokenList.json';
 
 interface EchelonReward {
   token: string;
@@ -32,19 +37,25 @@ interface ClaimAllRewardsEchelonModalProps {
   tokenPrices?: Record<string, string>;
 }
 
-export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPrices = {} }: ClaimAllRewardsEchelonModalProps) {
+export function ClaimAllRewardsEchelonModal({
+  isOpen,
+  onClose,
+  rewards,
+  tokenPrices = {},
+}: ClaimAllRewardsEchelonModalProps) {
   const { signAndSubmitTransaction, account } = useWallet();
   const { toast } = useToast();
   const [isClaiming, setIsClaiming] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<ClaimResult[]>([]);
-  const [currentHash, setCurrentHash] = useState<string>("");
+  const [currentHash, setCurrentHash] = useState<string>('');
 
   // Фильтруем награды с положительным количеством
   const claimableRewards = rewards.filter(reward => reward.amount > 0);
 
   const totalRewards = claimableRewards.length;
-  const progress = totalRewards > 0 ? ((currentIndex + 1) / totalRewards) * 100 : 0;
+  const progress =
+    totalRewards > 0 ? ((currentIndex + 1) / totalRewards) * 100 : 0;
 
   // Функция для получения цены токена
   const getTokenPrice = (tokenAddress: string): string => {
@@ -60,29 +71,33 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
   // Функция для получения информации о токене наград
   const getRewardTokenInfoHelper = (tokenSymbol: string) => {
-    console.log('[ClaimModal] getRewardTokenInfoHelper called for:', tokenSymbol);
-    
-    const token = (tokenList as any).data.data.find((token: any) => 
-      token.symbol.toLowerCase() === tokenSymbol.toLowerCase() ||
-      token.name.toLowerCase().includes(tokenSymbol.toLowerCase())
+    console.log(
+      '[ClaimModal] getRewardTokenInfoHelper called for:',
+      tokenSymbol
     );
-    
+
+    const token = (tokenList as any).data.data.find(
+      (token: any) =>
+        token.symbol.toLowerCase() === tokenSymbol.toLowerCase() ||
+        token.name.toLowerCase().includes(tokenSymbol.toLowerCase())
+    );
+
     console.log('[ClaimModal] Found token:', token);
-    
+
     if (!token) {
       console.log('[ClaimModal] Token not found for symbol:', tokenSymbol);
       return undefined;
     }
-    
+
     const result = {
       address: token.tokenAddress,
       faAddress: token.faAddress,
       symbol: token.symbol,
       icon_uri: token.logoUrl,
       decimals: token.decimals,
-      price: null // Цена будет получена динамически
+      price: null, // Цена будет получена динамически
     };
-    
+
     console.log('[ClaimModal] Returning token info:', result);
     return result;
   };
@@ -91,25 +106,27 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
   const totalRewardsValue = claimableRewards.reduce((sum, reward) => {
     const tokenInfo = getRewardTokenInfoHelper(reward.token);
     if (!tokenInfo) return sum;
-    
+
     const price = getTokenPrice(tokenInfo.faAddress || tokenInfo.address || '');
-    const value = price && price !== '0' ? reward.amount * parseFloat(price) : 0;
-    
+    const value =
+      price && price !== '0' ? reward.amount * parseFloat(price) : 0;
+
     return sum + value;
   }, 0);
 
   const handleClaimAll = async () => {
-    if (!signAndSubmitTransaction || !account?.address || totalRewards === 0) return;
+    if (!signAndSubmitTransaction || !account?.address || totalRewards === 0)
+      return;
 
     setIsClaiming(true);
     setCurrentIndex(0);
     setResults([]);
-    setCurrentHash("");
+    setCurrentHash('');
 
     for (let i = 0; i < totalRewards; i++) {
       const reward = claimableRewards[i];
       setCurrentIndex(i);
-      setCurrentHash("");
+      setCurrentHash('');
 
       try {
         // Получаем payload для claim из API
@@ -121,22 +138,23 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
           body: JSON.stringify({
             userAddress: account.address.toString(),
             rewardName: reward.rewardName || reward.token,
-            farmingId: reward.farmingId
-          })
+            farmingId: reward.farmingId,
+          }),
         });
 
         const data = await response.json();
-        
+
         if (!response.ok || !data.success) {
-          throw new Error(data.error || "Failed to create claim transaction");
+          throw new Error(data.error || 'Failed to create claim transaction');
         }
 
         // Отправляем транзакцию
         const txResponse = await signAndSubmitTransaction({
           data: {
-            function: data.data.transactionPayload.function as `${string}::${string}::${string}`,
+            function: data.data.transactionPayload
+              .function as `${string}::${string}::${string}`,
             typeArguments: data.data.transactionPayload.type_arguments,
-            functionArguments: data.data.transactionPayload.arguments
+            functionArguments: data.data.transactionPayload.arguments,
           },
           options: { maxGasAmount: 20000 },
         });
@@ -150,13 +168,21 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
           try {
-            const txStatusResponse = await fetch(`https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${txResponse.hash}`);
+            const txStatusResponse = await fetch(
+              `https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_hash/${txResponse.hash}`
+            );
             const txData = await txStatusResponse.json();
-            
-            if (txData.success && txData.vm_status === 'Executed successfully') {
+
+            if (
+              txData.success &&
+              txData.vm_status === 'Executed successfully'
+            ) {
               success = true;
               break;
-            } else if (txData.vm_status && txData.vm_status !== 'Executed successfully') {
+            } else if (
+              txData.vm_status &&
+              txData.vm_status !== 'Executed successfully'
+            ) {
               throw new Error(`Transaction failed: ${txData.vm_status}`);
             }
           } catch (error) {
@@ -166,21 +192,26 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
         }
 
         if (success) {
-          setResults(prev => [...prev, {
-            rewardKey: `${reward.farmingId}-${reward.token}`,
-            success: true,
-            hash: txResponse.hash
-          }]);
+          setResults(prev => [
+            ...prev,
+            {
+              rewardKey: `${reward.farmingId}-${reward.token}`,
+              success: true,
+              hash: txResponse.hash,
+            },
+          ]);
         } else {
           throw new Error('Transaction timeout');
         }
-
       } catch (error) {
-        setResults(prev => [...prev, {
-          rewardKey: `${reward.farmingId}-${reward.token}`,
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        }]);
+        setResults(prev => [
+          ...prev,
+          {
+            rewardKey: `${reward.farmingId}-${reward.token}`,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        ]);
       }
 
       // Небольшая пауза между транзакциями
@@ -200,8 +231,11 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
         const reward = claimableRewards[index];
         const tokenInfo = getRewardTokenInfoHelper(reward.token);
         if (tokenInfo) {
-          const price = getTokenPrice(tokenInfo.faAddress || tokenInfo.address || '');
-          const value = price && price !== '0' ? reward.amount * parseFloat(price) : 0;
+          const price = getTokenPrice(
+            tokenInfo.faAddress || tokenInfo.address || ''
+          );
+          const value =
+            price && price !== '0' ? reward.amount * parseFloat(price) : 0;
           claimedValue += value;
         }
       }
@@ -209,22 +243,24 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
     if (successfulClaims > 0) {
       toast({
-        title: "Claim All Rewards Completed",
+        title: 'Claim All Rewards Completed',
         description: `Successfully claimed ${successfulClaims} rewards ($${claimedValue.toFixed(2)})${failedClaims > 0 ? `, ${failedClaims} failed` : ''}`,
       });
     }
 
     if (failedClaims > 0) {
       toast({
-        title: "Some Claims Failed",
+        title: 'Some Claims Failed',
         description: `${failedClaims} rewards failed to claim. Check the results below.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
 
     // Обновляем позиции
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('refreshPositions', { detail: { protocol: 'echelon' } }));
+      window.dispatchEvent(
+        new CustomEvent('refreshPositions', { detail: { protocol: 'echelon' } })
+      );
     }, 2000);
   };
 
@@ -240,7 +276,7 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
       return {
         token: reward.token,
         amount: reward.amount,
-        farmingId: reward.farmingId
+        farmingId: reward.farmingId,
       };
     }
     return null;
@@ -250,49 +286,61 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>
-            Claim All Echelon Rewards
-          </DialogTitle>
+          <DialogTitle>Claim All Echelon Rewards</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {/* Общая информация */}
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">${totalRewardsValue.toFixed(2)}</div>
-            <div className="text-sm text-muted-foreground">
+          <div className='text-center'>
+            <div className='text-2xl font-bold text-green-600'>
+              ${totalRewardsValue.toFixed(2)}
+            </div>
+            <div className='text-sm text-muted-foreground'>
               Total rewards across {totalRewards} positions
             </div>
-            
+
             {/* Детальная разбивка наград */}
             {claimableRewards.length > 0 && (
-              <div className="mt-3 text-left">
-                <div className="text-xs font-medium text-muted-foreground mb-2">Rewards breakdown:</div>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
+              <div className='mt-3 text-left'>
+                <div className='text-xs font-medium text-muted-foreground mb-2'>
+                  Rewards breakdown:
+                </div>
+                <div className='space-y-1 max-h-32 overflow-y-auto'>
                   {claimableRewards.map((reward, index) => {
                     const tokenInfo = getRewardTokenInfoHelper(reward.token);
                     if (!tokenInfo) return null;
-                    
-                    const price = getTokenPrice(tokenInfo.faAddress || tokenInfo.address || '');
-                    const value = price && price !== '0' ? (reward.amount * parseFloat(price)).toFixed(2) : 'N/A';
-                    
+
+                    const price = getTokenPrice(
+                      tokenInfo.faAddress || tokenInfo.address || ''
+                    );
+                    const value =
+                      price && price !== '0'
+                        ? (reward.amount * parseFloat(price)).toFixed(2)
+                        : 'N/A';
+
                     return (
-                      <div key={index} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
+                      <div
+                        key={index}
+                        className='flex items-center justify-between text-xs'
+                      >
+                        <div className='flex items-center gap-2'>
                           {tokenInfo.icon_uri && (
-                            <img 
-                              src={tokenInfo.icon_uri} 
-                              alt={tokenInfo.symbol} 
-                              className="w-3 h-3 rounded-full" 
+                            <img
+                              src={tokenInfo.icon_uri}
+                              alt={tokenInfo.symbol}
+                              className='w-3 h-3 rounded-full'
                             />
                           )}
-                          <span className="font-medium">{tokenInfo.symbol || reward.token}</span>
-                          <span className="text-muted-foreground">
+                          <span className='font-medium'>
+                            {tokenInfo.symbol || reward.token}
+                          </span>
+                          <span className='text-muted-foreground'>
                             {reward.amount.toFixed(6)}
                           </span>
                         </div>
-                        <span className="text-green-600 font-medium">
+                        <span className='text-green-600 font-medium'>
                           ${value}
                         </span>
                       </div>
@@ -305,28 +353,38 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
           {/* Прогресс */}
           {isClaiming && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+            <div className='space-y-2'>
+              <div className='flex justify-between text-sm'>
                 <span>Claiming rewards...</span>
-                <span>{currentIndex + 1} / {totalRewards}</span>
+                <span>
+                  {currentIndex + 1} / {totalRewards}
+                </span>
               </div>
-              <Progress value={progress} className="w-full" />
+              <Progress value={progress} className='w-full' />
               {currentReward && (
-                <div className="text-xs text-muted-foreground">
-                  Claiming {currentReward.amount.toFixed(6)} {currentReward.token}
+                <div className='text-xs text-muted-foreground'>
+                  Claiming {currentReward.amount.toFixed(6)}{' '}
+                  {currentReward.token}
                   {(() => {
-                    const tokenInfo = getRewardTokenInfoHelper(currentReward.token);
+                    const tokenInfo = getRewardTokenInfoHelper(
+                      currentReward.token
+                    );
                     if (!tokenInfo) return null;
-                    
-                    const price = getTokenPrice(tokenInfo.faAddress || tokenInfo.address || '');
-                    const value = price && price !== '0' ? (currentReward.amount * parseFloat(price)).toFixed(2) : null;
-                    
+
+                    const price = getTokenPrice(
+                      tokenInfo.faAddress || tokenInfo.address || ''
+                    );
+                    const value =
+                      price && price !== '0'
+                        ? (currentReward.amount * parseFloat(price)).toFixed(2)
+                        : null;
+
                     return value ? ` ($${value})` : '';
                   })()}
                 </div>
               )}
               {currentHash && (
-                <div className="text-xs text-muted-foreground font-mono">
+                <div className='text-xs text-muted-foreground font-mono'>
                   Hash: {currentHash.slice(0, 6)}...{currentHash.slice(-4)}
                 </div>
               )}
@@ -335,23 +393,23 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
 
           {/* Результаты */}
           {results.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Results:</div>
-              <div className="max-h-32 overflow-y-auto space-y-1">
+            <div className='space-y-2'>
+              <div className='text-sm font-medium'>Results:</div>
+              <div className='max-h-32 overflow-y-auto space-y-1'>
                 {results.map((result, index) => (
-                  <div key={index} className="flex items-center gap-2 text-xs">
+                  <div key={index} className='flex items-center gap-2 text-xs'>
                     {result.success ? (
-                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      <CheckCircle className='h-3 w-3 text-green-500' />
                     ) : (
-                      <AlertCircle className="h-3 w-3 text-red-500" />
+                      <AlertCircle className='h-3 w-3 text-red-500' />
                     )}
-                    <span className="font-mono">
+                    <span className='font-mono'>
                       {result.rewardKey.slice(0, 10)}...
                     </span>
                     {result.success ? (
-                      <span className="text-green-600">Success</span>
+                      <span className='text-green-600'>Success</span>
                     ) : (
-                      <span className="text-red-600">{result.error}</span>
+                      <span className='text-red-600'>{result.error}</span>
                     )}
                   </div>
                 ))}
@@ -360,20 +418,21 @@ export function ClaimAllRewardsEchelonModal({ isOpen, onClose, rewards, tokenPri
           )}
 
           {/* Кнопки */}
-          <div className="flex justify-end gap-2">
+          <div className='flex justify-end gap-2'>
             {!isClaiming && results.length === 0 && (
-              <Button onClick={handleClaimAll} className="bg-green-600 hover:bg-green-700">
+              <Button
+                onClick={handleClaimAll}
+                className='bg-green-600 hover:bg-green-700'
+              >
                 Start Claiming
               </Button>
             )}
             {!isClaiming && results.length > 0 && (
-              <Button onClick={handleClose}>
-                Close
-              </Button>
+              <Button onClick={handleClose}>Close</Button>
             )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
-} 
+}

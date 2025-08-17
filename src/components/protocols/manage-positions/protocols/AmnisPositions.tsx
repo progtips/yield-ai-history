@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { AmnisPositionsList } from '../../amnis/PositionsList';
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
 
 interface AmnisPosition {
   id: string;
@@ -35,17 +35,22 @@ export const AmnisPositions: React.FC = () => {
     if (!account?.address) return;
     setLoading(true);
     try {
-      const response = await fetch(`/api/protocols/amnis/userPositions?address=${account.address}`);
+      const response = await fetch(
+        `/api/protocols/amnis/userPositions?address=${account.address}`
+      );
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.positions)) {
         setPositions(data.positions);
         // Calculate total value using usdValue if available, otherwise fallback to value
-        const total = data.positions.reduce((sum: number, pos: AmnisPosition) => {
-          const positionValue = pos.usdValue || pos.value || 0;
-          const rewardsValue = pos.rewards || 0;
-          return sum + positionValue + rewardsValue;
-        }, 0);
+        const total = data.positions.reduce(
+          (sum: number, pos: AmnisPosition) => {
+            const positionValue = pos.usdValue || pos.value || 0;
+            const rewardsValue = pos.rewards || 0;
+            return sum + positionValue + rewardsValue;
+          },
+          0
+        );
         setTotalValue(total);
       } else {
         setPositions([]);
@@ -85,7 +90,7 @@ export const AmnisPositions: React.FC = () => {
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className='text-red-500'>{error}</div>;
   }
 
   return (
@@ -97,4 +102,4 @@ export const AmnisPositions: React.FC = () => {
       onStake={handleStake}
     />
   );
-}; 
+};

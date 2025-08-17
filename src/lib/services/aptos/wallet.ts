@@ -32,11 +32,11 @@ export class AptosWalletService {
   async getBalances(address: string) {
     try {
       console.log('Getting balances for address:', address);
-      
+
       // Use AptosApiService directly instead of making HTTP request
       const apiService = new AptosApiService();
       const data = await apiService.getBalances(address);
-      
+
       console.log('Balances response:', data);
       return data;
     } catch (error) {
@@ -62,4 +62,4 @@ export class AptosWalletService {
       throw error;
     }
   }
-} 
+}

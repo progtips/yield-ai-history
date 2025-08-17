@@ -1,20 +1,22 @@
-"use client";
-import { createContext, useContext, ReactNode } from "react";
+'use client';
+import { createContext, useContext, ReactNode } from 'react';
 
 interface MobileManagementContextType {
-  setActiveTab: ((tab: "ideas" | "assets" | "chat") => void) | null;
+  setActiveTab: ((tab: 'ideas' | 'assets' | 'chat') => void) | null;
   scrollToTop: (() => void) | null;
 }
 
-const MobileManagementContext = createContext<MobileManagementContextType | undefined>(undefined);
+const MobileManagementContext = createContext<
+  MobileManagementContextType | undefined
+>(undefined);
 
-export function MobileManagementProvider({ 
-  children, 
+export function MobileManagementProvider({
+  children,
   setActiveTab,
-  scrollToTop
-}: { 
+  scrollToTop,
+}: {
   children: ReactNode;
-  setActiveTab: (tab: "ideas" | "assets" | "chat") => void;
+  setActiveTab: (tab: 'ideas' | 'assets' | 'chat') => void;
   scrollToTop: () => void;
 }) {
   return (
@@ -29,8 +31,8 @@ export function useMobileManagement() {
   if (context === undefined) {
     return {
       setActiveTab: null,
-      scrollToTop: null
+      scrollToTop: null,
     };
   }
   return context;
-} 
+}

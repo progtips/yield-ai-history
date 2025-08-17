@@ -6,21 +6,24 @@ interface TransactionToastProps {
   title?: string;
 }
 
-export const showTransactionSuccessToast = ({ hash, title = "Deposit successful!" }: TransactionToastProps) => {
+export const showTransactionSuccessToast = ({
+  hash,
+  title = 'Deposit successful!',
+}: TransactionToastProps) => {
   toast({
     title,
     description: (
       <div>
-        Transaction hash:{" "}
+        Transaction hash:{' '}
         <a
           href={`https://explorer.aptoslabs.com/txn/${hash}?network=mainnet`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 underline"
+          target='_blank'
+          rel='noopener noreferrer'
+          className='text-blue-600 hover:text-blue-800 underline'
         >
           {hash.slice(0, 6)}...{hash.slice(-4)}
         </a>
       </div>
     ),
   });
-}; 
+};

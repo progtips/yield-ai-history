@@ -9,7 +9,7 @@ import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
 // Серверный лоадер для начальных данных
 async function loadInitialTransactions() {
   try {
-         const query = `
+    const query = `
        query LatestTransactions($limit: Int!, $offset: Int!) {
          user_transactions(
            limit: $limit
@@ -25,10 +25,10 @@ async function loadInitialTransactions() {
 
     const result = await executeQueryWithRetry(query, {
       limit: 50,
-      offset: 0
+      offset: 0,
     });
 
-         return result.user_transactions || [];
+    return result.user_transactions || [];
   } catch (error) {
     console.error('Failed to load initial transactions:', error);
     return [];
@@ -37,14 +37,17 @@ async function loadInitialTransactions() {
 
 function TransactionsTableSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-64" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-20" />
+        <div
+          key={i}
+          className='flex items-center space-x-4 p-4 border rounded-lg'
+        >
+          <Skeleton className='h-4 w-32' />
+          <Skeleton className='h-4 w-64' />
+          <Skeleton className='h-4 w-32' />
+          <Skeleton className='h-4 w-24' />
+          <Skeleton className='h-4 w-20' />
         </div>
       ))}
     </div>
@@ -55,18 +58,18 @@ export default async function TransactionsPage() {
   const initialTransactions = await loadInitialTransactions();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
-          <p className="text-muted-foreground">
+          <h1 className='text-3xl font-bold tracking-tight'>Transactions</h1>
+          <p className='text-muted-foreground'>
             Explore Aptos blockchain transactions in real-time
           </p>
         </div>
       </div>
 
       <TransactionsFilters />
-      
+
       <LiveTransactionsDemo />
 
       <Card>

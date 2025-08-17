@@ -43,19 +43,22 @@ export class PanoraPricesService {
       }
 
       // На сервере используем полный URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/panora/tokenPrices?${queryParams.toString()}`);
-      
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(
+        `${baseUrl}/api/panora/tokenPrices?${queryParams.toString()}`
+      );
+
       if (!response.ok) {
         throw new Error('Failed to fetch prices');
       }
 
       const data = await response.json();
-      
+
       // Кэшируем результат
       this.cache.set(cacheKey, {
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       return data;
@@ -64,4 +67,4 @@ export class PanoraPricesService {
       return { data: [] };
     }
   }
-} 
+}

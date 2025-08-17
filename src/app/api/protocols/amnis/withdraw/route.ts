@@ -50,20 +50,20 @@ export async function POST(request: Request) {
 
     if (!token || !amount) {
       return NextResponse.json(
-        { error: "Token and amount are required" },
+        { error: 'Token and amount are required' },
         { status: 400 }
       );
     }
 
     const protocol = new AmnisProtocol();
-    const payload = await protocol.buildWithdraw("", BigInt(amount), token);
+    const payload = await protocol.buildWithdraw('', BigInt(amount), token);
 
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Error generating unstake payload:", error);
+    console.error('Error generating unstake payload:', error);
     return NextResponse.json(
-      { error: "Failed to generate unstake payload" },
+      { error: 'Failed to generate unstake payload' },
       { status: 500 }
     );
   }
-} 
+}

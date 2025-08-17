@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sdk } from "@/lib/hyperion";
+import { sdk } from '@/lib/hyperion';
 
 /**
  * @swagger
@@ -48,54 +48,58 @@ import { sdk } from "@/lib/hyperion";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const address = searchParams.get("address");
+    const address = searchParams.get('address');
 
-    console.log("🔍 Hyperion userPositions API called with address:", address);
-    console.log("🔑 APTOS_API_KEY exists:", !!process.env.APTOS_API_KEY);
+    console.log('🔍 Hyperion userPositions API called with address:', address);
+    console.log('🔑 APTOS_API_KEY exists:', !!process.env.APTOS_API_KEY);
 
     if (!address) {
       return NextResponse.json(
-        { error: "Address is required" },
+        { error: 'Address is required' },
         { status: 400 }
       );
     }
 
     // Получаем позиции через локальный SDK
-    console.log("📡 Calling Hyperion SDK...");
+    console.log('📡 Calling Hyperion SDK...');
     const positions = await sdk.Position.fetchAllPositionsByAddress({
-      address: address
+      address: address,
     });
-    
-    console.log("✅ Hyperion SDK response:", {
+
+    console.log('✅ Hyperion SDK response:', {
       positionsCount: Array.isArray(positions) ? positions.length : 'not array',
-      positionsType: typeof positions
+      positionsType: typeof positions,
     });
-    
+
     // Возвращаем данные с настройками кэширования
-    return NextResponse.json({
-      success: true,
-      data: positions
-    }, {
-      headers: {
-        'Cache-Control': 'public, max-age=2, s-maxage=2, stale-while-revalidate=4',
-        'Cdn-Cache-Control': 'max-age=2',
-        'Surrogate-Control': 'max-age=2'
+    return NextResponse.json(
+      {
+        success: true,
+        data: positions,
+      },
+      {
+        headers: {
+          'Cache-Control':
+            'public, max-age=2, s-maxage=2, stale-while-revalidate=4',
+          'Cdn-Cache-Control': 'max-age=2',
+          'Surrogate-Control': 'max-age=2',
+        },
       }
-    });
+    );
   } catch (error) {
-    console.error("❌ Hyperion user positions error:", error);
-    console.error("❌ Error details:", {
+    console.error('❌ Hyperion user positions error:', error);
+    console.error('❌ Error details:', {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : 'No stack trace'
+      stack: error instanceof Error ? error.stack : 'No stack trace',
     });
     // Возвращаем пустой массив при ошибках (как в Echelon)
     return NextResponse.json(
       {
         success: true,
-        data: []
+        data: [],
       },
       { status: 200 }
     );
   }
-} 
+}

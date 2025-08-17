@@ -30,4 +30,4 @@ export interface InvestmentsResponse {
   data: InvestmentData[];
 }
 
-export type InvestmentAction = 'Invest' | 'Borrow' | 'Stake'; 
+export type InvestmentAction = 'Invest' | 'Borrow' | 'Stake';

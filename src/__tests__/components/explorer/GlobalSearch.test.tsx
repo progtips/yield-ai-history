@@ -1,5 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { GlobalSearch, getSearchType, PATTERNS } from '@/components/explorer/GlobalSearch';
+import {
+  GlobalSearch,
+  getSearchType,
+  PATTERNS,
+} from '@/components/explorer/GlobalSearch';
 import { useExplorerStore } from '@/stores/explorer';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
 
@@ -12,8 +16,12 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-const mockUseExplorerStore = useExplorerStore as jest.MockedFunction<typeof useExplorerStore>;
-const mockExecuteQueryWithRetry = executeQueryWithRetry as jest.MockedFunction<typeof executeQueryWithRetry>;
+const mockUseExplorerStore = useExplorerStore as jest.MockedFunction<
+  typeof useExplorerStore
+>;
+const mockExecuteQueryWithRetry = executeQueryWithRetry as jest.MockedFunction<
+  typeof executeQueryWithRetry
+>;
 
 describe('GlobalSearch', () => {
   beforeEach(() => {
@@ -41,7 +49,8 @@ describe('GlobalSearch', () => {
   describe('PATTERNS', () => {
     describe('TRANSACTION_HASH', () => {
       it('должен соответствовать полному хэшу транзакции', () => {
-        const validHash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+        const validHash =
+          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
         expect(PATTERNS.TRANSACTION_HASH.test(validHash)).toBe(true);
       });
 
@@ -51,12 +60,14 @@ describe('GlobalSearch', () => {
       });
 
       it('не должен соответствовать хэшу без 0x', () => {
-        const invalidHash = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+        const invalidHash =
+          '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
         expect(PATTERNS.TRANSACTION_HASH.test(invalidHash)).toBe(false);
       });
 
       it('не должен соответствовать хэшу с неверными символами', () => {
-        const invalidHash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdeg';
+        const invalidHash =
+          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdeg';
         expect(PATTERNS.TRANSACTION_HASH.test(invalidHash)).toBe(false);
       });
     });
@@ -68,7 +79,8 @@ describe('GlobalSearch', () => {
       });
 
       it('должен соответствовать длинному адресу', () => {
-        const longAddress = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+        const longAddress =
+          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
         expect(PATTERNS.ADDRESS.test(longAddress)).toBe(true);
       });
 
@@ -119,7 +131,8 @@ describe('GlobalSearch', () => {
 
   describe('getSearchType', () => {
     it('должен определять тип транзакции для полного хэша', () => {
-      const hash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+      const hash =
+        '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
       expect(getSearchType(hash)).toBe('transaction');
     });
 
@@ -153,70 +166,98 @@ describe('GlobalSearch', () => {
   describe('Компонент GlobalSearch', () => {
     it('должен рендериться с правильным placeholder', () => {
       render(<GlobalSearch />);
-      expect(screen.getByPlaceholderText(/Search by hash, address, version, or block height/)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(
+          /Search by hash, address, version, or block height/
+        )
+      ).toBeInTheDocument();
     });
 
     it('должен изменять placeholder при вводе хэша', async () => {
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Search by transaction hash/)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/Search by transaction hash/)
+        ).toBeInTheDocument();
       });
     });
 
     it('должен изменять placeholder при вводе адреса', async () => {
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef12345678' } });
-      
+
+      fireEvent.change(input, {
+        target: { value: '0x1234567890abcdef1234567890abcdef12345678' },
+      });
+
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Search by address/)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/Search by address/)
+        ).toBeInTheDocument();
       });
     });
 
     it('должен изменять placeholder при вводе числа', async () => {
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
+
       fireEvent.change(input, { target: { value: '1234567890' } });
-      
+
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/Search by version number/)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/Search by version number/)
+        ).toBeInTheDocument();
       });
     });
 
     it('должен выполнять поиск транзакции при вводе хэша', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: [{ hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' }]
+        transactions: [
+          {
+            hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          },
+        ],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
         expect(mockExecuteQueryWithRetry).toHaveBeenCalledWith(
           expect.stringContaining('TransactionByHash'),
-          { hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' }
+          {
+            hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          }
         );
       });
     });
 
     it('должен выполнять поиск версии при вводе большого числа', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: [{ version: '1234567890' }]
+        transactions: [{ version: '1234567890' }],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
+
       fireEvent.change(input, { target: { value: '1234567890' } });
-      
+
       await waitFor(() => {
         expect(mockExecuteQueryWithRetry).toHaveBeenCalledWith(
           expect.stringContaining('TransactionByVersion'),
@@ -227,14 +268,18 @@ describe('GlobalSearch', () => {
 
     it('должен выполнять поиск адреса при вводе адреса', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: [{ sender: '0x1234567890abcdef1234567890abcdef12345678' }]
+        transactions: [
+          { sender: '0x1234567890abcdef1234567890abcdef12345678' },
+        ],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef12345678' } });
-      
+
+      fireEvent.change(input, {
+        target: { value: '0x1234567890abcdef1234567890abcdef12345678' },
+      });
+
       await waitFor(() => {
         expect(mockExecuteQueryWithRetry).toHaveBeenCalledWith(
           expect.stringContaining('AccountTransactions'),
@@ -245,14 +290,23 @@ describe('GlobalSearch', () => {
 
     it('должен показывать статус "Found" при успешном поиске', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: [{ hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' }]
+        transactions: [
+          {
+            hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          },
+        ],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
         expect(screen.getByText('Found')).toBeInTheDocument();
       });
@@ -260,14 +314,19 @@ describe('GlobalSearch', () => {
 
     it('должен показывать статус "Not found" при неуспешном поиске', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: []
+        transactions: [],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
         expect(screen.getByText('Not found')).toBeInTheDocument();
       });
@@ -278,9 +337,14 @@ describe('GlobalSearch', () => {
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
         expect(screen.getByText('Search failed')).toBeInTheDocument();
       });
@@ -294,15 +358,24 @@ describe('GlobalSearch', () => {
 
     it('должен быть активен при валидном вводе', async () => {
       mockExecuteQueryWithRetry.mockResolvedValue({
-        transactions: [{ hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' }]
+        transactions: [
+          {
+            hash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          },
+        ],
       });
 
       render(<GlobalSearch />);
       const input = screen.getByRole('textbox');
       const searchButton = screen.getByRole('button', { name: /search/i });
-      
-      fireEvent.change(input, { target: { value: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' } });
-      
+
+      fireEvent.change(input, {
+        target: {
+          value:
+            '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+        },
+      });
+
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });

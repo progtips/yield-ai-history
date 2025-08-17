@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GlobalSearch, PATTERNS, getSearchType } from '@/components/explorer/GlobalSearch';
+import {
+  GlobalSearch,
+  PATTERNS,
+  getSearchType,
+} from '@/components/explorer/GlobalSearch';
 import { useExplorerStore } from '@/stores/explorer';
 
 // Mock Zustand store
@@ -77,11 +81,7 @@ describe('GlobalSearch', () => {
     });
 
     it('should match valid numbers', () => {
-      const validNumbers = [
-        '123456789',
-        '0',
-        '999999999999999999',
-      ];
+      const validNumbers = ['123456789', '0', '999999999999999999'];
 
       validNumbers.forEach(num => {
         expect(PATTERNS.NUMBER.test(num)).toBe(true);
@@ -89,13 +89,7 @@ describe('GlobalSearch', () => {
     });
 
     it('should not match invalid numbers', () => {
-      const invalidNumbers = [
-        '123.456',
-        'abc123',
-        '123abc',
-        '',
-        '0x123',
-      ];
+      const invalidNumbers = ['123.456', 'abc123', '123abc', '', '0x123'];
 
       invalidNumbers.forEach(num => {
         expect(PATTERNS.NUMBER.test(num)).toBe(false);
@@ -105,7 +99,8 @@ describe('GlobalSearch', () => {
 
   describe('getSearchType', () => {
     it('should identify transaction hashes', () => {
-      const hash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+      const hash =
+        '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
       expect(getSearchType(hash)).toBe('transaction_hash');
     });
 
@@ -128,80 +123,99 @@ describe('GlobalSearch', () => {
   describe('Component', () => {
     it('should render search input', () => {
       render(<GlobalSearch />);
-      expect(screen.getByPlaceholderText(/Search by hash, address, or version/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/Search by hash, address, or version/i)
+      ).toBeInTheDocument();
     });
 
     it('should update search query on input', async () => {
       const user = userEvent.setup();
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
       await user.type(input, '0x1234567890abcdef1234567890abcdef1234567890');
-      
-      expect(mockSetFilters).toHaveBeenCalledWith({ 
-        searchQuery: '0x1234567890abcdef1234567890abcdef1234567890' 
+
+      expect(mockSetFilters).toHaveBeenCalledWith({
+        searchQuery: '0x1234567890abcdef1234567890abcdef1234567890',
       });
     });
 
     it('should show transaction hash icon for hash input', async () => {
       const user = userEvent.setup();
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
-      await user.type(input, '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
-      
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
+      await user.type(
+        input,
+        '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      );
+
       // Check if the input has the correct placeholder
-      expect(input).toHaveValue('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
+      expect(input).toHaveValue(
+        '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      );
     });
 
     it('should show address icon for address input', async () => {
       const user = userEvent.setup();
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
       await user.type(input, '0x1234567890abcdef1234567890abcdef1234567890');
-      
+
       expect(input).toHaveValue('0x1234567890abcdef1234567890abcdef1234567890');
     });
 
     it('should show number icon for number input', async () => {
       const user = userEvent.setup();
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
       await user.type(input, '123456789');
-      
+
       expect(input).toHaveValue('123456789');
     });
 
     it('should handle empty input', async () => {
       const user = userEvent.setup();
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
       await user.clear(input);
-      
+
       expect(mockSetFilters).toHaveBeenCalledWith({ searchQuery: '' });
     });
 
     it('should debounce search input', async () => {
       vi.useFakeTimers();
       const user = userEvent.setup({ delay: null });
-      
+
       render(<GlobalSearch />);
-      
-      const input = screen.getByPlaceholderText(/Search by hash, address, or version/i);
+
+      const input = screen.getByPlaceholderText(
+        /Search by hash, address, or version/i
+      );
       await user.type(input, 'test');
-      
+
       // Should not be called immediately
       expect(mockSetFilters).not.toHaveBeenCalled();
-      
+
       // Fast forward time
       vi.advanceTimersByTime(300);
-      
+
       // Should be called after debounce
       expect(mockSetFilters).toHaveBeenCalledWith({ searchQuery: 'test' });
-      
+
       vi.useRealTimers();
     });
   });

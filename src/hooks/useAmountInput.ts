@@ -6,7 +6,11 @@ interface UseAmountInputProps {
   initialValue?: bigint;
 }
 
-export function useAmountInput({ balance, decimals, initialValue }: UseAmountInputProps) {
+export function useAmountInput({
+  balance,
+  decimals,
+  initialValue,
+}: UseAmountInputProps) {
   const [amount, setAmount] = useState<bigint>(initialValue || balance);
 
   const setHalf = useCallback(() => {
@@ -17,31 +21,36 @@ export function useAmountInput({ balance, decimals, initialValue }: UseAmountInp
     setAmount(balance);
   }, [balance]);
 
-  const setAmountFromString = useCallback((value: string) => {
-    if (!value) {
-      setAmount(BigInt(0));
-      return;
-    }
-
-    try {
-      // Разбиваем число на целую и дробную части
-      const [intPart, decPart = ''] = value.split('.');
-      
-      // Преобразуем целую часть в bigint
-      let newAmount = BigInt(intPart) * BigInt(Math.pow(10, decimals));
-      
-      // Добавляем дробную часть, если она есть
-      if (decPart) {
-        // Дополняем дробную часть нулями до нужного количества знаков
-        const paddedDecPart = decPart.padEnd(decimals, '0').slice(0, decimals);
-        newAmount += BigInt(paddedDecPart);
+  const setAmountFromString = useCallback(
+    (value: string) => {
+      if (!value) {
+        setAmount(BigInt(0));
+        return;
       }
-      
-      setAmount(newAmount);
-    } catch (e) {
-      console.error('Error parsing amount:', e);
-    }
-  }, [decimals]);
+
+      try {
+        // Разбиваем число на целую и дробную части
+        const [intPart, decPart = ''] = value.split('.');
+
+        // Преобразуем целую часть в bigint
+        let newAmount = BigInt(intPart) * BigInt(Math.pow(10, decimals));
+
+        // Добавляем дробную часть, если она есть
+        if (decPart) {
+          // Дополняем дробную часть нулями до нужного количества знаков
+          const paddedDecPart = decPart
+            .padEnd(decimals, '0')
+            .slice(0, decimals);
+          newAmount += BigInt(paddedDecPart);
+        }
+
+        setAmount(newAmount);
+      } catch (e) {
+        console.error('Error parsing amount:', e);
+      }
+    },
+    [decimals]
+  );
 
   const amountString = (Number(amount) / Math.pow(10, decimals)).toString();
 
@@ -52,6 +61,6 @@ export function useAmountInput({ balance, decimals, initialValue }: UseAmountInp
     setAmountFromString,
     setHalf,
     setMax,
-    isValid: amount > BigInt(0) && amount <= balance
+    isValid: amount > BigInt(0) && amount <= balance,
   };
-} 
+}

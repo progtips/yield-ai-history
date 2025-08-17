@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,18 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { executeQueryWithRetry } from '@/lib/aptos/indexerClient';
-import { 
-  Hash, 
-  Clock, 
-  TrendingUp, 
-  ChevronLeft, 
+import {
+  Hash,
+  Clock,
+  TrendingUp,
+  ChevronLeft,
   ChevronRight,
   Copy,
   ExternalLink,
   User,
   Zap,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -70,14 +70,16 @@ export default function VersionPage({ params }: VersionPageProps) {
           type: 'entry_function_payload',
           function: '0x1::coin::transfer',
           type_arguments: ['0x1::aptos_coin::AptosCoin'],
-          arguments: ['0x123...', '1000000']
-        }
+          arguments: ['0x123...', '1000000'],
+        },
       };
 
       setVersionData(mockData);
     } catch (error) {
       console.error('Failed to load version data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load version data');
+      setError(
+        error instanceof Error ? error.message : 'Failed to load version data'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -125,23 +127,23 @@ export default function VersionPage({ params }: VersionPageProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-64" />
-            <Skeleton className="h-4 w-32" />
+      <div className='space-y-6'>
+        <div className='flex items-center gap-4'>
+          <Skeleton className='h-12 w-12 rounded-full' />
+          <div className='space-y-2'>
+            <Skeleton className='h-6 w-64' />
+            <Skeleton className='h-4 w-32' />
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
               <CardHeader>
-                <Skeleton className="h-4 w-24" />
+                <Skeleton className='h-4 w-24' />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-16" />
+                <Skeleton className='h-8 w-16' />
               </CardContent>
             </Card>
           ))}
@@ -152,9 +154,9 @@ export default function VersionPage({ params }: VersionPageProps) {
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-destructive">Error: {error}</p>
-        <Button onClick={loadVersionData} className="mt-4">
+      <div className='text-center py-8'>
+        <p className='text-destructive'>Error: {error}</p>
+        <Button onClick={loadVersionData} className='mt-4'>
           Retry
         </Button>
       </div>
@@ -163,8 +165,8 @@ export default function VersionPage({ params }: VersionPageProps) {
 
   if (!versionData) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Version not found</p>
+      <div className='text-center py-8'>
+        <p className='text-muted-foreground'>Version not found</p>
       </div>
     );
   }
@@ -173,36 +175,38 @@ export default function VersionPage({ params }: VersionPageProps) {
   const nextVersion = getNextVersion();
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Заголовок версии */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Hash className="h-6 w-6 text-primary" />
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-4'>
+          <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center'>
+            <Hash className='h-6 w-6 text-primary' />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Version {versionData.version}</h1>
-            <div className="flex items-center gap-2">
-              <code className="text-sm bg-muted px-2 py-1 rounded">
+            <h1 className='text-2xl font-bold'>
+              Version {versionData.version}
+            </h1>
+            <div className='flex items-center gap-2'>
+              <code className='text-sm bg-muted px-2 py-1 rounded'>
                 Hash: {formatHash(versionData.hash)}
               </code>
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={() => copyToClipboard(versionData.hash)}
               >
-                <Copy className="h-4 w-4" />
+                <Copy className='h-4 w-4' />
               </Button>
             </div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Badge variant={versionData.success ? "default" : "destructive"}>
+
+        <div className='flex items-center gap-2'>
+          <Badge variant={versionData.success ? 'default' : 'destructive'}>
             {versionData.success ? (
-              <CheckCircle className="h-3 w-3 mr-1" />
+              <CheckCircle className='h-3 w-3 mr-1' />
             ) : (
-              <XCircle className="h-3 w-3 mr-1" />
+              <XCircle className='h-3 w-3 mr-1' />
             )}
             {versionData.success ? 'Success' : 'Failed'}
           </Badge>
@@ -210,81 +214,77 @@ export default function VersionPage({ params }: VersionPageProps) {
       </div>
 
       {/* Навигация */}
-      <div className="flex items-center justify-between">
+      <div className='flex items-center justify-between'>
         <Button
-          variant="outline"
-          size="sm"
+          variant='outline'
+          size='sm'
           disabled={!prevVersion}
           asChild={!!prevVersion}
         >
           {prevVersion ? (
             <Link href={`/explorer/tx/version/${prevVersion}`}>
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className='h-4 w-4 mr-2' />
               Previous Version
             </Link>
           ) : (
             <>
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className='h-4 w-4 mr-2' />
               Previous Version
             </>
           )}
         </Button>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Version</span>
-          <span className="font-mono font-medium">{versionData.version}</span>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm text-muted-foreground'>Version</span>
+          <span className='font-mono font-medium'>{versionData.version}</span>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-        >
+        <Button variant='outline' size='sm' asChild>
           <Link href={`/explorer/tx/version/${nextVersion}`}>
             Next Version
-            <ChevronRight className="h-4 w-4 ml-2" />
+            <ChevronRight className='h-4 w-4 ml-2' />
           </Link>
         </Button>
       </div>
 
       {/* Метрики версии */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sender</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Sender</CardTitle>
+            <User className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-mono">{formatAddress(versionData.sender)}</div>
-            <p className="text-xs text-muted-foreground">
-              Transaction sender
-            </p>
+            <div className='text-sm font-mono'>
+              {formatAddress(versionData.sender)}
+            </div>
+            <p className='text-xs text-muted-foreground'>Transaction sender</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gas Used</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Gas Used</CardTitle>
+            <Zap className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatGasUsed(versionData.gas_used)}</div>
-            <p className="text-xs text-muted-foreground">
-              Gas units consumed
-            </p>
+            <div className='text-2xl font-bold'>
+              {formatGasUsed(versionData.gas_used)}
+            </div>
+            <p className='text-xs text-muted-foreground'>Gas units consumed</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Timestamp</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Timestamp</CardTitle>
+            <Clock className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-medium">{formatTimestamp(versionData.timestamp)}</div>
-            <p className="text-xs text-muted-foreground">
-              Transaction time
-            </p>
+            <div className='text-sm font-medium'>
+              {formatTimestamp(versionData.timestamp)}
+            </div>
+            <p className='text-xs text-muted-foreground'>Transaction time</p>
           </CardContent>
         </Card>
       </div>
@@ -295,54 +295,74 @@ export default function VersionPage({ params }: VersionPageProps) {
           <CardTitle>Transaction Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='space-y-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Hash</label>
-                <div className="font-mono text-sm mt-1 p-2 bg-muted rounded">
+                <label className='text-sm font-medium text-muted-foreground'>
+                  Hash
+                </label>
+                <div className='font-mono text-sm mt-1 p-2 bg-muted rounded'>
                   {versionData.hash}
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Sender</label>
-                <div className="font-mono text-sm mt-1 p-2 bg-muted rounded">
+                <label className='text-sm font-medium text-muted-foreground'>
+                  Sender
+                </label>
+                <div className='font-mono text-sm mt-1 p-2 bg-muted rounded'>
                   {versionData.sender}
                 </div>
               </div>
             </div>
-            
+
             {versionData.payload && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Payload</label>
-                <div className="mt-1 p-3 bg-muted rounded space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className='text-sm font-medium text-muted-foreground'>
+                  Payload
+                </label>
+                <div className='mt-1 p-3 bg-muted rounded space-y-2'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <span className="text-xs text-muted-foreground">Type:</span>
-                      <div className="font-mono text-sm">{versionData.payload.type}</div>
+                      <span className='text-xs text-muted-foreground'>
+                        Type:
+                      </span>
+                      <div className='font-mono text-sm'>
+                        {versionData.payload.type}
+                      </div>
                     </div>
                     {versionData.payload.function && (
                       <div>
-                        <span className="text-xs text-muted-foreground">Function:</span>
-                        <div className="font-mono text-sm">{versionData.payload.function}</div>
+                        <span className='text-xs text-muted-foreground'>
+                          Function:
+                        </span>
+                        <div className='font-mono text-sm'>
+                          {versionData.payload.function}
+                        </div>
                       </div>
                     )}
                   </div>
-                  {versionData.payload.type_arguments && versionData.payload.type_arguments.length > 0 && (
-                    <div>
-                      <span className="text-xs text-muted-foreground">Type Arguments:</span>
-                      <div className="font-mono text-sm">
-                        {versionData.payload.type_arguments.join(', ')}
+                  {versionData.payload.type_arguments &&
+                    versionData.payload.type_arguments.length > 0 && (
+                      <div>
+                        <span className='text-xs text-muted-foreground'>
+                          Type Arguments:
+                        </span>
+                        <div className='font-mono text-sm'>
+                          {versionData.payload.type_arguments.join(', ')}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {versionData.payload.arguments && versionData.payload.arguments.length > 0 && (
-                    <div>
-                      <span className="text-xs text-muted-foreground">Arguments:</span>
-                      <div className="font-mono text-sm">
-                        {versionData.payload.arguments.join(', ')}
+                    )}
+                  {versionData.payload.arguments &&
+                    versionData.payload.arguments.length > 0 && (
+                      <div>
+                        <span className='text-xs text-muted-foreground'>
+                          Arguments:
+                        </span>
+                        <div className='font-mono text-sm'>
+                          {versionData.payload.arguments.join(', ')}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             )}

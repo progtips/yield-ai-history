@@ -31,39 +31,39 @@ interface TransactionsState {
   // Данные
   transactions: Transaction[];
   totalCount: number;
-  
+
   // Фильтры
   filters: TransactionFilters;
   setFilters: (filters: Partial<TransactionFilters>) => void;
   resetFilters: () => void;
-  
+
   // Состояние загрузки
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
-  
+
   // Ошибки
   error: string | null;
   setError: (error: string | null) => void;
-  
+
   // Поллинг
   isLive: boolean;
   setIsLive: (live: boolean) => void;
   pollingInterval: number | null;
   setPollingInterval: (interval: number | null) => void;
-  
+
   // Новые транзакции
   newTransactionsCount: number;
   setNewTransactionsCount: (count: number) => void;
   resetNewTransactionsCount: () => void;
   lastKnownVersion: string | null;
   setLastKnownVersion: (version: string) => void;
-  
+
   // Кэш
   cache: Record<string, any>;
   setCache: (key: string, value: any) => void;
   getCache: (key: string) => any;
   clearCache: () => void;
-  
+
   // Действия
   addTransactions: (transactions: Transaction[]) => void;
   updateTransactions: (transactions: Transaction[]) => void;
@@ -86,94 +86,102 @@ export const useTransactionsStore = create<TransactionsState>()(
       // Данные
       transactions: [],
       totalCount: 0,
-      
+
       // Фильтры
       filters: defaultFilters,
-      setFilters: (newFilters) => 
-        set((state) => ({
-          filters: { ...state.filters, ...newFilters, offset: 0 } // Сбрасываем пагинацию при изменении фильтров
+      setFilters: newFilters =>
+        set(state => ({
+          filters: { ...state.filters, ...newFilters, offset: 0 }, // Сбрасываем пагинацию при изменении фильтров
         })),
       resetFilters: () => set({ filters: defaultFilters }),
-      
+
       // Состояние загрузки
       isLoading: false,
-      setIsLoading: (loading) => set({ isLoading: loading }),
-      
+      setIsLoading: loading => set({ isLoading: loading }),
+
       // Ошибки
       error: null,
-      setError: (error) => set({ error }),
-      
+      setError: error => set({ error }),
+
       // Поллинг
       isLive: false,
-      setIsLive: (live) => set({ isLive: live }),
+      setIsLive: live => set({ isLive: live }),
       pollingInterval: null,
-      setPollingInterval: (interval) => set({ pollingInterval: interval }),
-      
+      setPollingInterval: interval => set({ pollingInterval: interval }),
+
       // Новые транзакции
       newTransactionsCount: 0,
-      setNewTransactionsCount: (count) => set({ newTransactionsCount: count }),
+      setNewTransactionsCount: count => set({ newTransactionsCount: count }),
       resetNewTransactionsCount: () => set({ newTransactionsCount: 0 }),
       lastKnownVersion: null,
-      setLastKnownVersion: (version) => set({ lastKnownVersion: version }),
-      
+      setLastKnownVersion: version => set({ lastKnownVersion: version }),
+
       // Кэш
       cache: {},
-      setCache: (key, value) => 
-        set((state) => ({
-          cache: { ...state.cache, [key]: { value, timestamp: Date.now() } }
+      setCache: (key, value) =>
+        set(state => ({
+          cache: { ...state.cache, [key]: { value, timestamp: Date.now() } },
         })),
-      getCache: (key) => {
+      getCache: key => {
         const cached = get().cache[key];
         if (!cached) return null;
-        
+
         // Кэш действителен 2 минуты для транзакций
         if (Date.now() - cached.timestamp > 2 * 60 * 1000) {
-          set((state) => {
+          set(state => {
             const newCache = { ...state.cache };
             delete newCache[key];
             return { cache: newCache };
           });
           return null;
         }
-        
+
         return cached.value;
       },
       clearCache: () => set({ cache: {} }),
-      
+
       // Действия
-      addTransactions: (newTransactions) => 
-        set((state) => ({
+      addTransactions: newTransactions =>
+        set(state => ({
           transactions: [...newTransactions, ...state.transactions],
-          totalCount: state.totalCount + newTransactions.length
+          totalCount: state.totalCount + newTransactions.length,
         })),
-      updateTransactions: (transactions) => 
-        set((state) => ({
-          transactions, 
+      updateTransactions: transactions =>
+        set(state => ({
+          transactions,
           totalCount: transactions.length,
-          lastKnownVersion: transactions.length > 0 ? transactions[0].version : state.lastKnownVersion
+          lastKnownVersion:
+            transactions.length > 0
+              ? transactions[0].version
+              : state.lastKnownVersion,
         })),
       clearTransactions: () => set({ transactions: [], totalCount: 0 }),
-             prependNewTransactions: (newTransactions) => 
-         set((state) => {
-           // Фильтруем только действительно новые транзакции
-           const existingVersions = new Set(state.transactions.map(tx => tx.version));
-           const trulyNewTransactions = newTransactions.filter(tx => !existingVersions.has(tx.version));
-           
-           if (trulyNewTransactions.length === 0) {
-             return state;
-           }
-           
-           return {
-             transactions: [...trulyNewTransactions, ...state.transactions],
-             totalCount: state.totalCount + trulyNewTransactions.length,
-             newTransactionsCount: state.newTransactionsCount + trulyNewTransactions.length,
-             lastKnownVersion: trulyNewTransactions[0].version
-           };
-         }),
+      prependNewTransactions: newTransactions =>
+        set(state => {
+          // Фильтруем только действительно новые транзакции
+          const existingVersions = new Set(
+            state.transactions.map(tx => tx.version)
+          );
+          const trulyNewTransactions = newTransactions.filter(
+            tx => !existingVersions.has(tx.version)
+          );
+
+          if (trulyNewTransactions.length === 0) {
+            return state;
+          }
+
+          return {
+            transactions: [...trulyNewTransactions, ...state.transactions],
+            totalCount: state.totalCount + trulyNewTransactions.length,
+            newTransactionsCount:
+              state.newTransactionsCount + trulyNewTransactions.length,
+            lastKnownVersion: trulyNewTransactions[0].version,
+          };
+        }),
     }),
     {
       name: 'transactions-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         filters: state.filters,
         isLive: state.isLive,
       }),
@@ -182,11 +190,16 @@ export const useTransactionsStore = create<TransactionsState>()(
 );
 
 // Селекторы для оптимизации
-export const useTransactionsFilters = () => useTransactionsStore((state) => state.filters);
-export const useTransactionsData = () => useTransactionsStore((state) => ({
-  transactions: state.transactions,
-  totalCount: state.totalCount,
-}));
-export const useTransactionsLoading = () => useTransactionsStore((state) => state.isLoading);
-export const useTransactionsError = () => useTransactionsStore((state) => state.error);
-export const useTransactionsLive = () => useTransactionsStore((state) => state.isLive);
+export const useTransactionsFilters = () =>
+  useTransactionsStore(state => state.filters);
+export const useTransactionsData = () =>
+  useTransactionsStore(state => ({
+    transactions: state.transactions,
+    totalCount: state.totalCount,
+  }));
+export const useTransactionsLoading = () =>
+  useTransactionsStore(state => state.isLoading);
+export const useTransactionsError = () =>
+  useTransactionsStore(state => state.error);
+export const useTransactionsLive = () =>
+  useTransactionsStore(state => state.isLive);
